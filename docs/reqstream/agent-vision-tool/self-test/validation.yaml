@@ -6,7 +6,7 @@
 # It supports writing results to TRX (MSTest) or JUnit XML format.
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     sections:
       - title: SelfTest Subsystem Requirements
         sections:

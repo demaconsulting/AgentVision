@@ -96,7 +96,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -131,7 +131,7 @@ jobs:
         run: |
           mkdir -p artifacts
           echo "Capturing tool versions..."
-          # Create short job ID: build-windows, build-ubuntu, build-macos
+          # Create short job ID: build-windows, build-ubuntu
           OS_SHORT=$(echo "${{ matrix.os }}" | sed 's/-latest//')
           JOB_ID="build-${OS_SHORT}"
           dotnet versionmark --capture --job-id "${JOB_ID}" \
@@ -198,13 +198,43 @@ jobs:
           end
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
-      - name: Create Dotnet Tool
+      # Packages are written to a single flat folder rather than each project's
+      # bin/Release. actions/upload-artifact roots its archive at the common ancestor of
+      # the paths it matches, so with two packable projects per-project output would
+      # preserve 'src/<project>/bin/Release/' inside the artifact, and neither the
+      # integration-test job (which installs the tool with
+      # 'dotnet tool install --add-source packages') nor the release job (which pushes
+      # 'artifacts/*.nupkg') would find the packages at the top of the downloaded folder.
+      - name: Create Library Package
         run: >
           dotnet pack
+          src/DemaConsulting.AgentVision.Core/DemaConsulting.AgentVision.Core.csproj
           --no-build
           --no-restore
           --configuration Release
+          --output packages
           --property:PackageVersion=${{ inputs.version }}
+
+      - name: Create Dotnet Tool Package
+        run: >
+          dotnet pack
+          src/DemaConsulting.AgentVision.Tool/DemaConsulting.AgentVision.Tool.csproj
+          --no-build
+          --no-restore
+          --configuration Release
+          --output packages
+          --property:PackageVersion=${{ inputs.version }}
+
+      # Asserts the shape of the packages just produced (net10.0 and net11.0 assemblies,
+      # package ids and metadata, and the companion symbols packages). These run here,
+      # against the real artifacts, rather than inside the test suite - packing is a build
+      # activity. The results are linked as evidence for the AgentVisionCore-System-Package
+      # requirement.
+      - name: Assert Packages with FileAssert
+        run: >
+          dotnet fileassert
+          --results artifacts/fileassert-packages-${{ matrix.os }}.trx
+          packages
 
       # === UPLOAD ARTIFACTS ===
       # This section uploads all generated artifacts for use by downstream jobs.
@@ -216,13 +246,14 @@ jobs:
           name: artifacts-build-${{ matrix.os }}
           path: artifacts/
 
+      # Packages are staged flat by the pack steps above (library and tool, each with its
+      # symbols package), so the artifact is a usable local NuGet feed that the integration
+      # tests install from and the release job publishes from.
       - name: Upload packages
         uses: actions/upload-artifact@v7
         with:
           name: packages-${{ matrix.os }}
-          path: |
-            src/DemaConsulting.AgentVision.Tool/bin/Release/*.nupkg
-            src/DemaConsulting.AgentVision.Tool/bin/Release/*.snupkg
+          path: packages/
 
   # Runs CodeQL security and quality analysis, gathering results to include
   # in the code quality report.
@@ -308,7 +339,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest]
         dotnet-version: ['10.x', '11.x']
 
     steps:
@@ -356,7 +387,7 @@ jobs:
         run: |
           mkdir -p artifacts
           echo "Capturing tool versions..."
-          # Create short job ID: int-windows-10, int-ubuntu-11, int-macos-10, etc.
+          # Create short job ID: int-windows-10, int-ubuntu-11, etc.
           OS_SHORT=$(echo "${{ matrix.os }}" | sed 's/-latest//')
           DOTNET_SHORT=$(echo "${{ matrix.dotnet-version }}" | sed 's/\.x$//')
           JOB_ID="int-${OS_SHORT}-${DOTNET_SHORT}"

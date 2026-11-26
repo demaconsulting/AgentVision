@@ -7,12 +7,15 @@ package AgentVisionTool {
 
     doc
     /*
-     * AgentVision is a template .NET command-line application demonstrating
-     * DemaConsulting's compliance/documentation tooling conventions.
+     * AgentVisionTool is the .NET command-line application (command agentvision) that
+     * exposes AgentVision, low-latency webcam capture for AI agents, from the command
+     * line. It is a thin front-end only: argument parsing, console and log output, exit
+     * codes, built-in help, and self-validation. All camera logic belongs in the
+     * AgentVisionCore library.
      */
 
     part def AgentVisionToolSystem {
-        doc /* The AgentVision system as a whole. */
+        doc /* The AgentVisionTool system as a whole: the thin command-line front-end. */
 
         metadata info : SoftwareInfo {
             testFiles = ("test/DemaConsulting.AgentVision.Tool.Tests/IntegrationTests.cs");

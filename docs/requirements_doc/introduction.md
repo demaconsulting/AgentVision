@@ -4,19 +4,23 @@ This document contains the requirements for the AgentVision project.
 
 ## Purpose
 
-AgentVision is a reference implementation demonstrating best practices for DEMA Consulting
-.NET command-line tools. It provides a standardized approach to command-line argument parsing,
-self-validation, and comprehensive documentation generation.
+AgentVision gives AI agents low-latency access to webcams. It is delivered as the
+`DemaConsulting.AgentVision.Core` .NET library and the `DemaConsulting.AgentVision.Tool` .NET
+command-line tool (command `agentvision`), which is a thin front-end for the library. This document
+specifies what the library and the tool shall do, together with the requirements on the off-the-shelf
+software and the repository quality outcomes that support them.
 
 ## Scope
 
 This requirements document covers:
 
-- Command-line interface and options
+- Library package identity, metadata, and independence from the tool
+- Command-line interface and options of the tool
+- Built-in help
 - Self-validation framework
 - Test result output formats
 - Logging capabilities
-- Multi-platform support
+- Windows and Linux platform support
 - Documentation generation
 - CI/CD integration
 

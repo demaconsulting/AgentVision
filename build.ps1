@@ -43,10 +43,9 @@
 #   the standard test suite (agents rely on that), and never remove or weaken a test step to make
 #   it pass.
 #
-#   When creating a new tool from this template, the project names need no edit: Get-ProjectGraph
-#   scans the .csproj files under the $ProjectRoots folders. Add a $RuntimeReads entry for each
-#   repository file a test reads at run time, and put any extra build, packaging, or test steps at
-#   the [PROJECT-SPECIFIC] points.
+#   The project names need no edit: Get-ProjectGraph scans the .csproj files under the $ProjectRoots
+#   folders. Add a $RuntimeReads entry for each repository file a test reads at run time, and put any
+#   extra build, packaging, or test steps at the [PROJECT-SPECIFIC] points.
 
 param(
     # Full local build and all tests.

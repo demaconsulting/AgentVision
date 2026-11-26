@@ -1,4 +1,4 @@
-# AgentVision
+# AgentVisionTool
 
 ## Verification Approach
 
@@ -19,7 +19,7 @@ runner compares the exit code and the output with the `exit` and `expect` values
 
 ## Test Environment
 
-Integration tests run on .NET 10.0 and .NET 11.0 across Windows, Linux, and macOS.
+Integration tests run on .NET 10.0 and .NET 11.0 on Windows and Linux.
 All scenarios are expected to produce identical results on all supported runtime and platform
 combinations. Temporary files and directories are created and cleaned up within each test.
 

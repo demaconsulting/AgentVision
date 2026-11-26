@@ -1,8 +1,8 @@
 ---
 title: AgentVision Review Plan
-subtitle: File Review Plan for the AgentVision
+subtitle: File Review Plan for AgentVision
 author: DEMA Consulting
-description: File Review Plan for the AgentVision
+description: File Review Plan for AgentVision
 lang: en-US
 keywords:
   - AgentVision

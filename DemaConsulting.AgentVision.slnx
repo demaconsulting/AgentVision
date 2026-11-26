@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/DemaConsulting.AgentVision.Core/DemaConsulting.AgentVision.Core.csproj" />
     <Project Path="src/DemaConsulting.AgentVision.Tool/DemaConsulting.AgentVision.Tool.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <Project Path="test/DemaConsulting.AgentVision.Core.Tests/DemaConsulting.AgentVision.Core.Tests.csproj" />
     <Project Path="test/DemaConsulting.AgentVision.Tool.Tests/DemaConsulting.AgentVision.Tool.Tests.csproj" />
   </Folder>
 </Solution>

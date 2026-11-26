@@ -1,21 +1,31 @@
 # Introduction
 
-The workflow below is a placeholder: replace its TODO boxes to show how users prepare inputs, run your
+The workflow below is a placeholder: replace its TODO boxes to show how users prepare inputs, run the
 tool locally or in a CI pipeline, get its outputs, and use them.
 
-![Placeholder workflow diagram: replace the TODO boxes to show how users prepare inputs, run your tool, get
+![Placeholder workflow diagram: replace the TODO boxes to show how users prepare inputs, run the tool, get
 its outputs, and use them](workflow.svg)
 
 ## Purpose
 
-AgentVision is a demonstration project that showcases best practices for DEMA
-Consulting DotNet Tools.
+AgentVision gives AI agents fast access to webcams. Its goal is low-latency webcam capture: keeping
+multiple cameras open ("hot") so that frames can be captured, cropped, and saved with almost no delay. It is
+delivered as two packages:
+
+- **`DemaConsulting.AgentVision.Core`**: a .NET library that owns all camera logic and can be used by any
+  .NET application.
+- **`DemaConsulting.AgentVision.Tool`**: a .NET tool, command `agentvision`, that exposes AgentVision from the
+  command line. It is a thin front-end for the library.
+
+AgentVision is under active development. The library is only a package skeleton so far, and the tool offers
+the standard options, built-in help, and self-validation but no webcam commands yet. The capture features
+described above are planned, and this guide documents only what exists in the current release.
 
 ## Scope
 
 This user guide covers:
 
-- Installation instructions
+- Installation instructions for the tool and the library
 - Usage examples for common tasks
 - The built-in `agentvision help` command
 - Command-line options reference
@@ -23,7 +33,7 @@ This user guide covers:
 
 # Continuous Compliance
 
-This template follows the
+AgentVision follows the
 [Continuous Compliance](https://github.com/demaconsulting/ContinuousCompliance) methodology, which ensures
 compliance evidence is generated automatically on every CI run.
 
@@ -38,10 +48,18 @@ compliance evidence is generated automatically on every CI run.
 
 # Installation
 
+AgentVision runs on Windows and Linux with .NET 10 or .NET 11.
+
 Install the tool globally using the .NET CLI:
 
 ```bash
 dotnet tool install -g DemaConsulting.AgentVision.Tool
+```
+
+Add the library to a .NET project with:
+
+```bash
+dotnet add package DemaConsulting.AgentVision.Core
 ```
 
 # Usage
@@ -56,7 +74,8 @@ agentvision --version
 
 ## Default Behavior
 
-When invoked with no arguments, the tool displays the banner and copyright notice:
+When invoked with no arguments, the tool displays the banner and copyright notice, followed by a short
+description of AgentVision and a pointer to the usage and help topics:
 
 ```bash
 agentvision

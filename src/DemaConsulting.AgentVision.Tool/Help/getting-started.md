@@ -75,8 +75,8 @@ It reads and writes only the files that options name, apart from a temporary fol
    The command from [[#validate]] runs the built-in self-tests and exits 0
    when all pass; see [[self-validation]].
 3. **Learn the options.** [[command-line]] lists every option. With no
-   arguments, the tool prints a banner and runs its main function, which in
-   the template prints a demonstration message.
+   arguments, the tool prints a banner, a short description of AgentVision,
+   and a pointer to the usage text and the help topics.
 
 Print any help topic with `{{tool}} help <topic>`, as in the command that
 [[#topic]] prints. Add `--search <words>` to find a topic, and `--json` to

@@ -1,0 +1,54 @@
+---
+# System-Level Platform Requirements
+#
+# These requirements specify the platforms and runtimes the library must support.
+# They ensure the library works across the required execution environments.
+#
+# Test links can include a source filter prefix (e.g. "windows@", "ubuntu@", "net10.0@") to restrict
+# which test results count as evidence for a requirement. This is critical for platform and framework
+# requirements - removing these filters invalidates the evidence-based proof.
+#
+# Source filter prefixes:
+#   windows@TestName  - proves the test passed on a Windows platform
+#   ubuntu@TestName   - proves the test passed on a Linux (Ubuntu) platform
+#   net10.0@TestName  - proves the test passed under the .NET 10 runtime
+#   net11.0@TestName  - proves the test passed under the .NET 11 runtime
+
+sections:
+  - title: AgentVisionCore Requirements
+    requirements:
+      - id: AgentVisionCore-Platform-Windows
+        title: The library shall build and run on Windows platforms.
+        tags: [system]
+        justification: |
+          DEMA Consulting libraries must support Windows as a major development platform.
+        tests:
+          # Tests link to "windows" to ensure results come from Windows platform
+          - "windows@AgentVisionCore_Assembly_Loaded_HasPackageName"
+
+      - id: AgentVisionCore-Platform-Linux
+        title: The library shall build and run on Linux platforms.
+        tags: [system]
+        justification: |
+          DEMA Consulting libraries must support Linux for CI/CD and containerized environments.
+        tests:
+          # Tests link to "ubuntu" to ensure results come from Linux platform
+          - "ubuntu@AgentVisionCore_Assembly_Loaded_HasPackageName"
+
+      - id: AgentVisionCore-Platform-Net10
+        title: The library shall support .NET 10 runtime.
+        tags: [system]
+        justification: |
+          .NET 10 is the current Long-Term Support (LTS) release. Supporting this runtime provides
+          a stable, long-term supported target for consumers of the library.
+        tests:
+          - "net10.0@AgentVisionCore_Assembly_Loaded_TargetsRunningRuntime"
+
+      - id: AgentVisionCore-Platform-Net11
+        title: The library shall support .NET 11 runtime.
+        tags: [system]
+        justification: |
+          .NET 11 is the latest release in the .NET platform roadmap. Supporting this runtime
+          ensures the library works for consumers as they adopt the newest .NET version.
+        tests:
+          - "net11.0@AgentVisionCore_Assembly_Loaded_TargetsRunningRuntime"

@@ -11,6 +11,7 @@ resource-path:
 input-files:
   - docs/verification/title.txt
   - docs/verification/introduction.md
+  - docs/verification/agent-vision-core.md
   - docs/verification/agent-vision-tool.md
   - docs/verification/agent-vision-tool/program.md
   - docs/verification/agent-vision-tool/cli.md

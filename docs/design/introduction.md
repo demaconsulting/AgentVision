@@ -1,13 +1,14 @@
 # Introduction
 
-This document provides the detailed design for the AgentVision, a .NET command-line
-application demonstrating best practices for DEMA Consulting DotNet Tools. It covers local
-software items (systems, subsystems, and units) and the OTS software items they consume.
+This document provides the detailed design for AgentVision, which gives AI agents low-latency access to webcams
+and is delivered as the `DemaConsulting.AgentVision.Core` .NET library and the `DemaConsulting.AgentVision.Tool`
+.NET command-line tool. It covers local software items (systems, subsystems, and units) and the OTS software
+items they consume.
 
 ## Purpose
 
 The purpose of this document is to describe the internal design of each software unit that
-comprises the AgentVision. It captures data models, algorithms, key methods, and
+comprises AgentVision. It captures data models, algorithms, key methods, and
 inter-unit interactions at a level of detail sufficient for formal code review, compliance
 verification, and future maintenance. A reviewer should be able to understand how each item
 satisfies its requirements without reading source code. The document does not restate
@@ -17,7 +18,12 @@ requirements; it explains how they are realized.
 
 Local items:
 
-- **AgentVision**: system, subsystem, and unit design for all local components.
+- **AgentVisionCore**: system design for the `DemaConsulting.AgentVision.Core` library, which owns all camera
+  logic. The library currently holds the package and assembly identity only; its subsystems and units are added
+  together with the capabilities they provide.
+- **AgentVisionTool**: system, subsystem, and unit design for all local components of the command-line tool
+  (command `agentvision`): the **Cli** subsystem (argument parsing and output, and **HelpCommand**, which answers the
+  built-in `help` command), the **SelfTest** subsystem, the **Utilities** subsystem, and the **Program** unit.
 
 OTS items:
 
@@ -44,7 +50,7 @@ The following topics are out of scope:
 The software structure is modeled in SysML2 under `docs/sysml2/` and rendered to the diagram
 below by SysML2Tools as part of the build pipeline. AI agents should query the SysML2 model
 directly (see the `sysml2tools-query` skill) rather than parsing this diagram or the prose
-elsewhere in this document. The model captures the shipped system's runtime composition only.
+elsewhere in this document. The model captures the shipped systems' runtime composition only.
 HelpCards, the one runtime OTS library, is modeled in `docs/sysml2/model/ots.sysml` and drawn in
 the OTS view rather than in the overview below. The other OTS items listed in Scope above are
 build-time/pipeline tooling, documented separately (see `docs/design/ots.md`) rather than modeled
@@ -53,16 +59,31 @@ as SysML2 parts.
 ![Software Structure](SoftwareStructureView.svg)
 
 The diagram below is a placeholder that complements the structure view by showing how data flows
-at run time: replace its TODO boxes to show how your tool's entry point, Cli, subsystems, inputs,
+at run time: replace its TODO boxes to show how the tool's entry point, Cli, subsystems, inputs,
 and outputs fit together.
 
-![Placeholder architecture diagram: replace the TODO boxes for your tool entry point, Cli,
+![Placeholder architecture diagram: replace the TODO boxes for the tool entry point, Cli,
 subsystems, support units, dependencies, inputs, and outputs with the real ones](architecture.svg)
+
+### Layering
+
+The AgentVisionCore library and the AgentVisionTool tool form a strict two-layer architecture, and every later
+change must preserve it:
+
+- **AgentVisionCore (library)** owns **all camera logic**. It is usable by any .NET application and never
+  depends on the tool.
+- **AgentVisionTool (command-line tool)** is a **thin front-end only**: argument parsing, console and log output,
+  exit codes, built-in help, self-validation, and calling the library. It contains no camera logic. The tool may
+  depend on the library; the dependency never runs in the other direction.
+
+New camera capability is therefore added to the library as subsystems and units with their own requirements,
+design, and verification, and the tool only gains the command-line options and output needed to invoke it.
 
 ## Folder Layout
 
 - **src/** - source files and projects
-  - **DemaConsulting.AgentVision.Tool/** - main application source
+  - **DemaConsulting.AgentVision.Core/** - library source
+  - **DemaConsulting.AgentVision.Tool/** - command-line tool source
     - **Cli/** - command-line interface subsystem, including `HelpCommand.cs` for the built-in help
     - **Help/** - built-in help cards (Markdown with front matter), embedded in the assembly
     - **SelfTest/** - self-validation subsystem

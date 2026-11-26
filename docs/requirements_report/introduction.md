@@ -5,7 +5,7 @@ This document contains the requirements traceability matrix for the AgentVision 
 ## Purpose
 
 The trace matrix provides traceability between requirements and test cases, ensuring that
-all requirements are validated through appropriate testing. This demonstrates that the
+all requirements are validated through appropriate testing. This demonstrates that
 AgentVision meets its specified requirements.
 
 ## Scope

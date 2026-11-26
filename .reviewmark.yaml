@@ -56,9 +56,50 @@ reviews:
       - docs/design/introduction.md
       - "docs/sysml2/**/*.sysml"
 
+  # AgentVisionCore (library) - Specials
+  - id: AgentVisionCore-Architecture
+    title: Review that AgentVisionCore Architecture Satisfies Requirements
+    context:
+      - README.md
+      - "docs/user_guide/**/*.md"
+    paths:
+      - "docs/reqstream/agent-vision-core.yaml"
+      - "docs/design/introduction.md"
+      - "docs/design/agent-vision-core.md"
+      - "docs/verification/introduction.md"
+      - "docs/verification/agent-vision-core.md"
+      - "test/**/AgentVisionCoreTests.cs"
+
+  - id: AgentVisionCore-Design
+    title: Review that AgentVisionCore Design is Consistent and Complete
+    context:
+      - docs/reqstream/agent-vision-core.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/platform-requirements.yaml"
+      - "docs/design/introduction.md"
+      - "docs/design/agent-vision-core.md"
+      - "docs/design/ots.md"
+
+  - id: AgentVisionCore-Verification
+    title: Review that AgentVisionCore Verification is Consistent and Complete
+    context:
+      - docs/reqstream/agent-vision-core.yaml
+    paths:
+      - "docs/verification/introduction.md"
+      - "docs/verification/agent-vision-core.md"
+      - "docs/verification/ots.md"
+
+  - id: AgentVisionCore-AllRequirements
+    title: Review that All AgentVisionCore Requirements are Complete
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/**/*.yaml"
+
   # AgentVisionTool - Specials
   - id: AgentVisionTool-Architecture
-    title: Review that AgentVision Architecture Satisfies Requirements
+    title: Review that AgentVisionTool Architecture Satisfies Requirements
     context:
       - README.md
       - "docs/user_guide/**/*.md"
@@ -69,20 +110,32 @@ reviews:
       - "docs/verification/introduction.md"
       - "docs/verification/agent-vision-tool.md"
       - "test/**/IntegrationTests.cs"
+      - "test/DemaConsulting.AgentVision.Tool.Tests/Runner.cs"
+      - "test/DemaConsulting.AgentVision.Tool.Tests/AssemblyInfo.cs"
 
   - id: AgentVisionTool-Design
-    title: Review that AgentVision Design is Consistent and Complete
+    title: Review that AgentVisionTool Design is Consistent and Complete
     context:
       - docs/reqstream/agent-vision-tool.yaml
     paths:
       - "docs/reqstream/agent-vision-tool/platform-requirements.yaml"
       - "docs/design/introduction.md"
+      - "docs/design/agent-vision-tool.md"
       - "docs/design/agent-vision-tool/**/*.md"
       - "docs/design/ots.md"
+
+  - id: AgentVisionTool-Verification
+    title: Review that AgentVisionTool Verification is Consistent and Complete
+    context:
+      - docs/reqstream/agent-vision-tool.yaml
+    paths:
+      - "docs/verification/introduction.md"
+      - "docs/verification/agent-vision-tool.md"
+      - "docs/verification/agent-vision-tool/**/*.md"
       - "docs/verification/ots.md"
 
   - id: AgentVisionTool-AllRequirements
-    title: Review that All AgentVision Requirements are Complete
+    title: Review that All AgentVisionTool Requirements are Complete
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -91,7 +144,7 @@ reviews:
 
   # AgentVisionTool - Program
   - id: AgentVisionTool-Program
-    title: Review that AgentVision Program Implementation is Correct
+    title: Review that AgentVisionTool Program Implementation is Correct
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -104,7 +157,7 @@ reviews:
 
   # AgentVisionTool - Cli
   - id: AgentVisionTool-Cli
-    title: Review that AgentVision Cli Satisfies Subsystem Requirements
+    title: Review that AgentVisionTool Cli Satisfies Subsystem Requirements
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -115,7 +168,7 @@ reviews:
       - "test/**/Cli/CliSubsystemTests.cs"
 
   - id: AgentVisionTool-Cli-Context
-    title: Review that AgentVision Cli Context Implementation is Correct
+    title: Review that AgentVisionTool Cli Context Implementation is Correct
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -129,7 +182,7 @@ reviews:
       - "test/**/Cli/ContextTests.cs"
 
   - id: AgentVisionTool-Cli-HelpCommand
-    title: Review that AgentVision Cli HelpCommand Implementation is Correct
+    title: Review that AgentVisionTool Cli HelpCommand Implementation is Correct
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -145,7 +198,7 @@ reviews:
 
   # AgentVisionTool - SelfTest
   - id: AgentVisionTool-SelfTest
-    title: Review that AgentVision SelfTest Satisfies Subsystem Requirements
+    title: Review that AgentVisionTool SelfTest Satisfies Subsystem Requirements
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -156,7 +209,7 @@ reviews:
       - "test/**/SelfTest/SelfTestSubsystemTests.cs"
 
   - id: AgentVisionTool-SelfTest-Validation
-    title: Review that AgentVision SelfTest Validation Implementation is Correct
+    title: Review that AgentVisionTool SelfTest Validation Implementation is Correct
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -171,7 +224,7 @@ reviews:
 
   # AgentVisionTool - Utilities
   - id: AgentVisionTool-Utilities
-    title: Review that AgentVision Utilities Satisfies Subsystem Requirements
+    title: Review that AgentVisionTool Utilities Satisfies Subsystem Requirements
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml
@@ -182,7 +235,7 @@ reviews:
       - "test/**/Utilities/UtilitiesSubsystemTests.cs"
 
   - id: AgentVisionTool-Utilities-PathHelpers
-    title: Review that AgentVision Utilities PathHelpers Implementation is Correct
+    title: Review that AgentVisionTool Utilities PathHelpers Implementation is Correct
     context:
       - docs/design/agent-vision-tool.md
       - docs/reqstream/agent-vision-tool.yaml

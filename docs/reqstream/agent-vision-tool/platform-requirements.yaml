@@ -11,12 +11,11 @@
 # Source filter prefixes:
 #   windows@TestName      - proves the test passed on a Windows platform
 #   ubuntu@TestName       - proves the test passed on a Linux (Ubuntu) platform
-#   macos@TestName        - proves the test passed on a macOS platform
 #   dotnet10.x@TestName   - proves the self-validation test ran with .NET 10.x runtime
 #   dotnet11.x@TestName   - proves the self-validation test ran with .NET 11.x runtime
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     requirements:
       - id: AgentVisionTool-Platform-Windows
         title: The tool shall execute successfully on Windows platforms.
@@ -37,16 +36,6 @@ sections:
           # Tests link to "ubuntu" to ensure results come from Linux platform
           - "ubuntu@AgentVisionTool_VersionDisplay"
           - "ubuntu@AgentVisionTool_HelpDisplay"
-
-      - id: AgentVisionTool-Platform-MacOS
-        title: The tool shall execute successfully on macOS platforms.
-        tags: [system]
-        justification: |
-          DEMA Consulting tools must support macOS for developers using Apple platforms.
-        tests:
-          # Tests link to "macos" to ensure results come from macOS platform
-          - "macos@AgentVisionTool_VersionDisplay"
-          - "macos@AgentVisionTool_HelpDisplay"
 
       - id: AgentVisionTool-Platform-Net10
         title: The tool shall support .NET 10 runtime.

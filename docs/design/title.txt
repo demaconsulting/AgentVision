@@ -1,12 +1,14 @@
 ---
 title: AgentVision Software Design Document
-subtitle: A .NET Reference Implementation for CLI Tools
+subtitle: Low-latency webcam capture for AI agents
 author: DEMA Consulting
-description: Detailed design document for the AgentVision
+description: Detailed design document for AgentVision
 lang: en-US
 keywords:
   - AgentVision
   - .NET
+  - FlashCap
+  - Webcam
   - Command-Line Tool
   - Design
   - Software Design Document

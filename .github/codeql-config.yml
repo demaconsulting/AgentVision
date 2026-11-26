@@ -9,10 +9,10 @@ query-filters:
   - exclude:
       id: cs/catch-of-all-exceptions
     paths:
-      - src/DemaConsulting.AgentVision.Tool/Context.cs
-      - src/DemaConsulting.AgentVision.Tool/Validation.cs
+      - src/DemaConsulting.AgentVision.Tool/Cli/Context.cs
+      - src/DemaConsulting.AgentVision.Tool/SelfTest/Validation.cs
   # Exclude path-combine warnings in PathHelpers (validated safe usage)
   - exclude:
       id: cs/path-combine
     paths:
-      - src/DemaConsulting.AgentVision.Tool/PathHelpers.cs
+      - src/DemaConsulting.AgentVision.Tool/Utilities/PathHelpers.cs

@@ -15,13 +15,13 @@
     <Version>0.0.0</Version>
     <Authors>DEMA Consulting</Authors>
     <Company>DEMA Consulting</Company>
-    <Description>Template project for DEMA Consulting DotNet Tools</Description>
+    <Description>AgentVision command-line tool: low-latency webcam capture for AI agents</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/demaconsulting/AgentVision</PackageProjectUrl>
     <RepositoryUrl>https://github.com/demaconsulting/AgentVision</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>Icon.png</PackageIcon>
-    <PackageTags>template;dotnet-tool</PackageTags>
+    <PackageTags>agentvision;webcam;camera;dotnet-tool</PackageTags>
     <Copyright>Copyright DEMA Consulting</Copyright>
     <Title>AgentVision Tool</Title>
     <Product>DemaConsulting.AgentVision.Tool</Product>

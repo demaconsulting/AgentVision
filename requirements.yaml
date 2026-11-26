@@ -8,6 +8,8 @@
 root-tags: [system, quality]
 includes:
   - docs/reqstream/quality.yaml
+  - docs/reqstream/agent-vision-core.yaml
+  - docs/reqstream/agent-vision-core/platform-requirements.yaml
   - docs/reqstream/agent-vision-tool.yaml
   - docs/reqstream/agent-vision-tool/program.yaml
   - docs/reqstream/agent-vision-tool/cli.yaml

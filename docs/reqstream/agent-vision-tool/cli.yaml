@@ -8,7 +8,7 @@
 # - Subsystem requirements describe the externally visible command-line interface behavior
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     sections:
       - title: Cli Subsystem Requirements
         requirements:

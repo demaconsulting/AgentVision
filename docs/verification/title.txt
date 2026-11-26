@@ -1,12 +1,14 @@
 ---
 title: AgentVision Verification Design Document
-subtitle: A .NET Reference Implementation for CLI Tools
+subtitle: Low-latency webcam capture for AI agents
 author: DEMA Consulting
-description: Verification design document for the AgentVision
+description: Verification design document for AgentVision
 lang: en-US
 keywords:
   - AgentVision
   - .NET
+  - FlashCap
+  - Webcam
   - Command-Line Tool
   - Verification
   - Verification Design Document

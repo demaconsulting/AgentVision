@@ -1,21 +1,25 @@
 # Project Overview
 
-> **Downstream customization required**: Replace the `TODO` values below with
-> values specific to the target repository. These values are the canonical source
-> for project-wide template placeholders used throughout the repository.
+- **project-name**: AgentVision
+- **organization**: DEMA Consulting
+- **project-tagline**: Low-latency webcam capture for AI agents
+- **description**: AgentVision gives AI agents fast access to webcams. A .NET library
+  (`DemaConsulting.AgentVision.Core`) keeps multiple cameras open ("hot") so frames can be
+  captured, cropped, and saved with almost no delay, and a .NET tool
+  (`DemaConsulting.AgentVision.Tool`, command `agentvision`) exposes this from the command
+  line, optionally through a background daemon. The camera features are being added
+  incrementally; the repository currently holds the two package skeletons.
+- **languages**: C#
+- **technologies**: .NET, FlashCap, DemaConsulting.CanvasNet
 
-- **project-name**: TODO — repository/project name (e.g., `ReqStream`)
-- **organization**: TODO — organization name for document authorship (e.g., `DEMA Consulting`)
-- **project-tagline**: TODO — document subtitle; 4–8 words, noun phrase, no period
-  (e.g., `Requirements traceability for .NET projects`)
-- **description**: TODO — full project description, may be multiple sentences
-- **languages**: TODO — programming languages used (e.g., `C#`, `C++`)
-- **technologies**: TODO — key technologies and frameworks (e.g., `.NET`, `CMake`)
+# Architecture Layering (ALL Agents)
+
+ALL camera logic belongs in the `DemaConsulting.AgentVision.Core` library.
+`DemaConsulting.AgentVision.Tool` is a thin CLI front-end only (argument parsing, console/log
+output, exit codes, built-in help, self-validation, and calling the library). The tool may
+depend on the library; the library never depends on the tool. Never add camera logic to the tool.
 
 # Project Structure
-
-> **Downstream customization required**: Replace `{project}` and
-> `{test-project}` with the actual source and test project folder names.
 
 ```text
 ├── docs/
@@ -32,9 +36,11 @@
 │   └── verification/
 ├── scripts/
 ├── src/
-│   └── {project}/
+│   ├── DemaConsulting.AgentVision.Core/
+│   └── DemaConsulting.AgentVision.Tool/
 └── test/
-    └── {test-project}/
+    ├── DemaConsulting.AgentVision.Core.Tests/
+    └── DemaConsulting.AgentVision.Tool.Tests/
 ```
 
 # Language and Spelling (ALL Agents)

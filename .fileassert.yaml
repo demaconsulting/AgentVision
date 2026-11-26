@@ -1,7 +1,8 @@
 ---
 # FileAssert document validation tests for AgentVision.
 # Tests are tagged by document group to allow per-group execution during the build pipeline.
-# Tags: build-notes, code-quality, code-review, design, verification, user-guide, requirements.
+# Tags: build-notes, code-quality, code-review, design, verification, user-guide, requirements,
+# packages.
 #
 # NOTE: build-notes through user-guide tests provide OTS evidence for Pandoc and WeasyPrint
 # and run before ReqStream. The requirements tests run after ReqStream and validate the
@@ -153,6 +154,12 @@ tests:
         xml:
           - query: "//*[local-name()='svg']"
             count: 1
+      - pattern: "docs/design/generated/AgentVisionCoreView.svg"
+        count: 1
+        min-size: 100
+        xml:
+          - query: "//*[local-name()='svg']"
+            count: 1
       - pattern: "docs/design/generated/AgentVisionToolView.svg"
         count: 1
         min-size: 100
@@ -275,7 +282,7 @@ tests:
             - field: "Author"
               contains: "DEMA Consulting"
             - field: "Subject"
-              contains: "Reference Implementation"
+              contains: "User guide"
           pages:
             min: 3
           text:
@@ -348,3 +355,67 @@ tests:
             min: 1
           text:
             - contains: "Trace Matrix"
+
+  # --- PACKAGES ---
+  #
+  # These tests assert the shape of the NuGet packages the build just produced, in the flat
+  # 'packages' folder written by build.yaml. Packing is a build activity, so the real
+  # artifacts are inspected here rather than re-packed from inside the unit-test suite.
+  #
+  # The library package id (DemaConsulting.AgentVision.Core) is not a prefix of the tool package
+  # id (DemaConsulting.AgentVision.Tool), so the patterns below match one package each however
+  # the pack steps are ordered. 'count: 1' makes a violation loud: a pattern that matched two
+  # files would fail the test rather than pass vacuously.
+
+  - name: AgentVisionCore_Package_Packed_ContainsLibraryAssemblies
+    description: "The library package ships the net10.0 and net11.0 assemblies with their XML documentation"
+    tags: [packages]
+    files:
+      - pattern: "packages/DemaConsulting.AgentVision.Core.*.nupkg"
+        count: 1
+        zip:
+          files:
+            - pattern: "lib/net10.0/DemaConsulting.AgentVision.Core.dll"
+              min: 1
+              max: 1
+            - pattern: "lib/net10.0/DemaConsulting.AgentVision.Core.xml"
+              min: 1
+              max: 1
+            - pattern: "lib/net11.0/DemaConsulting.AgentVision.Core.dll"
+              min: 1
+              max: 1
+            - pattern: "lib/net11.0/DemaConsulting.AgentVision.Core.xml"
+              min: 1
+              max: 1
+            # The library targets net10.0 and net11.0 only: the whole lib/ tree must hold exactly the
+            # four files above, so any other assembly or target-framework folder fails the test.
+            - pattern: "lib/**"
+              min: 4
+              max: 4
+      # The symbols package is published alongside the library package.
+      - pattern: "packages/DemaConsulting.AgentVision.Core.*.snupkg"
+        count: 1
+
+  - name: AgentVisionCore_Package_Packed_HasPackageMetadata
+    description: "The library package is named DemaConsulting.AgentVision.Core and carries its publisher metadata"
+    tags: [packages]
+    files:
+      - pattern: "packages/DemaConsulting.AgentVision.Core.*.nupkg"
+        count: 1
+        zip:
+          files:
+            - pattern: "DemaConsulting.AgentVision.Core.nuspec"
+              min: 1
+              max: 1
+              text:
+                - contains: "<id>DemaConsulting.AgentVision.Core</id>"
+                - contains: "<authors>DEMA Consulting</authors>"
+                - contains: '<license type="expression">MIT</license>'
+                - contains: "<readme>README.md</readme>"
+                - contains: "<icon>Icon.png</icon>"
+            - pattern: "README.md"
+              min: 1
+              max: 1
+            - pattern: "Icon.png"
+              min: 1
+              max: 1

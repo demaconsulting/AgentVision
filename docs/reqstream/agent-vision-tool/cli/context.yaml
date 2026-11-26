@@ -6,7 +6,7 @@
 # the tool's internal logic.
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     sections:
       - title: Cli Subsystem Requirements
         sections:

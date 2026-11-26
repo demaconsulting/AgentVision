@@ -1,13 +1,14 @@
 ---
 title: AgentVision User Guide
-subtitle: A .NET Reference Implementation for CLI Tools
+subtitle: Low-latency webcam capture for AI agents
 author: DEMA Consulting
-description: A .NET Reference Implementation for CLI Tools
+description: User guide for AgentVision
 lang: en-US
 keywords:
   - AgentVision
   - .NET
+  - FlashCap
+  - Webcam
   - Command-Line Tool
   - Documentation
-  - Best Practices
 ---

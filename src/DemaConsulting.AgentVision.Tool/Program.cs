@@ -115,7 +115,7 @@ internal static class Program
     /// <param name="context">The context containing command line arguments and program state.</param>
     /// <remarks>
     ///     Dispatch is priority-ordered: version check first, then help, then self-validation,
-    ///     then main tool logic. Only the highest-priority matching action is executed per invocation.
+    ///     then the default tool behavior. Only the highest-priority matching action is executed per invocation.
     /// </remarks>
     public static void Run(Context context)
     {
@@ -143,7 +143,7 @@ internal static class Program
             return;
         }
 
-        // Priority 4: Main tool functionality
+        // Priority 4: Default behavior when no action flag was given
         RunToolLogic(context);
     }
 
@@ -180,14 +180,18 @@ internal static class Program
     }
 
     /// <summary>
-    ///     Runs the main tool logic.
+    ///     Runs the default tool behavior, used when no action flag is given.
     /// </summary>
     /// <param name="context">The context containing command line arguments and program state.</param>
+    /// <remarks>
+    ///     The tool has no webcam commands yet, so the default behavior describes the product and
+    ///     points to the usage text and the built-in help topics.
+    /// </remarks>
     private static void RunToolLogic(Context context)
     {
-        context.WriteLine("AgentVision Tool - Demo Functionality");
-        context.WriteLine("This is a template project demonstrating best practices.");
+        context.WriteLine("AgentVision gives AI agents low-latency access to webcams.");
+        context.WriteLine("This release has no webcam commands yet.");
         context.WriteLine("");
-        context.WriteLine("Replace this with your actual tool implementation.");
+        context.WriteLine($"Run '{HelpCommand.ToolName} --help' for usage or '{HelpCommand.ToolName} help' for help topics.");
     }
 }

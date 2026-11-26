@@ -90,6 +90,16 @@ AgentVision reads and writes files on the local file system. Users should:
 - Be cautious when processing files in shared directories
 - Validate file paths to prevent directory traversal attacks
 
+### Webcam Access
+
+AgentVision exists to give AI agents access to webcams, so its camera features read video frames from capture
+devices and save them as image files. This release does not access any camera yet. Once camera features are
+available, users should:
+
+- Treat saved frames as sensitive data, because they can show people and private spaces
+- Grant the AI agents and processes that use AgentVision access only to the cameras and folders they need
+- Be aware that a camera kept open by a background process is in use until that process stops
+
 ## Security Disclosure Policy
 
 When we receive a security bug report, we will:

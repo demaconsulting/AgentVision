@@ -1,0 +1,44 @@
+---
+# AgentVisionCore System-Level Requirements
+#
+# PURPOSE:
+# - Define system-level requirements describing what consumers of the DemaConsulting.AgentVision.Core
+#   library package need from it
+# - The library owns ALL camera logic; the tool is a thin front-end that depends on it, never the
+#   reverse
+# - The library is the foundation of AgentVision: low-latency webcam capture for AI agents. The camera
+#   capabilities themselves are added, top-down, with their own requirements, design, and verification
+# - Package requirements are validated by FileAssert checks of the produced NuGet package
+#   (.fileassert.yaml, run by build.yaml) and by assembly-level tests in AgentVisionCoreTests.cs
+
+sections:
+  - title: AgentVisionCore Requirements
+    requirements:
+      - id: AgentVisionCore-System-Package
+        title: The library shall be distributed as the DemaConsulting.AgentVision.Core NuGet package.
+        tags: [system]
+        justification: |
+          Consumers (including the AgentVision tool) obtain the library as a NuGet package. The
+          package identity, its net10.0 and net11.0 assemblies, and its publisher metadata must be
+          stable so that dependent projects can reference the library by a single, predictable
+          name. The primary evidence is the produced package itself: the build packs the library
+          and FileAssert inspects the resulting .nupkg (package id, lib/net10.0 and lib/net11.0
+          assemblies and XML documentation, license, README, icon, and the companion symbols
+          package). The assembly-level tests additionally confirm the compiled assembly carries
+          the same identity and metadata.
+        tests:
+          - AgentVisionCore_Package_Packed_ContainsLibraryAssemblies
+          - AgentVisionCore_Package_Packed_HasPackageMetadata
+          - AgentVisionCore_Assembly_Loaded_HasPackageName
+          - AgentVisionCore_Assembly_Loaded_HasPackageMetadata
+
+      - id: AgentVisionCore-System-ToolIndependent
+        title: The library shall be usable without the AgentVision tool and shall not depend on it.
+        tags: [system]
+        justification: |
+          The library owns all camera logic so that any .NET application can use webcams without
+          the command-line tool; the tool is only a thin front-end that depends on the library. A
+          library that depended on the tool would invert that layering, forcing consumers to take
+          the tool (and its console, argument-parsing, and exit-code concerns) with it.
+        tests:
+          - AgentVisionCore_Assembly_Loaded_DoesNotReferenceTool

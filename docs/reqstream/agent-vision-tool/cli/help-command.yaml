@@ -5,7 +5,7 @@
 # embedded in the tool assembly. It is the only unit that uses the HelpCards library.
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     sections:
       - title: Cli Subsystem Requirements
         sections:

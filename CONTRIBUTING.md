@@ -18,7 +18,7 @@ If you find a bug, please create an issue on GitHub with the following informati
 - **Steps to Reproduce**: Detailed steps to reproduce the issue
 - **Expected Behavior**: What you expected to happen
 - **Actual Behavior**: What actually happened
-- **Environment**: Operating system, .NET version, AgentVision Tool version
+- **Environment**: Operating system, .NET version, AgentVision package versions (library and tool)
 - **Logs**: Any relevant error messages or logs
 
 ### Suggesting Features
@@ -89,6 +89,8 @@ We follow a standard GitHub workflow for contributions:
 - Write XML documentation comments for all public, internal, and private members
 - Keep methods focused and single-purpose
 - Write tests for new functionality
+- Keep the layering: all camera logic belongs in `DemaConsulting.AgentVision.Core`, and
+  `DemaConsulting.AgentVision.Tool` stays a thin command-line front-end that never carries camera logic
 
 ### Code Style
 
@@ -233,49 +235,6 @@ assembly. `Cli/HelpCommand.cs` is the only code that uses the package.
 Run `pwsh ./build.ps1 -Changed` after changing a card. The `HelpCommand` unit tests validate every card, with
 warnings treated as errors, and check its printed width; an integration test runs every command example against
 the built tool and compares the result with the card.
-
-### Adding Built-in Help to an Existing Tool
-
-> **Template only.** This checklist is for retrofitting DEMA Consulting tools from this template; do not copy it
-> into a tool's own `CONTRIBUTING.md`. Copy the *Help Cards* section above instead.
-
-1. **Copy verbatim**, renaming only the system, tool, and id prefixes:
-   - `Cli/HelpCommand.cs`, `Cli/HelpCommandTests.cs`, and `Runner.RunInDirectory`;
-   - the help tests in `ProgramTests.cs`, `CliSubsystemTests.cs`, and `IntegrationTests.cs`;
-   - `ots/help-cards.*` under `docs/reqstream`, `docs/design`, and `docs/verification`, and the `HelpCards` part
-     def in `docs/sysml2/model/ots.sysml`;
-   - `cli/help-command.*` under the same three folders and `docs/sysml2/model`.
-2. **Adapt**:
-   - `HelpCommand.ToolName` (the one place the command name appears in the help code), `RootCardIds`, and the
-     cards: write the tool's own, keeping the starter cards' structure. Check every `expect` value against the
-     tool's output. Keep the install guidance of `getting-started` (the .NET version, the manifest install, the
-     global install, and the complete GitHub Actions `ci-steps` snippet with `actions/setup-dotnet`,
-     `dotnet tool restore`, and a run step), with the tool's package id, command name, and main command.
-   - `Program.Main` (the `TryRun` call before `Context.Create`) and `Program.PrintHelp` (the `help [topic]` usage
-     line and the footer).
-   - The `DemaConsulting.HelpCards` package reference, the `src/**/Help/**` pattern in `needs-review`, and the
-     `AgentVisionTool-Cli-HelpCommand` and `OTS-HelpCards` review sets.
-   - The help requirements of the system, Cli, and Program; the *Help Command* interface of the system design,
-     which is the design documents' one statement of the exit codes and of `--silent`/`--log` not applying; the
-     Cli and Program design and verification docs; and the file lists in `requirements.yaml`, `definition.yaml`,
-     `introduction.md`, and `ots.md`.
-   - The README usage block and any `--help` output it shows, and the user guide: put *Built-in Help* right after
-     `--help`, in the file that describes the command line in a multi-file guide. The user guide keeps its own
-     exit-code table, and the rest of its help text refers to that table.
-3. **Change together**: each requirement id with every `children` link to it; each test name with its
-   requirement, its verification scenario, and the test; the review-set ids; and the tool name in `ToolName` and
-   `_source.md` (cards use the `{{tool}}` token).
-4. **Commit the review sets with the code.** ReviewMark fails a commit that adds source files no review set covers.
-   The build, lint, and fix scripts need no change.
-5. **Classify HelpCards as OTS**, like the other DEMA Consulting tools that this template uses (BuildMark,
-   ReqStream, and others): another repository produces it and the tool does not change it.
-6. **Existing `ots.sysml`**: add the `HelpCards` part def to its package, with the repository's naming suffix if it
-   uses one (for example `HelpCardsPackage`), and declare `dependency HelpCommand to HelpCards;`. Follow the
-   repository's convention for drawing OTS items: if its overview view already draws runtime OTS packages, add a
-   `HelpCards` part there too; otherwise expose them in an `OtsView`, as this template does.
-7. **Flat namespace**: when the tool has no `Cli` namespace, put `HelpCommand.cs` beside `Context.cs`, drop `.Cli`
-   from the namespaces, and place its requirement, design, verification, and SysML files beside those of
-   `Context`.
 
 ## Quality Checks
 

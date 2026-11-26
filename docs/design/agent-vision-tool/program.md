@@ -1,10 +1,10 @@
 ## Program
 
-![AgentVision Structure](AgentVisionToolView.svg)
+![AgentVisionTool Structure](AgentVisionToolView.svg)
 
 ### Purpose
 
-`Program` is the entry point and execution orchestrator for the AgentVision Tool. Its single
+`Program` is the entry point and execution orchestrator for the AgentVisionTool system. Its single
 responsibility is to hand the `help` command to `HelpCommand`, otherwise create a `Context`
 from the command-line arguments, dispatch to the appropriate handler based on the parsed flags,
 and return the exit code.
@@ -56,8 +56,8 @@ table to `context`, and ends with `HelpCommand.Default.Footer`, the pointer to t
 - *Parameters*: `Context context` — output target.
 - *Returns*: `void`.
 
-**RunToolLogic**: Placeholder for main tool logic; writes a demo message to `context`.
-Downstream projects replace this method body with actual tool behavior.
+**RunToolLogic**: Default behavior when no action flag is given. The tool has no webcam commands yet, so it
+writes a one-line product description and a pointer to the usage text and the help topics to `context`.
 
 - *Parameters*: `Context context` — output target.
 - *Returns*: `void`.

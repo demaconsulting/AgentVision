@@ -1,8 +1,8 @@
 ---
 title: AgentVision Trace Matrix
-subtitle: Requirements Traceability Matrix for the AgentVision
+subtitle: Requirements Traceability Matrix for AgentVision
 author: DEMA Consulting
-description: Requirements Traceability Matrix for the AgentVision
+description: Requirements Traceability Matrix for AgentVision
 lang: en-US
 keywords:
   - AgentVision

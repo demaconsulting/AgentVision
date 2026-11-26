@@ -1,6 +1,6 @@
 ---
 name: ❓ Question / Help
-description: Ask a usage question or get help with the AgentVision
+description: Ask a usage question or get help with AgentVision
 title: "[Question]: "
 labels: ["question"]
 assignees: []
@@ -44,8 +44,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Tool Version
-      description: What version of the AgentVision are you using?
+      label: AgentVision Version
+      description: What version of AgentVision (the library or the tool) are you using?
       placeholder: e.g., 1.0.0
     validations:
       required: true

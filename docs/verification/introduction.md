@@ -1,11 +1,12 @@
 # Introduction
 
-This document provides the verification design for the AgentVision, a .NET command-line
-application demonstrating best practices for DEMA Consulting DotNet Tools.
+This document provides the verification design for AgentVision, which gives AI agents low-latency access to
+webcams and is delivered as the `DemaConsulting.AgentVision.Core` .NET library and the
+`DemaConsulting.AgentVision.Tool` .NET command-line tool.
 
 ## Purpose
 
-The purpose of this document is to describe how each requirement for the AgentVision is
+The purpose of this document is to describe how each requirement for AgentVision is
 verified. For every software item — system, subsystem, and unit — this document names the
 verification approach, identifies the test scenarios (including boundary conditions and error
 paths), describes what is mocked or stubbed, and maps each requirement to at least one named
@@ -17,7 +18,9 @@ This document covers the verification design for the following software items:
 
 **Local items:**
 
-- **AgentVision** — system, subsystem, and unit verification:
+- **AgentVisionCore** — system verification of the `DemaConsulting.AgentVision.Core` library, which has no
+  subsystems or units yet
+- **AgentVisionTool** — system, subsystem, and unit verification of the command-line tool:
   - **Program** — entry point and execution orchestrator
   - **Cli** subsystem
     - **Context** — argument parser and I/O owner
@@ -56,7 +59,8 @@ The test folder structure mirrors the source subsystem breakdown:
 
 ```text
 test/
-└── DemaConsulting.AgentVision.Tool.Tests/  — unit and integration tests
+├── DemaConsulting.AgentVision.Core.Tests/  — library tests
+└── DemaConsulting.AgentVision.Tool.Tests/  — tool unit and integration tests
 ```
 
 ## Companion Artifact Structure

@@ -4,7 +4,7 @@
 # The Program unit is the top-level command dispatcher for the tool.
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     sections:
       - title: Program Unit Requirements
         requirements:

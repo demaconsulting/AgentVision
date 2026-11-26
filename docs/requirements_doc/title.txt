@@ -1,8 +1,8 @@
 ---
 title: AgentVision Requirements
-subtitle: Requirements Specification for the AgentVision
+subtitle: Requirements Specification for AgentVision
 author: DEMA Consulting
-description: Requirements Specification for the AgentVision
+description: Requirements Specification for AgentVision
 lang: en-US
 keywords:
   - AgentVision

@@ -8,7 +8,7 @@
 #   in regulated environments
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     sections:
       - title: SelfTest Subsystem Requirements
         requirements:

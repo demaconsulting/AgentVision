@@ -1,8 +1,8 @@
 ---
 title: AgentVision Review Report
-subtitle: File Review Report for the AgentVision
+subtitle: File Review Report for AgentVision
 author: DEMA Consulting
-description: File Review Report for the AgentVision
+description: File Review Report for AgentVision
 lang: en-US
 keywords:
   - AgentVision

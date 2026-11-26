@@ -1,10 +1,13 @@
-# AgentVision
+# AgentVisionTool
 
-![AgentVision Structure](AgentVisionToolView.svg)
+![AgentVisionTool Structure](AgentVisionToolView.svg)
 
 ## Architecture
 
-The AgentVision Tool is a command-line application built on .NET. It is structured as one
+The AgentVisionTool system is the `agentvision` command-line application built on .NET. It is the thin
+front-end of the AgentVision product: it handles arguments, output, exit codes, help, and self-validation, while
+all camera logic belongs in the *AgentVisionCore* library, which never depends on the tool. The tool has no
+webcam commands yet and does not call the library. It is structured as one
 system containing one top-level unit (`Program`) and three subsystems (`Cli`, `SelfTest`,
 `Utilities`):
 
@@ -63,7 +66,7 @@ and uses `PathHelpers` to construct safe temporary file paths.
 
 - *Type*: Standard I/O.
 - *Role*: Provider.
-- *Contract*: Writes version, banner, help text, validation summary, or demo message depending
+- *Contract*: Writes version, banner, help text, validation summary, or the default message depending
   on the flags provided. Suppressed when `--silent` is active; the log file still receives all
   output.
 - *Constraints*: Human-readable text; no machine-parseable format contract.
@@ -129,7 +132,7 @@ N/A - not a safety-classified software item.
 
 ## Design Constraints
 
-- Platform: multi-targets net10.0 and net11.0 framework compatibility specifications on Windows, Linux, and macOS.
+- Platform: multi-targets net10.0 and net11.0 framework compatibility specifications on Windows and Linux.
 - Threading: single-threaded console application; no shared mutable state between invocations.
 - Immutability: `Context` properties are set once at construction via `init` accessors and are
   read-only thereafter.

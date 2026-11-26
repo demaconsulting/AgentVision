@@ -8,27 +8,38 @@
 [![Quality Gate][badge-quality]][link-quality]
 [![Security][badge-security]][link-security]
 [![NuGet][badge-nuget]][link-nuget]
+[![NuGet][badge-nuget-core]][link-nuget-core]
 
-DEMA Consulting template project for DotNet Tools, demonstrating best practices for building command-line
-tools with .NET.
+AgentVision gives AI agents fast access to webcams. It is delivered as the `DemaConsulting.AgentVision.Core` .NET
+library and the `DemaConsulting.AgentVision.Tool` .NET tool (command `agentvision`), which is a thin command-line
+front-end for the library. The goal of the project is low-latency webcam capture: keeping multiple cameras open
+("hot") so that frames can be captured, cropped, and saved with almost no delay, using
+[FlashCap][link-flashcap] and [DemaConsulting.CanvasNet][link-canvasnet], with the command-line tool optionally
+running through a background daemon.
+
+**Status**: under active development. The repository currently provides the two package skeletons: the library
+has no camera features yet, and the tool offers the standard command-line options, built-in help, and
+self-validation. The capture features described above are planned and are not available yet.
 
 The diagram below is a placeholder workflow diagram: replace its TODO boxes (in `docs/images/workflow.svg`,
-then re-render `docs/images/workflow.png`) to show how users prepare inputs, run your tool, get its outputs,
+then re-render `docs/images/workflow.png`) to show how users prepare inputs, run the tool, get its outputs,
 and use them.
 
-![Placeholder workflow diagram: replace the TODO boxes to show how users prepare inputs, run your tool, get
+![Placeholder workflow diagram: replace the TODO boxes to show how users prepare inputs, run the tool, get
 its outputs, and use them][workflow]
 
 ## Features
 
-This template demonstrates:
+AgentVision provides:
 
 - **Standardized Command-Line Interface**: Context class handling common arguments
   (`--version`, `--help`, `--silent`, `--validate`, `--results`, `--depth`, `--log`)
 - **Self-Validation**: Built-in validation tests with TRX/JUnit output
 - **Built-in Help**: `agentvision help` serves Markdown help cards ([DemaConsulting.HelpCards][link-helpcards])
   with runnable examples, search, and JSON output for AI agents
-- **Multi-Platform Support**: Builds and runs on Windows, Linux, and macOS
+- **Reusable Library**: `DemaConsulting.AgentVision.Core` is the home of all camera logic and is usable by any
+  .NET application without the tool
+- **Multi-Platform Support**: Builds and runs on Windows and Linux
 - **Multi-Runtime Support**: Targets .NET 10 and 11
 - **Comprehensive CI/CD**: GitHub Actions workflows with quality checks, builds, and
   integration tests
@@ -48,10 +59,16 @@ Install the tool globally using the .NET CLI:
 dotnet tool install -g DemaConsulting.AgentVision.Tool
 ```
 
+Add the library to a project with:
+
+```bash
+dotnet add package DemaConsulting.AgentVision.Core
+```
+
 ## Usage
 
 ```bash
-# Default behavior (no arguments) — displays banner and copyright
+# Default behavior (no arguments) — displays banner, copyright, and a pointer to the help
 agentvision
 
 # Display version
@@ -174,6 +191,7 @@ By contributing to this project, you agree that your contributions will be licen
 [badge-quality]: https://sonarcloud.io/api/project_badges/measure?project=demaconsulting_AgentVision&metric=alert_status
 [badge-security]: https://sonarcloud.io/api/project_badges/measure?project=demaconsulting_AgentVision&metric=security_rating
 [badge-nuget]: https://img.shields.io/nuget/v/DemaConsulting.AgentVision.Tool?style=plastic
+[badge-nuget-core]: https://img.shields.io/nuget/v/DemaConsulting.AgentVision.Core?style=plastic
 
 <!-- Link References -->
 [link-forks]: https://github.com/demaconsulting/AgentVision/network/members
@@ -184,6 +202,9 @@ By contributing to this project, you agree that your contributions will be licen
 [link-quality]: https://sonarcloud.io/dashboard?id=demaconsulting_AgentVision
 [link-security]: https://sonarcloud.io/dashboard?id=demaconsulting_AgentVision
 [link-nuget]: https://www.nuget.org/packages/DemaConsulting.AgentVision.Tool
+[link-nuget-core]: https://www.nuget.org/packages/DemaConsulting.AgentVision.Core
+[link-flashcap]: https://github.com/kekyo/FlashCap
+[link-canvasnet]: https://github.com/demaconsulting/CanvasNet
 [link-guide]: https://github.com/demaconsulting/AgentVision/blob/main/docs/user_guide/introduction.md
 [link-continuous-compliance]: https://github.com/demaconsulting/ContinuousCompliance
 [link-helpcards]: https://www.nuget.org/packages/DemaConsulting.HelpCards

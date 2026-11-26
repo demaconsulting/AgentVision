@@ -1,6 +1,6 @@
 ---
 name: ✨ Feature Request
-description: Suggest a new feature or enhancement for the AgentVision
+description: Suggest a new feature or enhancement for AgentVision
 title: "[Feature]: "
 labels: ["enhancement"]
 assignees: []
@@ -43,7 +43,7 @@ body:
       placeholder: |
         ```csharp
         // Example usage
-        agentvision --input report.json --output report.md --feature-flag
+        agentvision your-command --your-option
         ```
       render: csharp
 

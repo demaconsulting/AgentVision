@@ -1,7 +1,7 @@
 # OTS Software Verification
 
 This section provides verification evidence for all Off-The-Shelf (OTS) software items
-used by the AgentVision.
+used by AgentVision.
 
 ## Scope
 
@@ -9,7 +9,7 @@ Each OTS item is verified by a combination of:
 
 - The OTS tool's own self-validation suite (where the tool supports `--validate`)
 - Pipeline output assertions performed by FileAssert on documents produced by the tool
-- Integration tests of the AgentVision, for a library that the tool uses at run time
+- Integration tests of the tool, for a library that the tool uses at run time
 
 Internal OTS tool design is out of scope; only integration and usage evidence is documented.
 

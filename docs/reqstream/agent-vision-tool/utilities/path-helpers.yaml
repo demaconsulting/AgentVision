@@ -6,7 +6,7 @@
 # or absolute paths when a relative path is expected.
 
 sections:
-  - title: AgentVision Requirements
+  - title: AgentVisionTool Requirements
     sections:
       - title: Utilities Subsystem Requirements
         sections:
