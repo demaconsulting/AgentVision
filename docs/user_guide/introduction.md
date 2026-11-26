@@ -17,9 +17,10 @@ delivered as two packages:
 - **`DemaConsulting.AgentVision.Tool`**: a .NET tool, command `agentvision`, that exposes AgentVision from the
   command line. It is a thin front-end for the library.
 
-AgentVision is under active development. The first camera feature, listing the cameras of a machine and the video
-formats they support, is available in both packages. Opening a camera and capturing frames are planned, and this
-guide documents only what exists in the current release.
+AgentVision is under active development. Listing the cameras of a machine and the video formats they support is
+available in both packages. The library can also keep cameras open and hand out their frames, crop them, and save them
+as PNG, JPEG, or BMP files; the command-line tool does not capture frames yet, and this guide documents only what exists
+in the current release.
 
 ## Scope
 
@@ -27,6 +28,7 @@ This user guide covers:
 
 - Installation instructions for the tool and the library
 - Listing cameras with the tool and with the library
+- Capturing frames with the library: opening cameras, snapshots, cropping, saving, options, and errors
 - Usage examples for common tasks
 - The built-in `agentvision help` command
 - Command-line options reference
@@ -174,10 +176,181 @@ public sealed class FixedCameraSource : ICameraSource
 {
     public IReadOnlyList<CameraInfo> GetCameras() =>
         [new CameraInfo("Custom:1", "Test Camera", "Test Camera", "Custom", [new CameraFormat(640, 480, "YUYV", 30)])];
+
+    // Only needed to capture; a source that is only listed can refuse it
+    public IDisposable Open(CameraInfo camera, CameraFormat format, Action<EncodedFrame> frameArrived, Action<Exception> faulted) =>
+        throw new NotSupportedException();
 }
 
 var cameras = new CameraEnumerator(new FixedCameraSource()).Enumerate();
 ```
+
+A source can also stand in for a camera: its `Open` method starts delivering frames (each frame is the bytes of a JPEG,
+PNG, or BMP file) to the callback it is given, and returns a handle whose disposal stops them. Pass it to
+`new CameraOpener(source)` to run capture code without camera hardware.
+
+## Capturing Frames with the Library
+
+The library keeps a camera open ("hot"): opening a camera takes a second or more, but once it is open, taking a picture
+is a read of the newest frame that is already in memory. An application that needs many pictures opens each camera once,
+takes snapshots as often as it likes from any thread, and disposes the session when it is done. The camera is released
+as soon as the session is disposed.
+
+### Opening a Camera and Taking a Snapshot
+
+```csharp
+using DemaConsulting.AgentVision.Core.Capture;
+
+var opener = new CameraOpener();
+
+// "0" is the index that the camera listing shows; an identifier or a name works too
+using var session = opener.Open("0");
+
+// The first snapshot waits for the warm-up (one second by default); later snapshots return at once
+CameraFrame frame = session.Snapshot();
+
+// The frame is the bytes of a JPEG, PNG, or BMP file: forward them as they are, or decode them into an image
+using var image = frame.ToImage();
+image.Save("desk.png");
+```
+
+`Open` accepts the index of the camera as `agentvision cameras` lists it (a number), the identifier of the camera (the
+stable form), or the name of the camera (letter case does not matter). A number is always an index. When Windows
+reports one camera through several backends under one name, the first backend of the list is used, and two cameras of
+one backend that share a name must be told apart by index or identifier.
+
+A `CameraFrame` is immutable and stays valid after the session is disposed. `Sequence` is the frame number, so two
+snapshots with the same number are the same frame; `Age` says how long ago the frame arrived; and `ToImage()` decodes
+it (tens of milliseconds for a full-HD picture) on the thread that calls it, so a service can forward the
+`EncodedData` bytes without decoding them at all.
+
+### Cropping and Saving
+
+```csharp
+using DemaConsulting.AgentVision.Core.Imaging;
+
+using var image = session.Snapshot().ToImage();
+
+// Keep a region: x, y, width, height in pixels from the top-left corner
+using var detail = image.Crop(new CropRectangle(100, 50, 320, 240));
+
+detail.Save("detail.png");   // lossless
+detail.Save("detail.jpg");   // small (quality 90); .jpeg works too
+detail.Save("detail.bmp");   // uncompressed
+```
+
+The extension chooses the format (`.png`, `.jpg`, `.jpeg`, and `.bmp`, in any letter case), and any other extension is
+refused with a message that lists the supported ones. A crop returns a new image with its own pixels, so the original
+can be cropped again, and a region that does not fit inside the picture is refused with a message that names the region
+and the size of the picture. `Save(Stream, ImageFileFormat)` writes to a stream instead of a file.
+
+### One Picture with One Call
+
+When one picture is all that is needed, `CameraSnapper` opens the camera, waits for the warm-up, saves the picture, and
+closes the camera, also when something fails:
+
+```csharp
+var snapper = new CameraSnapper();
+var result = snapper.Snap(new SnapRequest("0", "desk.jpg")
+{
+    Crop = new CropRectangle(100, 50, 320, 240)   // optional
+});
+
+Console.WriteLine($"Saved {result.OutputPath} ({result.Width}x{result.Height}) from {result.Camera.Name}");
+```
+
+Everything that can be checked without the camera (the file name and extension, the folder, the options, and the crop
+against the size of the format that will be used) is checked before the camera is started.
+
+### Several Cameras at Once
+
+Open each camera with the same opener; the sessions are independent, and closing one leaves the others streaming:
+
+```csharp
+var opener = new CameraOpener();
+using var desk = opener.Open("Desk Camera");
+using var door = opener.Open("1");
+
+var deskFrame = desk.Snapshot();
+var doorFrame = door.Snapshot();
+```
+
+A physical camera that Windows reports through several backends can only be opened once at a time; open it through one
+entry.
+
+### Choosing the Format, the Warm-Up, and the Timeouts
+
+Every option is optional. The size and the frame rate are preferences: the camera is opened with the format that comes
+closest, and `session.Format` tells which format was chosen.
+
+```csharp
+var options = new CameraOpenOptions
+{
+    Width = 1280,                                   // requested frame size (nearest size wins)
+    Height = 720,
+    FramesPerSecond = 30,                           // requested frame rate (not below, then closest)
+    WarmUp = TimeSpan.FromMilliseconds(1500),       // default 1000 ms; zero disables it
+    FirstFrameTimeout = TimeSpan.FromSeconds(10),   // default 5 s: wait for the first frame after the warm-up
+    StaleFrameTimeout = TimeSpan.FromSeconds(5)     // default 5 s: a frame this old means the camera stopped
+};
+
+using var session = new CameraOpener().Open("0", options);
+```
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `Width`, `Height` | none | Requested frame size in pixels. An unspecified dimension counts as a match |
+| `FramesPerSecond` | none | Requested frame rate |
+| `WarmUp` | 1000 ms | Frames that arrive during this time after streaming starts are discarded |
+| `FirstFrameTimeout` | 5 s | How long the first snapshot waits for a frame after the warm-up |
+| `StaleFrameTimeout` | 5 s | Age of the newest frame at which the camera counts as disconnected |
+
+Without a request, the library chooses the largest size that is not above 1920x1080 and offers at least 15 frames per
+second, then the highest frame rate, and JPEG when the camera offers it (it needs the least USB bandwidth). The warm-up
+exists because most webcams deliver dark or unfocused frames for a moment after they start while exposure and white
+balance settle; frames inside the warm-up are never served. Durations must not be negative or longer than one hour.
+
+### Using the Library from Many Threads
+
+`CameraOpener`, `CameraSession`, and `CameraFrame` are safe to use from many threads: any number of threads may call
+`Snapshot` at the same time, even while frames arrive, and `Dispose` may be called from any thread. A `CameraImage` is
+not thread-safe, so give each thread its own image. A background service typically opens its cameras at start,
+checks `session.IsReady` to know when the first frame can be read without waiting, and disposes the sessions at stop.
+
+### Errors
+
+Failures are reported with exceptions of one family, `CameraException`, and the standard argument exceptions for
+mistakes of the caller. Every message names the camera or the selector and says what to do next.
+
+- `CameraNotFoundException`: no camera matches the index, identifier, or name. Read the message: it lists the
+  available cameras (`Selector` and `Available` carry the same information).
+- `CameraOpenException`: the camera cannot be opened or started, or offers no usable format. Check that no other
+  application holds the camera and that you may use it; the inner exception has the details.
+- `CameraTimeoutException`: the camera delivered no frame in time. Try a smaller format or a longer
+  `FirstFrameTimeout`, and check that the camera is not covered.
+- `CameraDisconnectedException`: the camera reported a failure, or stopped delivering frames. Dispose the session and
+  open the camera again.
+- `ObjectDisposedException`: the session was disposed. Open the camera again.
+- `ArgumentException` and `ArgumentOutOfRangeException`: an option, an index, a crop, or a file name is invalid.
+  Correct the argument.
+- `InvalidDataException`: a frame is damaged and cannot be decoded. Take another snapshot.
+
+### Notes and Troubleshooting
+
+- **The first snapshot is slow.** It waits for the warm-up. Open the session early, or set `WarmUp` shorter if the
+  camera settles quickly.
+- **The picture is dark.** Lengthen the warm-up; some cameras need two seconds.
+- **A camera cannot be opened.** Another application (a video call, the camera app) may hold it. Close that
+  application and try again. On Linux the account must be allowed to use `/dev/video*`, normally through the
+  `video` group.
+- **Frames from a camera do not decode.** Many motion JPEG cameras omit the Huffman tables from their frames; the
+  library inserts the standard tables, so those frames decode normally. A frame that is truly damaged raises an
+  `InvalidDataException`.
+- **Dispose every session.** An undisposed session keeps its camera, and its light, on until the process ends.
+- **Hardware tests.** `pwsh ./build.ps1 -All -Hardware` also runs smoke tests against the cameras of the machine. A
+  camera can be open in one program at a time, so the tests of the two target frameworks queue on a lock file in the
+  temporary folder and run one after another, and nothing else (an `agentvision` process or another application) may
+  use the cameras meanwhile.
 
 ## Display Help
 

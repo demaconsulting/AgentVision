@@ -18,19 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using DemaConsulting.AgentVision.Core.Capture;
 using FlashCap;
 
 namespace DemaConsulting.AgentVision.Core.Cameras;
 
 /// <summary>
-///     Reports the cameras of the host by asking FlashCap, and translates what FlashCap describes into the
-///     library's own camera types.
+///     Reports the cameras of the host by asking FlashCap, translates what FlashCap describes into the
+///     library's own camera types, and opens a described camera.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This is the only type of the library that references FlashCap. It exists so that FlashCap types
-///         never cross the <see cref="ICameraSource"/> boundary: the rest of the library, and every consumer
-///         of the public API, sees only <see cref="CameraInfo"/> and <see cref="CameraFormat"/>.
+///         This type and <see cref="FlashCapCameraDevice"/> are the only types of the library that reference
+///         FlashCap. They exist so that FlashCap types never cross the <see cref="ICameraSource"/> boundary: the
+///         rest of the library, and every consumer of the public API, sees only <see cref="CameraInfo"/>,
+///         <see cref="CameraFormat"/>, and <see cref="EncodedFrame"/>.
 ///     </para>
 ///     <para>
 ///         FlashCap reports one entry per capture backend, so on Windows a single physical camera usually
@@ -89,6 +91,63 @@ internal sealed class FlashCapCameraSource : ICameraSource
         _enumerate().Select(ToCameraInfo).ToList().AsReadOnly();
 
     /// <summary>
+    ///     Opens the FlashCap device that belongs to a camera and starts it streaming.
+    /// </summary>
+    /// <param name="camera">The camera to open, as <see cref="GetCameras"/> described it.</param>
+    /// <param name="format">The format to stream, one of the formats of the camera.</param>
+    /// <param name="frameArrived">Receives each frame on a FlashCap thread.</param>
+    /// <param name="faulted">Receives a failure of the capture path.</param>
+    /// <returns>A handle that stops and releases the device when disposed.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when an argument is null.</exception>
+    /// <exception cref="CameraOpenException">
+    ///     Thrown when FlashCap no longer reports a device with the identifier of the camera, the device offers no
+    ///     such format any more, or the device cannot be opened or started.
+    /// </exception>
+    /// <remarks>
+    ///     The descriptors are asked for again instead of being remembered from the earlier listing, because the
+    ///     camera may have been removed since. The camera is found by the identifier that <see cref="GetCameras"/>
+    ///     built, and the format by its size, pixel format, and frame rate.
+    /// </remarks>
+    public IDisposable Open(
+        CameraInfo camera,
+        CameraFormat format,
+        Action<EncodedFrame> frameArrived,
+        Action<Exception> faulted)
+    {
+        ArgumentNullException.ThrowIfNull(camera);
+        ArgumentNullException.ThrowIfNull(format);
+        ArgumentNullException.ThrowIfNull(frameArrived);
+        ArgumentNullException.ThrowIfNull(faulted);
+
+        // Find the device again by the identifier that the listing built; it may have been unplugged since
+        var descriptor = _enumerate().FirstOrDefault(candidate => IdOf(candidate) == camera.Id)
+                         ?? throw new CameraOpenException(
+                             $"Camera '{camera.Name}' ({camera.Id}) is no longer available. " +
+                             "It may have been unplugged; list the cameras again.");
+
+        // Find the characteristics that describe exactly the chosen format
+        var characteristics = descriptor.Characteristics.FirstOrDefault(candidate =>
+                                  candidate.PixelFormat != PixelFormats.Unknown && ToCameraFormat(candidate) == format)
+                              ?? throw new CameraOpenException(
+                                  $"Camera '{camera.Name}' does not offer the format {format.Width}x{format.Height} " +
+                                  $"{format.PixelFormat} at {format.FramesPerSecond:0.##} fps any more.");
+
+        return FlashCapCameraDevice.Open(descriptor, characteristics, camera.Name, frameArrived, faulted);
+    }
+
+    /// <summary>
+    ///     Builds the identifier of a descriptor: the backend, a colon, and the identity.
+    /// </summary>
+    /// <param name="descriptor">The FlashCap descriptor.</param>
+    /// <returns>The identifier that <see cref="CameraInfo.Id"/> carries.</returns>
+    /// <remarks>
+    ///     The identity is an opaque object whose text form is its stable value; a missing identity gives an
+    ///     identifier with an empty part after the backend rather than a failure.
+    /// </remarks>
+    private static string IdOf(CaptureDeviceDescriptor descriptor) =>
+        $"{descriptor.DeviceType}:{descriptor.Identity}";
+
+    /// <summary>
     ///     Translates one FlashCap descriptor into a camera description.
     /// </summary>
     /// <param name="descriptor">The FlashCap descriptor of one device.</param>
@@ -103,9 +162,8 @@ internal sealed class FlashCapCameraSource : ICameraSource
     {
         var backend = descriptor.DeviceType.ToString();
 
-        // The identity is an opaque object whose text form is its stable value; a missing identity gives
-        // an identifier with an empty part after the backend rather than a failure
-        var id = $"{backend}:{descriptor.Identity}";
+        // The identifier joins the backend and the identity (see IdOf)
+        var id = IdOf(descriptor);
 
         var formats = descriptor.Characteristics
             .Where(characteristics => characteristics.PixelFormat != PixelFormats.Unknown)

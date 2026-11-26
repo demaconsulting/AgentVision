@@ -1,0 +1,68 @@
+---
+# FlashCapCameraDevice Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the FlashCapCameraDevice unit of the Cameras subsystem
+# - The unit is one FlashCap device that is streaming: it opens and starts the device with a latest-frame-only
+#   strategy, turns each FlashCap pixel buffer into an encoded frame, and stops and releases the device in a
+#   bounded time; it also owns the encoded frame type
+# - The FlashCap requirements it depends on are linked as children, so the evidence for the runtime OTS item traces
+#   to the requirement of the unit that uses it
+# - Unit requirements are validated by FlashCapCameraDeviceTests.cs, which opens descriptors whose device follows
+#   FlashCap's real lifecycle without a camera
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Cameras Subsystem Requirements
+        sections:
+          - title: FlashCapCameraDevice Unit Requirements
+            requirements:
+              - id: AgentVisionCore-FlashCapCameraDevice-Stream
+                title: >-
+                  The FlashCapCameraDevice shall start a FlashCap device streaming and deliver each frame it
+                  captures exactly once, as an encoded frame that holds the bytes of a complete image file, with at
+                  most one frame waiting.
+                justification: |
+                  The session wants the newest frame and nothing else; a backlog would make pictures late. Raw frames
+                  are converted by FlashCap, so every frame can be decoded without knowing the camera.
+                children:
+                  - AgentVision-OTS-FlashCap-OpenDevice
+                  - AgentVision-OTS-FlashCap-DeliverFrames
+                tests:
+                  - FlashCapCameraDevice_Open_RealFlashCapLifecycle_StartsDevice
+                  - FlashCapCameraDevice_FrameArrived_RealFlashCapQueue_DeliversEncodedFrame
+                  - FlashCapCameraDevice_FrameArrived_RealFlashCapQueueRawFrame_DeliversBitmapFile
+                  - FlashCapCameraDevice_FrameArrived_RealFlashCapQueueYuyvFrame_DeliversDecodableBitmap
+
+              - id: AgentVisionCore-FlashCapCameraDevice-Stop
+                title: >-
+                  The FlashCapCameraDevice shall stop and release the FlashCap device when it is disposed, in a
+                  bounded time, exactly once however often it is disposed, so that no frame is delivered afterwards.
+                justification: |
+                  Releasing the camera must be deterministic and must not hang on a camera that was unplugged, and a
+                  second disposal during cleanup must not fail.
+                children:
+                  - AgentVision-OTS-FlashCap-OpenDevice
+                tests:
+                  - FlashCapCameraDevice_Dispose_RealFlashCapLifecycle_StopsAndDisposes
+
+              - id: AgentVisionCore-FlashCapCameraDevice-Failure
+                title: >-
+                  The FlashCapCameraDevice shall report a device that cannot be opened or started with an open
+                  exception that names the camera and carries the FlashCap failure (a canceled or timed-out open
+                  says that the backend did not open the device), shall release a device that
+                  opened but did not start, and shall report a failure while delivering a frame through the fault
+                  callback.
+                justification: |
+                  A busy or unplugged camera is an everyday failure that the caller must be able to read; a half-open
+                  device must not stay blocked, and a failure on the capture thread must reach the session instead of
+                  being lost in FlashCap.
+                children:
+                  - AgentVision-OTS-FlashCap-OpenFailure
+                tests:
+                  - FlashCapCameraDevice_Open_RealFlashCapDescriptorFails_ThrowsCameraOpen
+                  - FlashCapCameraDevice_Open_RealFlashCapVideoForWindowsCanceled_ThrowsCameraOpenWithBackendHint
+                  - FlashCapCameraDevice_Open_RealFlashCapOtherBackendCanceled_ThrowsCameraOpenWithoutHint
+                  - FlashCapCameraDevice_Open_RealFlashCapStartFails_ThrowsCameraOpenAndDisposesDevice
+                  - FlashCapCameraDevice_FrameArrived_CallbackThrows_ReportsFault

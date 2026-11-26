@@ -8,7 +8,8 @@
   captured, cropped, and saved with almost no delay, and a .NET tool
   (`DemaConsulting.AgentVision.Tool`, command `agentvision`) exposes this from the command
   line, optionally through a background daemon. The camera features are being added
-  incrementally; camera enumeration (listing the cameras and their formats) is available first.
+  incrementally; camera enumeration (listing the cameras and their formats) and, in the library, hot capture with image
+  operations (crop and save) are available.
 - **languages**: C#
 - **technologies**: .NET, FlashCap, DemaConsulting.CanvasNet
 

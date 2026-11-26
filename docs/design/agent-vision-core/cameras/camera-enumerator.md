@@ -18,7 +18,9 @@ compare, and choose cameras without referencing the capture library that found t
   `Name`, `Description`, `Backend` (`DirectShow`, `MediaFoundation`, `VideoForWindows`, or `V4L2`), and `Formats`
   (read-only list of `CameraFormat`, empty when none can be captured). Record equality compares `Formats` by
   reference.
-- **ICameraSource** (interface): one method, `GetCameras`, that returns the cameras available now.
+- **ICameraSource** (interface): two methods: `GetCameras`, which returns the cameras available now, and `Open`, which
+  starts a camera streaming in a format and delivers its frames to a callback (see *FlashCapCameraSource*; the
+  enumerator itself only uses `GetCameras`).
 - **CameraEnumerator** (class): one read-only field, the source. No other state.
 
 Invariants: the list returned by `Enumerate` is never null, and its cameras and formats are in the documented order

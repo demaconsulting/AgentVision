@@ -37,6 +37,12 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
 
+    <!-- NU5104 is raised when a stable package version depends on a prerelease package. The library depends on a
+         prerelease DemaConsulting.CanvasNet (as the tool does on a prerelease DemaConsulting.HelpCards) and is
+         still unreleased (version 0.0.0). Packing a stable version while a prerelease dependency exists is
+         accepted knowingly; remove this suppression when CanvasNet has a stable release and the reference moves to it. -->
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
+
     <!-- SBOM Configuration -->
     <GenerateSBOM>true</GenerateSBOM>
     <SBOMPackageName>$(PackageId)</SBOMPackageName>
@@ -48,6 +54,8 @@
   <ItemGroup>
     <!-- FlashCap enumerates the video capture devices; only FlashCapCameraSource references it. -->
     <PackageReference Include="FlashCap" Version="1.13.0" />
+    <!-- CanvasNet decodes, crops, and saves the captured frames; only the Imaging subsystem references it. -->
+    <PackageReference Include="DemaConsulting.CanvasNet" Version="0.2.0-beta.14" />
   </ItemGroup>
 
   <!-- Build Tool Dependencies -->

@@ -18,8 +18,9 @@ Internal OTS tool design is out of scope; only integration and usage evidence is
 The following OTS items have verification evidence in this section:
 
 - BuildMark (*buildmark.md*) — build-notes documentation tool
+- CanvasNet (*canvasnet.md*) — image decoding, cropping, and saving library
 - FileAssert (*fileassert.md*) — document assertion tool
-- FlashCap (*flashcap.md*) — video capture device enumeration library
+- FlashCap (*flashcap.md*) — video capture library: device enumeration and streaming
 - HelpCards (*help-cards.md*) — built-in help library
 - Pandoc (*pandoc.md*) — Markdown-to-HTML conversion tool
 - ReqStream (*reqstream.md*) — requirements traceability tool

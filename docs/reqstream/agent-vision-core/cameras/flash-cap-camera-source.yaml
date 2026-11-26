@@ -56,3 +56,22 @@ sections:
                   empty list so that they need no special handling.
                 tests:
                   - FlashCapCameraSource_GetCameras_NoDescriptors_ReturnsEmptyList
+
+              - id: AgentVisionCore-FlashCapCameraSource-OpenDevice
+                title: >-
+                  The FlashCapCameraSource shall open the FlashCap device that has the identifier of a camera, with the
+                  video characteristics that match the chosen format, and shall report a camera that FlashCap no
+                  longer lists, or a format that the camera no longer offers, with an open exception that names it.
+                justification: |
+                  A camera is opened some time after it was listed, and it may have been unplugged in between. The
+                  device is found again by its identifier, and the exact characteristics are the ones the format
+                  describes, so what is opened is what was chosen; a mismatch fails clearly instead of opening
+                  something else.
+                children:
+                  - AgentVision-OTS-FlashCap-OpenDevice
+                tests:
+                  - FlashCapCameraSource_Open_MatchingDescriptor_OpensWithChosenCharacteristics
+                  - FlashCapCameraSource_Open_DisposeHandle_StopsAndDisposesDevice
+                  - FlashCapCameraSource_Open_UnknownId_ThrowsCameraOpen
+                  - FlashCapCameraSource_Open_UnknownFormat_ThrowsCameraOpen
+                  - FlashCapCameraSource_Open_NullArguments_ThrowsArgumentNullException

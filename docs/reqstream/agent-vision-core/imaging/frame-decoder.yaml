@@ -1,0 +1,65 @@
+---
+# FrameDecoder Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the FrameDecoder unit of the Imaging subsystem
+# - The unit decodes the bytes of a camera frame (JPEG, PNG, or BMP) into pixels with CanvasNet, and repairs the
+#   defects of camera frames: a JPEG without Huffman tables, a top-down bitmap, and a bitmap whose unused fourth
+#   byte is zero
+# - The CanvasNet requirements it depends on are linked as children, so the evidence for the runtime OTS item traces
+#   to the requirement of the unit that uses it
+# - Unit requirements are validated by FrameDecoderTests.cs, which uses synthetic frames, so no camera hardware
+#   is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Imaging Subsystem Requirements
+        sections:
+          - title: FrameDecoder Unit Requirements
+            requirements:
+              - id: AgentVisionCore-FrameDecoder-Decode
+                title: >-
+                  The FrameDecoder shall decode JPEG, PNG, and BMP frames (24-bit and 32-bit, rows stored bottom-up or
+                  top-down, with a fourth byte that is zero) to pixels of the size and the colors of the frame.
+                justification: |
+                  These are the frame formats that cameras deliver once the capture library has converted raw
+                  formats to bitmaps. A bitmap with the rows in the other order, or with zero in the unused byte,
+                  must not give a mirrored or transparent picture.
+                children:
+                  - AgentVision-OTS-CanvasNet-DecodeFrames
+                tests:
+                  - FrameDecoder_Decode_Jpeg_RealCanvasNet_ReturnsSurfaceOfFrameSize
+                  - FrameDecoder_Decode_Png_RealCanvasNet_ReturnsExactPixels
+                  - FrameDecoder_Decode_Bmp_RealCanvasNet_ReturnsPixelsInPlace
+                  - FrameDecoder_Decode_Bmp32ZeroFourthByte_RealCanvasNet_ReturnsOpaquePixels
+
+              - id: AgentVisionCore-FrameDecoder-RepairHuffman
+                title: >-
+                  The FrameDecoder shall insert the standard Huffman tables into a JPEG frame that defines none, so
+                  that the frame decodes to the pixels the camera sent, and shall leave a frame that has tables, and
+                  any frame that is not a JPEG, unchanged.
+                justification: |
+                  Many motion JPEG webcams leave out the Huffman tables because the stream format implies them, and a
+                  decoder that follows the JPEG file rules rejects such a frame. The cameras encode with the standard
+                  tables, so inserting them restores the picture; inserting them into a frame that has its own would
+                  corrupt it.
+                tests:
+                  - FrameDecoder_Decode_JpegWithoutDht_DecodesLikeOriginal
+                  - FrameDecoder_EnsureHuffmanTables_JpegWithTables_ReturnsInputUnchanged
+                  - FrameDecoder_EnsureHuffmanTables_NotJpeg_ReturnsInputUnchanged
+                  - StandardJpegTables_Segment_MatchesCanvasNetEncoderTables
+
+              - id: AgentVisionCore-FrameDecoder-Invalid
+                title: >-
+                  The FrameDecoder shall report empty, unrecognized, damaged, and truncated frames with an
+                  invalid-data exception whose message says that a camera frame could not be decoded.
+                justification: |
+                  A camera can deliver a damaged frame (a dropped packet, a cable fault). The caller needs one
+                  exception type to handle, with a message that points at the frame and not at an internal detail.
+                children:
+                  - AgentVision-OTS-CanvasNet-DecodeFrames
+                tests:
+                  - FrameDecoder_Decode_Garbage_RealCanvasNet_ThrowsInvalidData
+                  - FrameDecoder_Decode_Empty_ThrowsInvalidData
+                  - FrameDecoder_Decode_Truncated_ThrowsInvalidData

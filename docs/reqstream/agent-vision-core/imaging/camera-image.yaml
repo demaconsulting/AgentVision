@@ -1,0 +1,75 @@
+---
+# CameraImage Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the CameraImage unit of the Imaging subsystem
+# - The unit is the picture of a frame: it reports its size, crops a region into a new independent image, and saves
+#   as PNG, JPEG, or BMP by the file extension; it also owns the crop rectangle and the file format types
+# - The CanvasNet requirements it depends on are linked as children, so the evidence for the runtime OTS item traces
+#   to the requirement of the unit that uses it
+# - Unit requirements are validated by CameraImageTests.cs, which uses synthetic pictures, so no camera hardware
+#   is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Imaging Subsystem Requirements
+        sections:
+          - title: CameraImage Unit Requirements
+            requirements:
+              - id: AgentVisionCore-CameraImage-Crop
+                title: >-
+                  The CameraImage shall copy a rectangular region of the picture into a new image of the size of the
+                  region, and shall reject a region with a negative position, without width or height, or that
+                  reaches past the picture, with a message that names the region and the size of the picture.
+                justification: |
+                  Cropping is how an agent focuses on the part of the scene that matters. A region that does not fit
+                  is a mistake of the caller, and the message must give the numbers that make the mistake visible.
+                children:
+                  - AgentVision-OTS-CanvasNet-Crop
+                tests:
+                  - CameraImage_Crop_RealCanvasNet_CopiesRegion
+                  - CameraImage_Crop_ExactlyTheImage_ReturnsWholeImage
+                  - CameraImage_Crop_OutsideImage_ThrowsWithMessage
+                  - CameraImage_Crop_ZeroSizeOrNegative_ThrowsArgumentOutOfRange
+                  - CameraImage_Decode_Frame_ReportsSize
+
+              - id: AgentVisionCore-CameraImage-CropIndependent
+                title: >-
+                  The CameraImage shall give a crop its own pixels, so that disposing or changing one image does not
+                  affect the other.
+                justification: |
+                  A service crops the same frame several times and keeps the crops while the frame is released; a
+                  crop that shared memory with its source would be corrupted by the release.
+                tests:
+                  - CameraImage_Crop_Result_IsIndependentOfSource
+                  - CameraImage_Dispose_Twice_IsHarmlessAndImageIsUnusable
+
+              - id: AgentVisionCore-CameraImage-SaveByExtension
+                title: >-
+                  The CameraImage shall save the picture as a PNG, JPEG, or BMP file or stream, choosing the format by
+                  the extension (.png, .jpg, .jpeg, .bmp, in any letter case), so that the file can be read back
+                  with the same size.
+                justification: |
+                  The file is the product that an agent or person uses. PNG keeps every pixel, JPEG is small, and BMP
+                  is read by everything; the extension states which is wanted.
+                children:
+                  - AgentVision-OTS-CanvasNet-Encode
+                tests:
+                  - CameraImage_Save_Path_RealCanvasNet_RoundTrips
+                  - CameraImage_Save_Png_RealCanvasNet_KeepsExactPixels
+                  - CameraImage_Save_Stream_RealCanvasNet_WritesFormatSignature
+                  - CameraImage_Save_MissingFolder_ThrowsDirectoryNotFound
+                  - CameraImage_Save_NullArguments_ThrowsArgumentNullException
+                  - CameraImage_Save_UndefinedFormat_ThrowsArgumentOutOfRange
+
+              - id: AgentVisionCore-CameraImage-UnsupportedExtension
+                title: >-
+                  The CameraImage shall refuse a file name with another or no extension with an argument exception
+                  that lists the supported extensions, and shall write nothing.
+                justification: |
+                  Writing PNG data into a file named after another format would produce a file that tools reject. The
+                  message lists what is accepted so that the caller can correct the name at once.
+                tests:
+                  - CameraImage_Save_UnknownExtension_ThrowsListingSupported
+                  - CameraImage_TryGetFormat_Path_ReportsSupport

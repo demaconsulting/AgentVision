@@ -19,9 +19,19 @@ This document covers the verification design for the following software items:
 **Local items:**
 
 - **AgentVisionCore** — system verification of the `DemaConsulting.AgentVision.Core` library, with the
-  **Cameras** subsystem
-  - **CameraEnumerator** — camera list policy and camera types
-  - **FlashCapCameraSource** — FlashCap adapter
+  **Cameras**, **Capture**, and **Imaging** subsystems
+  - **Cameras** subsystem
+    - **CameraEnumerator** — camera list policy and camera types
+    - **FlashCapCameraSource** — FlashCap adapter
+    - **FlashCapCameraDevice** — one streaming FlashCap device
+  - **Capture** subsystem
+    - **CameraSelector** — which camera and format a request means
+    - **CameraOpener** — opens cameras
+    - **CameraSession** — the open camera that holds the newest frame
+    - **CameraSnapper** — one-shot snapshot
+  - **Imaging** subsystem
+    - **FrameDecoder** — decodes camera frames and repairs their defects
+    - **CameraImage** — the picture: crop and save
 - **AgentVisionTool** — system, subsystem, and unit verification of the command-line tool:
   - **Program** — entry point and execution orchestrator
   - **CamerasCommand** — the `cameras` command
@@ -36,8 +46,9 @@ This document covers the verification design for the following software items:
 **OTS items:**
 
 - **BuildMark** — build-notes documentation tool
+- **CanvasNet** — image decoding, cropping, and saving library
 - **FileAssert** — document assertion tool
-- **FlashCap** — video capture device enumeration library
+- **FlashCap** — video capture library: device enumeration and streaming
 - **HelpCards** — built-in help library
 - **Pandoc** — Markdown-to-HTML conversion tool
 - **ReqStream** — requirements traceability tool

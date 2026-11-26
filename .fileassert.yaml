@@ -166,6 +166,18 @@ tests:
         xml:
           - query: "//*[local-name()='svg']"
             count: 1
+      - pattern: "docs/design/generated/CaptureView.svg"
+        count: 1
+        min-size: 100
+        xml:
+          - query: "//*[local-name()='svg']"
+            count: 1
+      - pattern: "docs/design/generated/ImagingView.svg"
+        count: 1
+        min-size: 100
+        xml:
+          - query: "//*[local-name()='svg']"
+            count: 1
       - pattern: "docs/design/generated/AgentVisionToolView.svg"
         count: 1
         min-size: 100
@@ -419,8 +431,9 @@ tests:
                 - contains: '<license type="expression">MIT</license>'
                 - contains: "<readme>README.md</readme>"
                 - contains: "<icon>Icon.png</icon>"
-                # The runtime dependency flows to consumers as a package dependency.
+                # The runtime dependencies flow to consumers as package dependencies.
                 - contains: '<dependency id="FlashCap"'
+                - contains: '<dependency id="DemaConsulting.CanvasNet"'
             - pattern: "README.md"
               min: 1
               max: 1

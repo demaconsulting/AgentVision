@@ -16,8 +16,9 @@ scope; only how this project integrates and uses each item is documented.
 The following OTS items have integration design documentation:
 
 - BuildMark (*buildmark.md*) — build-notes documentation tool
+- CanvasNet (*canvasnet.md*) — image decoding, cropping, and saving library (runtime)
 - FileAssert (*fileassert.md*) — document assertion tool
-- FlashCap (*flashcap.md*) — video capture device enumeration library (runtime)
+- FlashCap (*flashcap.md*) — video capture library: device enumeration and streaming (runtime)
 - HelpCards (*help-cards.md*) — built-in help library (runtime)
 - Pandoc (*pandoc.md*) — Markdown-to-HTML conversion tool
 - ReqStream (*reqstream.md*) — requirements traceability tool

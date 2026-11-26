@@ -4,6 +4,8 @@ resource-path:
   - docs/design/generated
   - docs/design/agent-vision-core
   - docs/design/agent-vision-core/cameras
+  - docs/design/agent-vision-core/capture
+  - docs/design/agent-vision-core/imaging
   - docs/design/agent-vision-tool
   - docs/design/agent-vision-tool/cli
   - docs/design/agent-vision-tool/self-test
@@ -20,6 +22,15 @@ input-files:
   - docs/design/agent-vision-core/cameras.md
   - docs/design/agent-vision-core/cameras/camera-enumerator.md
   - docs/design/agent-vision-core/cameras/flash-cap-camera-source.md
+  - docs/design/agent-vision-core/cameras/flash-cap-camera-device.md
+  - docs/design/agent-vision-core/capture.md
+  - docs/design/agent-vision-core/capture/camera-selector.md
+  - docs/design/agent-vision-core/capture/camera-opener.md
+  - docs/design/agent-vision-core/capture/camera-session.md
+  - docs/design/agent-vision-core/capture/camera-snapper.md
+  - docs/design/agent-vision-core/imaging.md
+  - docs/design/agent-vision-core/imaging/camera-image.md
+  - docs/design/agent-vision-core/imaging/frame-decoder.md
   - docs/design/agent-vision-tool.md
   - docs/design/agent-vision-tool/program.md
   - docs/design/agent-vision-tool/cameras-command.md
@@ -32,6 +43,7 @@ input-files:
   - docs/design/agent-vision-tool/utilities/path-helpers.md
   - docs/design/ots.md
   - docs/design/ots/buildmark.md
+  - docs/design/ots/canvasnet.md
   - docs/design/ots/fileassert.md
   - docs/design/ots/flashcap.md
   - docs/design/ots/help-cards.md

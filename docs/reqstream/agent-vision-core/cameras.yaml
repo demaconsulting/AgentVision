@@ -54,3 +54,20 @@ sections:
               - AgentVisionCore-CameraEnumerator-CustomSource
             tests:
               - CamerasSubsystem_Enumeration_CustomSource_IsUsedInsteadOfFlashCap
+
+          - id: AgentVisionCore-Cameras-Streaming
+            title: >-
+              The Cameras subsystem shall open a camera of its source with a chosen format, deliver its frames as
+              encoded image files while it streams, and stop the camera when it is closed, and shall report a camera
+              that cannot be opened with an open exception.
+            justification: |
+              Hot capture needs a source that can keep a camera streaming and release it on request. The source finds
+              the device and the format, and the device unit owns the stream, so the pair must work together from
+              the open call to the stop.
+            children:
+              - AgentVisionCore-FlashCapCameraSource-OpenDevice
+              - AgentVisionCore-FlashCapCameraDevice-Stream
+              - AgentVisionCore-FlashCapCameraDevice-Stop
+              - AgentVisionCore-FlashCapCameraDevice-Failure
+            tests:
+              - CamerasSubsystem_Streaming_FlashCapFakeDescriptor_DeliversStartAndStop

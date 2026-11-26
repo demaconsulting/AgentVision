@@ -1,0 +1,59 @@
+---
+# CameraOpener Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the CameraOpener unit of the Capture subsystem
+# - The unit opens cameras: it checks the options, selects the camera and format, starts the device through the
+#   camera source, and returns a session; it translates failures of the source into the library's exceptions
+# - Unit requirements are validated by CameraOpenerTests.cs and use a hand-written camera source, so no camera
+#   hardware is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Capture Subsystem Requirements
+        sections:
+          - title: CameraOpener Unit Requirements
+            requirements:
+              - id: AgentVisionCore-CameraOpener-Open
+                title: >-
+                  The CameraOpener shall open the camera that a selector names, or that a camera description
+                  describes, with the format chosen for it, and shall return a streaming session for that camera.
+                justification: |
+                  Opening is the one step that turns a request into a running camera. The caller must get a session
+                  for exactly the camera it asked for, in a format it can read back, and an unknown camera must
+                  leave nothing open.
+                tests:
+                  - CameraOpener_Open_Selector_ReturnsSessionForCamera
+                  - CameraOpener_Open_CameraInfo_ReturnsSession
+                  - CameraOpener_Open_UnknownSelector_ThrowsNotFoundAndOpensNothing
+                  - CameraOpener_Open_RequestedSize_PassesChosenFormatToSource
+
+              - id: AgentVisionCore-CameraOpener-Options
+                title: >-
+                  The CameraOpener shall use documented defaults for options that are not given (a one-second
+                  warm-up and five-second timeouts) and shall reject a size or frame rate that is not positive and
+                  a duration that is negative, zero where a wait is required, or longer than one hour, before it
+                  touches any camera.
+                justification: |
+                  Every option has a default that suits a typical webcam, so a caller can open a camera with one
+                  argument. An option that can never be satisfied is a mistake of the caller, and reporting it before
+                  anything is opened avoids a long wait that ends in a confusing failure.
+                tests:
+                  - CameraOpener_Open_InvalidOption_ThrowsArgumentOutOfRange
+                  - CameraOpener_Open_NullArguments_ThrowsArgumentNullException
+                  - CameraOpenOptions_Default_HasDocumentedValues
+
+              - id: AgentVisionCore-CameraOpener-OpenFailure
+                title: >-
+                  The CameraOpener shall report a camera that cannot be opened or started with an open exception that
+                  names the camera and carries the original failure, shall pass on the library's own exceptions
+                  unchanged, and shall leave no device open when opening fails.
+                justification: |
+                  A camera held by another application, a missing permission, and a camera without a usable format
+                  are everyday failures. The caller needs one exception type with the camera named, and the cause
+                  attached for diagnosis; a failed open must not leave a camera blocked.
+                tests:
+                  - CameraOpener_Open_SourceThrows_ThrowsCameraOpenWithInner
+                  - CameraOpener_Open_SourceThrowsCameraException_PassesItOn
+                  - CameraOpener_Open_NoUsableFormat_ThrowsOpenExceptionAndOpensNothing

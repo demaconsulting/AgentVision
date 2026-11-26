@@ -3,15 +3,18 @@
 #
 # Requirements for FlashCap, the .NET library that AgentVisionCore uses at run time to enumerate the
 # video capture devices of the host (DirectShow, Media Foundation, and Video for Windows on Windows;
-# V4L2 on Linux). It ships as a package dependency of the library.
+# V4L2 on Linux), and to open them, stream their frames, and stop them. It ships as a package dependency
+# of the library.
 #
 # EVIDENCE: there is no dedicated OTS test project. The evidence is the Core test suite, which calls
 # the real FlashCap (the tests named RealFlashCap) and feeds FlashCap's own value types through the
-# FlashCapCameraSource translation. These tests assert invariants, never camera counts, so they pass
-# with and without a camera.
+# FlashCapCameraSource translation. The enumeration tests assert invariants, never camera counts, so they
+# pass with and without a camera. The streaming tests open descriptors whose device is a test device that
+# follows FlashCap's real lifecycle and frame queue, so no camera is needed; what a real camera and driver
+# deliver is checked by the opt-in hardware tests and the manual checklist, which are not requirement evidence.
 #
 # Each requirement is a child of the requirement of the unit that uses FlashCap
-# (AgentVisionCore-FlashCapCameraSource-*), not of a root requirement.
+# (AgentVisionCore-FlashCapCameraSource-* and AgentVisionCore-FlashCapCameraDevice-*), not of a root requirement.
 
 sections:
   - title: OTS Software Requirements
@@ -48,3 +51,47 @@ sections:
               - FlashCapCameraSource_GetCameras_Characteristics_MapSizePixelFormatAndFrameRate
               - FlashCapCameraSource_GetCameras_UnknownPixelFormat_IsExcluded
               - FlashCapCameraSource_GetCameras_FractionalFrameRate_IsReportedAsDouble
+
+          - id: AgentVision-OTS-FlashCap-OpenDevice
+            title: >-
+              FlashCap shall open a capture device with the video characteristics that are chosen from those that
+              the device offers, start it streaming, and stop and release it when it is disposed.
+            justification: |
+              Hot capture depends on a device that stays open and streaming, and on a stop that releases it, so that
+              the camera is free for other applications again. The lifecycle (open, start, stop, dispose) is
+              what the library drives; it is checked with devices that follow FlashCap's real lifecycle, without a
+              camera.
+            tags: [ots]
+            tests:
+              - FlashCapCameraDevice_Open_RealFlashCapLifecycle_StartsDevice
+              - FlashCapCameraDevice_Dispose_RealFlashCapLifecycle_StopsAndDisposes
+              - FlashCapCameraSource_Open_MatchingDescriptor_OpensWithChosenCharacteristics
+              - FlashCapCameraSource_Open_DisposeHandle_StopsAndDisposesDevice
+
+          - id: AgentVision-OTS-FlashCap-OpenFailure
+            title: >-
+              FlashCap shall report a device that cannot be opened or started with an exception, and shall not hang or
+              leave the device open.
+            justification: |
+              A camera that another application holds, or that has been unplugged, is an everyday event. The library
+              turns FlashCap's exception into its own open exception, which only works when FlashCap reports the
+              failure through an exception.
+            tags: [ots]
+            tests:
+              - FlashCapCameraDevice_Open_RealFlashCapDescriptorFails_ThrowsCameraOpen
+              - FlashCapCameraDevice_Open_RealFlashCapStartFails_ThrowsCameraOpenAndDisposesDevice
+
+          - id: AgentVision-OTS-FlashCap-DeliverFrames
+            title: >-
+              FlashCap shall deliver each frame of a streaming device to a callback, queuing at most one frame so
+              that a slow callback sees the newest frame, as the bytes of a complete JPEG, PNG, or BMP file, with
+              raw 24-bit frames as BMP files and YUV frames converted to 24-bit BMP files.
+            justification: |
+              The library holds only the newest frame and decodes it later, so it needs the frame as one complete
+              image file, and needs FlashCap to drop old frames instead of building a backlog that makes the picture
+              late. The tests feed frames into FlashCap's real frame queue and conversion without a camera.
+            tags: [ots]
+            tests:
+              - FlashCapCameraDevice_FrameArrived_RealFlashCapQueue_DeliversEncodedFrame
+              - FlashCapCameraDevice_FrameArrived_RealFlashCapQueueRawFrame_DeliversBitmapFile
+              - FlashCapCameraDevice_FrameArrived_RealFlashCapQueueYuyvFrame_DeliversDecodableBitmap

@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 using DemaConsulting.AgentVision.Core.Cameras;
+using DemaConsulting.AgentVision.Core.Imaging;
 using DemaConsulting.AgentVision.Core.Tests.TestSupport;
 using FlashCap;
 using FlashCap.Utilities;
@@ -102,5 +103,43 @@ public class CamerasSubsystemTests
         // Assert: exactly the custom camera is reported, and the custom source was asked once
         Assert.Equal("Custom:1", Assert.Single(cameras).Id);
         Assert.Equal(1, source.CallCount);
+    }
+
+    /// <summary>
+    ///     Test that a camera of the FlashCap source can be opened, streams its frames to the callback, and stops
+    ///     when the handle is disposed.
+    /// </summary>
+    [Fact]
+    public async Task CamerasSubsystem_Streaming_FlashCapFakeDescriptor_DeliversStartAndStop()
+    {
+        // Arrange: a FlashCap source whose descriptor yields a fake FlashCap device, and the camera as the enumerator lists it
+        var fake = new FakeFlashCapDevice("/dev/video0", "Desk Camera");
+        var source = new FlashCapCameraSource(() =>
+        [
+            new FakeCaptureDeviceDescriptor(
+                DeviceTypes.V4L2,
+                "/dev/video0",
+                "Desk Camera",
+                "Desk Camera",
+                new VideoCharacteristics(PixelFormats.JPEG, 64, 48, new Fraction(30, 1)))
+            {
+                OpenDevice = () => fake
+            }
+        ]);
+        var camera = new CameraEnumerator(source).Enumerate()[0];
+        var delivered = new TaskCompletionSource<EncodedFrame>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // Act: open the camera, let it deliver a frame, and close it
+        var handle = source.Open(camera, camera.Formats[0], frame => delivered.TrySetResult(frame), _ => { });
+        fake.InjectJpeg(SyntheticFrames.SolidJpeg(64, 48, 90), 3);
+        var frame = await delivered.Task.WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
+        handle.Dispose();
+
+        // Assert: the device was started, the frame arrived as a picture of the right size, and the device was stopped
+        using var image = CameraImage.Decode(frame.Data);
+        Assert.Equal((64, 48), (image.Width, image.Height));
+        Assert.Equal(1, fake.StartCount);
+        Assert.Equal(1, fake.StopCount);
+        Assert.Equal(1, fake.DisposeCount);
     }
 }

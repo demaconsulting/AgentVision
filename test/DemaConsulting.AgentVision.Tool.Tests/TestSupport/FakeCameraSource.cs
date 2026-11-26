@@ -34,4 +34,20 @@ internal sealed class FakeCameraSource(IReadOnlyList<CameraInfo> cameras) : ICam
     /// </summary>
     /// <returns>The fixed list given to the constructor.</returns>
     public IReadOnlyList<CameraInfo> GetCameras() => cameras;
+
+    /// <summary>
+    ///     Opening is not part of what the cameras command does, so the fake does not support it.
+    /// </summary>
+    /// <param name="camera">The camera to open.</param>
+    /// <param name="format">The format to open.</param>
+    /// <param name="frameArrived">The receiver of the frames.</param>
+    /// <param name="faulted">The receiver of the failures.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always thrown.</exception>
+    public IDisposable Open(
+        CameraInfo camera,
+        CameraFormat format,
+        Action<EncodedFrame> frameArrived,
+        Action<Exception> faulted) =>
+        throw new NotSupportedException("The fake source of the tool tests cannot open a camera.");
 }

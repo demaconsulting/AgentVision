@@ -1,0 +1,61 @@
+---
+# CanvasNet OTS Software Requirements
+#
+# Requirements for CanvasNet (the DemaConsulting.CanvasNet package), the .NET imaging library that
+# AgentVisionCore uses at run time to decode the frames of a camera, crop them, and write them as PNG, JPEG, or
+# BMP files. It ships as a package dependency of the library. (The CanvasNet command-line tool that renders the
+# diagrams of the documentation is a different, build-time use and is not covered here.)
+#
+# EVIDENCE: there is no dedicated OTS test project. The evidence is the Core test suite, which calls the real
+# CanvasNet (the tests named RealCanvasNet) with pictures that the tests generate, so no camera is needed.
+#
+# Each requirement is a child of the requirement of the unit that uses CanvasNet (AgentVisionCore-FrameDecoder-*
+# and AgentVisionCore-CameraImage-*), not of a root requirement.
+
+sections:
+  - title: OTS Software Requirements
+    sections:
+      - title: CanvasNet Requirements
+        requirements:
+          - id: AgentVision-OTS-CanvasNet-DecodeFrames
+            title: >-
+              CanvasNet shall decode JPEG, PNG, and uncompressed 24-bit and 32-bit BMP images from bytes to a pixel
+              surface of the size of the image, and shall report data that is empty, unrecognized, or damaged with an
+              invalid-data exception.
+            justification: |
+              Every frame that a camera delivers is one of these formats, and the library must turn it into pixels.
+              Damaged frames happen, so the failure has to be an exception that can be handled and not a crash or a
+              wrong picture.
+            tags: [ots]
+            tests:
+              - FrameDecoder_Decode_Jpeg_RealCanvasNet_ReturnsSurfaceOfFrameSize
+              - FrameDecoder_Decode_Png_RealCanvasNet_ReturnsExactPixels
+              - FrameDecoder_Decode_Bmp_RealCanvasNet_ReturnsPixelsInPlace
+              - FrameDecoder_Decode_Bmp32ZeroFourthByte_RealCanvasNet_ReturnsOpaquePixels
+              - FrameDecoder_Decode_Garbage_RealCanvasNet_ThrowsInvalidData
+
+          - id: AgentVision-OTS-CanvasNet-Crop
+            title: >-
+              CanvasNet shall copy a rectangular region of a surface into a new surface with its own pixels, and shall
+              reject a region that lies outside the surface or has no area.
+            justification: |
+              Cropping is a feature of the library, and it relies on the copy being independent of its source and on a
+              region that does not fit being refused instead of read from outside the picture.
+            tags: [ots]
+            tests:
+              - CameraImage_Crop_RealCanvasNet_CopiesRegion
+              - CameraImage_Crop_RealCanvasNet_RejectsOutside
+
+          - id: AgentVision-OTS-CanvasNet-Encode
+            title: >-
+              CanvasNet shall write a surface as a PNG file that keeps every pixel, as a JPEG file, and as a BMP file,
+              each of which can be read back with the same size.
+            justification: |
+              The saved file is the product that the user receives. PNG must be lossless for pictures that must be
+              exact, and all three formats must be read by ordinary tools; reading them back with the same size is the
+              check that the file is whole.
+            tags: [ots]
+            tests:
+              - CameraImage_Save_Path_RealCanvasNet_RoundTrips
+              - CameraImage_Save_Png_RealCanvasNet_KeepsExactPixels
+              - CameraImage_Save_Stream_RealCanvasNet_WritesFormatSignature

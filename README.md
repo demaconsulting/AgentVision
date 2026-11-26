@@ -17,9 +17,10 @@ front-end for the library. The goal of the project is low-latency webcam capture
 [FlashCap][link-flashcap] and [DemaConsulting.CanvasNet][link-canvasnet], with the command-line tool optionally
 running through a background daemon.
 
-**Status**: under active development. The first camera feature is available: both packages can list the cameras of
-a machine and the video formats each one supports (`agentvision cameras`, or `CameraEnumerator` in the library).
-Opening a camera and capturing frames are planned and are not available yet.
+**Status**: under active development. Both packages can list the cameras of a machine and the video formats each one
+supports (`agentvision cameras`, or `CameraEnumerator` in the library). The library can also keep cameras open
+("hot"), hand out their newest frame with almost no delay, crop it, and save it as PNG, JPEG, or BMP. The
+command-line tool does not capture frames yet.
 
 The diagram below is a placeholder workflow diagram: replace its TODO boxes (in `docs/images/workflow.svg`,
 then re-render `docs/images/workflow.png`) to show how users prepare inputs, run the tool, get its outputs,
@@ -35,6 +36,11 @@ AgentVision provides:
 - **Camera Enumeration**: `agentvision cameras` lists the video capture devices of the machine with their stable
   identifiers, names, and supported formats (resolution, pixel format, and frame rate), using [FlashCap][link-flashcap];
   a machine without a camera is reported plainly and is not an error
+- **Hot Camera Capture (library)**: `CameraOpener` opens one or several cameras by index, identifier, or name and keeps
+  them streaming; `CameraSession.Snapshot()` returns the newest frame from any thread without waiting, after a
+  configurable warm-up that discards the dark first frames; disposing a session stops the camera
+- **Image Operations (library)**: decode a frame, crop a region, and save it as PNG, JPEG, or BMP by the file
+  extension, using [DemaConsulting.CanvasNet][link-canvasnet]
 - **Standardized Command-Line Interface**: Context class handling common arguments
   (`--version`, `--help`, `--silent`, `--validate`, `--results`, `--depth`, `--log`)
 - **Self-Validation**: Built-in validation tests with TRX/JUnit output
@@ -139,6 +145,48 @@ foreach (var camera in cameras)
 
 An application or a test can supply its own `ICameraSource` to `new CameraEnumerator(source)` instead, so that
 enumeration runs without camera hardware.
+
+## Capturing Frames with the Library
+
+The library keeps a camera open ("hot"): opening takes a second or more, but every snapshot after the first is a read of
+the newest frame that is already in memory, so it is safe and cheap to take snapshots from many threads.
+
+```csharp
+using DemaConsulting.AgentVision.Core.Capture;
+using DemaConsulting.AgentVision.Core.Imaging;
+
+var opener = new CameraOpener();
+
+// Open by the index that `agentvision cameras` prints, by identifier, or by name; open as many cameras as you like
+using var session = opener.Open("0", new CameraOpenOptions { Width = 1280, Height = 720 });
+
+// The first snapshot waits for the warm-up (1 s by default); later ones return at once
+using var image = session.Snapshot().ToImage();
+
+// Keep a region and save it; the extension (.png, .jpg, .jpeg, .bmp) chooses the format
+using var detail = image.Crop(new CropRectangle(100, 50, 320, 240));
+detail.Save("detail.png");
+```
+
+For one picture with one call, `new CameraSnapper().Snap(new SnapRequest("0", "picture.jpg"))` opens the camera, saves a
+frame (optionally cropped), and closes the camera again, also when something fails.
+
+Disposing a session stops the camera deterministically. Failures are reported with documented exceptions
+(`CameraNotFoundException`, `CameraOpenException`, `CameraTimeoutException`, and `CameraDisconnectedException`, all
+derived from `CameraException`) whose messages say what happened and what to do. Camera features can be tested without
+hardware by giving `CameraOpener` an `ICameraSource` of your own. The [User Guide][link-guide] describes the options
+(size, frame rate, warm-up, timeouts), the exceptions, and several cameras at once in detail.
+
+## Hardware Tests
+
+The standard test run (`pwsh ./build.ps1 -All`) needs no camera. To also run the smoke tests against the real cameras of
+your machine, add the opt-in switch. The smoke tests of the two target frameworks run one after another (they queue on a
+lock file in the temporary folder), because a camera can be open in one program at a time; close other programs that use
+the cameras first:
+
+```bash
+pwsh ./build.ps1 -All -Hardware
+```
 
 ## Command-Line Options
 

@@ -25,9 +25,9 @@ namespace DemaConsulting.AgentVision.Core.Cameras;
 ///     that discovers the devices.
 /// </summary>
 /// <remarks>
-///     The abstraction exists so that enumeration policy can be exercised without camera hardware and so
-///     that an application can supply its own descriptions. No type of the capture library appears in it,
-///     which keeps the public API independent of that library.
+///     The abstraction exists so that enumeration and capture policy can be exercised without camera
+///     hardware and so that an application can supply its own cameras. No type of the capture library appears
+///     in it, which keeps the public API independent of that library.
 /// </remarks>
 public interface ICameraSource
 {
@@ -45,4 +45,35 @@ public interface ICameraSource
     ///     on the implementation.
     /// </remarks>
     IReadOnlyList<CameraInfo> GetCameras();
+
+    /// <summary>
+    ///     Starts a camera streaming in the given format and delivers its frames to a callback.
+    /// </summary>
+    /// <param name="camera">The camera to open, as <see cref="GetCameras"/> described it.</param>
+    /// <param name="format">The format to stream, one of the formats of <paramref name="camera"/>.</param>
+    /// <param name="frameArrived">
+    ///     Called for every frame, on a thread of the source. It must return quickly because a slow callback
+    ///     makes the source drop frames. The frame belongs to the callee.
+    /// </param>
+    /// <param name="faulted">
+    ///     Called when the device fails after it was opened, for example when it is unplugged. Frames may stop
+    ///     without further notice if the capture library gives no failure signal.
+    /// </param>
+    /// <returns>
+    ///     A handle that stops the camera when it is disposed. Disposing is idempotent, never throws, and returns
+    ///     only when the device has stopped and no callback can run any more.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">Thrown when an argument is null.</exception>
+    /// <exception cref="Capture.CameraOpenException">
+    ///     Thrown when the camera cannot be found any more, offers no such format, or cannot be opened or started.
+    /// </exception>
+    /// <remarks>
+    ///     Opening is the slow, device-dependent step (it can take a second or more); applications that need low
+    ///     latency open once and keep the handle. The source starts no thread of its own that outlives the handle.
+    /// </remarks>
+    IDisposable Open(
+        CameraInfo camera,
+        CameraFormat format,
+        Action<EncodedFrame> frameArrived,
+        Action<Exception> faulted);
 }

@@ -1,0 +1,97 @@
+---
+# CameraSession Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the CameraSession unit of the Capture subsystem (which also owns the frame and
+#   the exception types of the subsystem)
+# - The unit is an open ("hot") camera: it receives the frames of the device, discards the warm-up, publishes the
+#   newest frame, hands it out to snapshots from any thread, and stops the device when it is closed
+# - Unit requirements are validated by CameraSessionTests.cs, which drives a hand-written device, so no camera
+#   hardware is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Capture Subsystem Requirements
+        sections:
+          - title: CameraSession Unit Requirements
+            requirements:
+              - id: AgentVisionCore-CameraSession-HoldLatest
+                title: >-
+                  The CameraSession shall return the newest frame that arrived after the warm-up to every snapshot
+                  without waiting, and shall return the same frame again until a newer one arrives.
+                justification: |
+                  A snapshot that waits for the camera is as slow as opening the camera for every picture. Holding the
+                  newest frame in memory makes a snapshot a read, so the answer is current and immediate, and a
+                  caller can tell by the frame number whether anything new has arrived.
+                tests:
+                  - CameraSession_Snapshot_AfterFrames_ReturnsLatest
+                  - CameraSession_Snapshot_Repeated_ReturnsSameFrameUntilNewArrives
+                  - CameraSession_Properties_AfterOpen_ReportCameraAndFormat
+                  - CameraFrame_ToImage_JpegFrame_ReturnsImageOfFrameSize
+                  - CameraFrame_ToImage_DamagedFrame_ThrowsInvalidData
+
+              - id: AgentVisionCore-CameraSession-FirstFrame
+                title: >-
+                  The CameraSession shall make the first snapshot wait, without polling, for the first frame that
+                  arrives after the warm-up, and shall report a timeout exception that names the camera when no frame
+                  arrives within the first-frame timeout after the warm-up.
+                justification: |
+                  Right after the camera is opened no frame exists yet. Waiting for it (on an event, so that no
+                  processor time is spent) gives a fresh session a picture; a camera that never delivers one must
+                  end the wait with a clear message instead of hanging the caller.
+                tests:
+                  - CameraSession_Snapshot_FirstFrameArrivesLate_Waits
+                  - CameraSession_Snapshot_NoFrame_ThrowsTimeout
+                  - CameraSession_Snapshot_WaitsThroughWarmUp_ThenReturnsFirstFrameAfterIt
+
+              - id: AgentVisionCore-CameraSession-WarmUp
+                title: >-
+                  The CameraSession shall discard every frame that arrives before the warm-up has passed, counted
+                  from the moment streaming started, and shall serve the first frame when the warm-up is zero.
+                justification: |
+                  Cameras deliver dark and unfocused frames while they settle. Discarding them is the whole point of
+                  the warm-up; a warm-up of zero must disable it, so that a caller that opened the camera long ago
+                  or knows its camera is not delayed.
+                tests:
+                  - CameraSession_Snapshot_DarkFramesBeforeWarmUp_ServesLaterFrame
+                  - CameraSession_Snapshot_ZeroWarmUp_ServesFirstFrame
+
+              - id: AgentVisionCore-CameraSession-ConcurrentSnapshots
+                title: >-
+                  The CameraSession shall allow any number of threads to take snapshots at the same time, while the
+                  device delivers frames, without failures and without a caller-supplied lock.
+                justification: |
+                  A service answers many requests at once. A lock-free hand-over of the newest frame lets every
+                  request proceed and never blocks the device thread, which would otherwise make the camera drop
+                  frames.
+                tests:
+                  - CameraSession_Snapshot_ManyThreads_NoExceptionsAndValidFrames
+
+              - id: AgentVisionCore-CameraSession-Dispose
+                title: >-
+                  The CameraSession shall stop its device exactly once when it is disposed, however often and from
+                  whichever thread, shall wake snapshots that are waiting so that they fail with an
+                  object-disposed exception, and shall ignore frames that arrive afterwards.
+                justification: |
+                  Deterministic release is what frees the camera for other applications. Disposal must be safe to
+                  repeat because cleanup code often runs twice, and it must not leave a thread waiting for a frame
+                  that will never come.
+                tests:
+                  - CameraSession_Dispose_Twice_DisposesDeviceOnce
+                  - CameraSession_Dispose_WhileWaiting_ThrowsObjectDisposed
+                  - CameraSession_Dispose_AfterDispose_FramesIgnoredAndSnapshotFails
+
+              - id: AgentVisionCore-CameraSession-Disconnect
+                title: >-
+                  The CameraSession shall make snapshots fail with a disconnected exception that carries the cause
+                  when the device reports a failure, and when the newest frame is older than the stale-frame
+                  timeout.
+                justification: |
+                  An unplugged camera leaves its last frame in memory. Serving that frame as if it were current would
+                  mislead the agent, so a failure or a silence longer than the limit must end the session's service
+                  with a message that says the camera is gone.
+                tests:
+                  - CameraSession_Snapshot_DeviceFaulted_ThrowsDisconnected
+                  - CameraSession_Snapshot_FaultWhileWaiting_ThrowsDisconnected
+                  - CameraSession_Snapshot_FramesStop_ThrowsDisconnectedAfterStaleTimeout

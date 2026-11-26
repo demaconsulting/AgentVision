@@ -15,6 +15,11 @@
 #                                              names: Tests finds DemaConsulting.AgentVision.Tool.Tests, Core is the
 #                                              core library; -Help lists this repository's names)
 #   Add -DryRun to any scope to print the selection without building anything.
+#   Add -Hardware to a scope to also run the opt-in hardware smoke tests: they open the real cameras of this
+#   machine (test/DemaConsulting.AgentVision.Core.Tests/Hardware); otherwise they are skipped. They are not part of
+#   any requirement evidence. -All alone still runs the standard suite, which needs no camera. The smoke tests of the
+#   two target frameworks run one after another (a lock file in the temporary folder), because a camera can be open in
+#   one process only; the hardware run is therefore slower, but passes.
 #   With no arguments the usage text is printed and the script exits 1 (a scope must be chosen).
 #
 #   A changed project selects every project that references it, directly or transitively, from the
@@ -63,11 +68,20 @@ param(
     # Print the selection and exit without building.
     [switch]$DryRun,
 
+    # [PROJECT-SPECIFIC] Also run the opt-in hardware smoke tests against the real cameras of this machine.
+    [switch]$Hardware,
+
     # Print the usage text and exit 0.
     [switch]$Help
 )
 
 Import-Module (Join-Path $PSScriptRoot 'scripts/ProjectScripts.psm1') -Force
+
+# [PROJECT-SPECIFIC] The hardware smoke tests (Core.Tests/Hardware) run only when this variable is 1; they open the
+# real cameras of the machine, so they are an opt-in tier and the standard run (-All) never sets it. The test hosts of
+# the two target frameworks run at the same time, so each hardware test takes an exclusive lock file in the temporary
+# folder; the smoke tests of the two frameworks therefore run one after another.
+if ($Hardware) { $env:AGENTVISION_HARDWARE_TESTS = '1' }
 
 # [PROJECT-SPECIFIC] Repository files that tests read at run time (through the repository root, not through a
 # project item), mapped to the test project that reads them. Keep in step with the tests. Example:
@@ -118,11 +132,12 @@ function Show-Usage {
             '-Base <ref>'      = 'Base reference for -Changed (default origin/main, else main).'
             '-Project <names>' = 'Only the test projects affected by these projects (full or short names, e.g. Tests).'
             '-DryRun'          = 'Print what would be built, tested, and skipped, then exit 0 without running anything.'
+            '-Hardware'        = 'Also run the opt-in hardware smoke tests on this machine''s real cameras (with a scope).'
             '-Help'            = 'Print this text and exit 0.'
         }) `
         -ChecksLabel 'Projects and aliases (-Project names; short names such as Core or Tests also work)' `
         -Checks @(try { Get-ProjectNameList (Get-ProjectGraph -Root $ProjectRoots) $ProjectAliases } catch { }) `
-        -Examples @('-Changed', '-Project DemaConsulting.AgentVision.Tool', '-Changed -DryRun', '-All')
+        -Examples @('-Changed', '-Project DemaConsulting.AgentVision.Tool', '-Changed -DryRun', '-All', '-All -Hardware')
 }
 
 if ($Help) { Show-Usage; exit 0 }

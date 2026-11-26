@@ -1,0 +1,57 @@
+---
+# Imaging Subsystem Requirements
+#
+# PURPOSE:
+# - Define requirements for the AgentVisionCore Imaging subsystem
+# - The Imaging subsystem spans FrameDecoder (turns the bytes of a camera frame into pixels, and repairs the
+#   defects that cameras commonly have) and CameraImage (the picture: crop and save)
+# - Subsystem requirements decompose the system requirement for image operations; they are validated by
+#   ImagingSubsystemTests.cs, which uses synthetic pictures, so no camera hardware is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Imaging Subsystem Requirements
+        requirements:
+          - id: AgentVisionCore-Imaging-Decode
+            title: >-
+              The Imaging subsystem shall turn the bytes of a camera frame (JPEG, PNG, or BMP) into an image,
+              including a JPEG frame without Huffman tables, and shall report a frame that cannot be decoded as
+              invalid data.
+            justification: |
+              Cameras deliver frames in the formats that the decoder reads, and many motion JPEG cameras leave out the
+              Huffman tables, which no standard decoder accepts. The subsystem decodes what cameras really send and
+              refuses damaged data with one kind of error.
+            children:
+              - AgentVisionCore-FrameDecoder-Decode
+              - AgentVisionCore-FrameDecoder-RepairHuffman
+              - AgentVisionCore-FrameDecoder-Invalid
+            tests:
+              - ImagingSubsystem_Decode_JpegBmpPngFrames_ProduceImages
+              - ImagingSubsystem_Decode_JpegWithoutHuffmanTables_ProducesImage
+
+          - id: AgentVisionCore-Imaging-Crop
+            title: >-
+              The Imaging subsystem shall crop a decoded frame to a rectangle and return an independent image.
+            justification: |
+              An agent usually needs one region of the picture. The crop is a copy, so the full frame stays
+              available for other regions and the cropped image can outlive it.
+            children:
+              - AgentVisionCore-CameraImage-Crop
+              - AgentVisionCore-CameraImage-CropIndependent
+            tests:
+              - ImagingSubsystem_Crop_Region_ProducesCroppedImage
+
+          - id: AgentVisionCore-Imaging-Save
+            title: >-
+              The Imaging subsystem shall save an image as a PNG, JPEG, or BMP file that is chosen by the file
+              extension, and shall refuse any other extension.
+            justification: |
+              The file is the output that an agent, a person, or another program uses. The extension is the
+              natural statement of the wanted format, and an unknown extension must fail loudly instead of writing
+              a file that nothing can read.
+            children:
+              - AgentVisionCore-CameraImage-SaveByExtension
+              - AgentVisionCore-CameraImage-UnsupportedExtension
+            tests:
+              - ImagingSubsystem_Save_PngAndJpeg_CanBeReloaded

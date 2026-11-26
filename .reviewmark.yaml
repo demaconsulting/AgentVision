@@ -142,12 +142,143 @@ reviews:
       - "src/DemaConsulting.AgentVision.Core/Cameras/FlashCapCameraSource.cs"
       - "test/DemaConsulting.AgentVision.Core.Tests/Cameras/FlashCapCameraSourceTests.cs"
 
+  - id: AgentVisionCore-Cameras-FlashCapCameraDevice
+    title: Review that AgentVisionCore Cameras FlashCapCameraDevice Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/cameras.md
+      - docs/reqstream/agent-vision-core/cameras.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/cameras/flash-cap-camera-device.yaml"
+      - "docs/design/agent-vision-core/cameras/flash-cap-camera-device.md"
+      - "docs/verification/agent-vision-core/cameras/flash-cap-camera-device.md"
+      - "src/DemaConsulting.AgentVision.Core/Cameras/FlashCapCameraDevice.cs"
+      - "src/DemaConsulting.AgentVision.Core/Cameras/EncodedFrame.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Cameras/FlashCapCameraDeviceTests.cs"
+
+  # AgentVisionCore - Capture
+  - id: AgentVisionCore-Capture
+    title: Review that AgentVisionCore Capture Satisfies Subsystem Requirements
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/capture.yaml"
+      - "docs/design/agent-vision-core/capture.md"
+      - "docs/verification/agent-vision-core/capture.md"
+      - "test/**/Capture/CaptureSubsystemTests.cs"
+      - "test/**/Hardware/CameraHardwareSmokeTests.cs"
+
+  - id: AgentVisionCore-Capture-CameraSelector
+    title: Review that AgentVisionCore Capture CameraSelector Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/capture.md
+      - docs/reqstream/agent-vision-core/capture.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/capture/camera-selector.yaml"
+      - "docs/design/agent-vision-core/capture/camera-selector.md"
+      - "docs/verification/agent-vision-core/capture/camera-selector.md"
+      - "src/DemaConsulting.AgentVision.Core/Capture/CameraSelector.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Capture/CameraSelectorTests.cs"
+
+  - id: AgentVisionCore-Capture-CameraOpener
+    title: Review that AgentVisionCore Capture CameraOpener Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/capture.md
+      - docs/reqstream/agent-vision-core/capture.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/capture/camera-opener.yaml"
+      - "docs/design/agent-vision-core/capture/camera-opener.md"
+      - "docs/verification/agent-vision-core/capture/camera-opener.md"
+      - "src/DemaConsulting.AgentVision.Core/Capture/CameraOpener.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Capture/CameraOpenerTests.cs"
+
+  - id: AgentVisionCore-Capture-CameraSession
+    title: Review that AgentVisionCore Capture CameraSession Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/capture.md
+      - docs/reqstream/agent-vision-core/capture.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/capture/camera-session.yaml"
+      - "docs/design/agent-vision-core/capture/camera-session.md"
+      - "docs/verification/agent-vision-core/capture/camera-session.md"
+      - "src/DemaConsulting.AgentVision.Core/Capture/CameraSession.cs"
+      - "src/DemaConsulting.AgentVision.Core/Capture/CameraFrame.cs"
+      - "src/DemaConsulting.AgentVision.Core/Capture/CameraOpenOptions.cs"
+      - "src/DemaConsulting.AgentVision.Core/Capture/CameraException.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Capture/CameraSessionTests.cs"
+
+  - id: AgentVisionCore-Capture-CameraSnapper
+    title: Review that AgentVisionCore Capture CameraSnapper Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/capture.md
+      - docs/reqstream/agent-vision-core/capture.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/capture/camera-snapper.yaml"
+      - "docs/design/agent-vision-core/capture/camera-snapper.md"
+      - "docs/verification/agent-vision-core/capture/camera-snapper.md"
+      - "src/DemaConsulting.AgentVision.Core/Capture/CameraSnapper.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Capture/CameraSnapperTests.cs"
+
+  # AgentVisionCore - Imaging
+  - id: AgentVisionCore-Imaging
+    title: Review that AgentVisionCore Imaging Satisfies Subsystem Requirements
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/imaging.yaml"
+      - "docs/design/agent-vision-core/imaging.md"
+      - "docs/verification/agent-vision-core/imaging.md"
+      - "test/**/Imaging/ImagingSubsystemTests.cs"
+
+  - id: AgentVisionCore-Imaging-FrameDecoder
+    title: Review that AgentVisionCore Imaging FrameDecoder Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/imaging.md
+      - docs/reqstream/agent-vision-core/imaging.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/imaging/frame-decoder.yaml"
+      - "docs/design/agent-vision-core/imaging/frame-decoder.md"
+      - "docs/verification/agent-vision-core/imaging/frame-decoder.md"
+      - "src/DemaConsulting.AgentVision.Core/Imaging/FrameDecoder.cs"
+      - "src/DemaConsulting.AgentVision.Core/Imaging/StandardJpegTables.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Imaging/FrameDecoderTests.cs"
+
+  - id: AgentVisionCore-Imaging-CameraImage
+    title: Review that AgentVisionCore Imaging CameraImage Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/imaging.md
+      - docs/reqstream/agent-vision-core/imaging.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/imaging/camera-image.yaml"
+      - "docs/design/agent-vision-core/imaging/camera-image.md"
+      - "docs/verification/agent-vision-core/imaging/camera-image.md"
+      - "src/DemaConsulting.AgentVision.Core/Imaging/CameraImage.cs"
+      - "src/DemaConsulting.AgentVision.Core/Imaging/CropRectangle.cs"
+      - "src/DemaConsulting.AgentVision.Core/Imaging/ImageFileFormat.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Imaging/CameraImageTests.cs"
+
   # AgentVisionCore - Test support
   - id: AgentVisionCore-TestSupport
     title: Review that AgentVisionCore Test Support Doubles are Correct
     context:
       - docs/verification/agent-vision-core.md
       - docs/verification/agent-vision-core/cameras.md
+      - docs/verification/agent-vision-core/capture.md
     paths:
       - "test/DemaConsulting.AgentVision.Core.Tests/TestSupport/*.cs"
 
@@ -331,6 +462,13 @@ reviews:
       - "docs/reqstream/ots/buildmark.yaml"
       - "docs/design/ots/buildmark.md"
       - "docs/verification/ots/buildmark.md"
+
+  - id: OTS-CanvasNet
+    title: Review that CanvasNet Provides Required Functionality
+    paths:
+      - "docs/reqstream/ots/canvasnet.yaml"
+      - "docs/design/ots/canvasnet.md"
+      - "docs/verification/ots/canvasnet.md"
 
   - id: OTS-FileAssert
     title: Review that FileAssert Provides Required Functionality

@@ -1,0 +1,113 @@
+---
+# CameraSelector Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the CameraSelector unit of the Capture subsystem
+# - The unit decides which camera a selector means and which format a request means; both decisions are pure
+#   functions of their inputs
+# - Unit requirements are validated by CameraSelectorTests.cs and use plain camera descriptions, so no camera
+#   hardware is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Capture Subsystem Requirements
+        sections:
+          - title: CameraSelector Unit Requirements
+            requirements:
+              - id: AgentVisionCore-CameraSelector-ByIndex
+                title: >-
+                  The CameraSelector shall treat a selector that is a non-negative number as the position of the
+                  camera in the camera list, and shall not use a number that is out of range as a name.
+                justification: |
+                  The command that lists the cameras prints a position for each camera, and a person types that
+                  number back. A number that is out of range is a mistake in the index; reading it as the name of
+                  some camera would silently open a different camera than the one the user meant.
+                tests:
+                  - CameraSelector_SelectCamera_Index_ReturnsCameraAtIndex
+                  - CameraSelector_SelectCamera_IndexOutOfRange_ThrowsNotFoundAndIgnoresName
+
+              - id: AgentVisionCore-CameraSelector-ById
+                title: The CameraSelector shall select the camera whose identifier equals the selector exactly.
+                justification: |
+                  The identifier is the stable name of a camera, so an exact match is unambiguous and survives a
+                  change of the order of the list.
+                tests:
+                  - CameraSelector_SelectCamera_Id_ReturnsCamera
+
+              - id: AgentVisionCore-CameraSelector-ByName
+                title: >-
+                  The CameraSelector shall select a camera by its name without regard to letter case, and when
+                  several backends report the name it shall choose the camera of the first backend of the list.
+                justification: |
+                  A person remembers the name of a camera, and writes it in any letter case. Windows reports one
+                  physical camera through several backends under one name; they are the same camera, so the
+                  first backend of the list, which is the preferred one, is chosen.
+                tests:
+                  - CameraSelector_SelectCamera_Name_IsCaseInsensitive
+                  - CameraSelector_SelectCamera_NameOnTwoBackends_PicksFirstBackend
+
+              - id: AgentVisionCore-CameraSelector-AmbiguousName
+                title: >-
+                  The CameraSelector shall reject a name that is shared by several cameras of the same backend and
+                  shall tell the caller to use the index or the identifier.
+                justification: |
+                  Two cameras of one backend with one name are two different cameras, and guessing one would show
+                  the wrong scene. The message names the alternatives so that the caller can choose without
+                  another look at the list.
+                tests:
+                  - CameraSelector_SelectCamera_NameTwiceOnSameBackend_ThrowsWithGuidance
+
+              - id: AgentVisionCore-CameraSelector-NotFound
+                title: >-
+                  The CameraSelector shall report a selector that matches no camera with an exception that names
+                  the selector and lists the available cameras by index, name, and backend, or says that none is
+                  available.
+                justification: |
+                  The caller is often an AI agent that cannot look at the machine. Listing the cameras that exist
+                  in the message lets it correct the request at once.
+                tests:
+                  - CameraSelector_SelectCamera_Unknown_MessageListsAvailable
+                  - CameraSelector_SelectCamera_NoCameras_MessageSaysNone
+
+              - id: AgentVisionCore-CameraSelector-FormatDefault
+                title: >-
+                  When no size or frame rate is requested, the CameraSelector shall choose the largest format that
+                  is not above 1920x1080 and offers at least 15 frames per second, then the highest frame rate, then
+                  the preferred pixel format (JPEG first), and shall fall back to the smallest fast format when
+                  every format is larger.
+                justification: |
+                  Full HD is enough detail for an agent and keeps the transfer light, a rate below 15 frames per
+                  second leaves the camera's exposure slow to settle, and JPEG needs the least USB bandwidth and the
+                  cheapest conversion. A camera that offers only larger sizes must still open.
+                tests:
+                  - CameraSelector_SelectFormat_NoRequest_PrefersHdJpeg
+                  - CameraSelector_SelectFormat_NoRequest_SkipsFormatsBelowMinimumRate
+                  - CameraSelector_SelectFormat_Only4kFormats_ChoosesSmallestAtLeast15Fps
+
+              - id: AgentVisionCore-CameraSelector-FormatBestMatch
+                title: >-
+                  When a size or frame rate is requested, the CameraSelector shall choose the format whose size is
+                  nearest to the request (an unspecified dimension counts as matching), then the frame rate that is
+                  not below the request and closest to it, and shall not fail because the requested size is absent.
+                justification: |
+                  A request is a preference. Cameras rarely offer exactly the size that was asked for, and failing
+                  there would make the request useless; the nearest size gives a usable picture and the session
+                  reports what was chosen.
+                tests:
+                  - CameraSelector_SelectFormat_ExactRequest_ReturnsExact
+                  - CameraSelector_SelectFormat_AbsentSize_ReturnsNearest
+                  - CameraSelector_SelectFormat_OnlyWidth_IgnoresHeight
+                  - CameraSelector_SelectFormat_Fps_PrefersNotBelowThenClosest
+                  - CameraSelector_SelectFormat_OnlyFps_KeepsDefaultSizePolicy
+
+              - id: AgentVisionCore-CameraSelector-FormatUsable
+                title: >-
+                  The CameraSelector shall only choose formats whose pixel format the library can turn into a
+                  picture, and shall report a camera that offers none with an open exception that names the camera.
+                justification: |
+                  A format that cannot be converted would open successfully and then fail on every frame. Refusing
+                  it at selection time gives the user a clear message at the right moment.
+                tests:
+                  - CameraSelector_SelectFormat_UnusableFormatsPresent_AreSkipped
+                  - CameraSelector_SelectFormat_NoUsableFormat_ThrowsOpenException

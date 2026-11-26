@@ -24,6 +24,14 @@ package AgentVisionDesignViews {
         expose CamerasSubsystem;
     }
 
+    view CaptureView {
+        expose CaptureSubsystem;
+    }
+
+    view ImagingView {
+        expose ImagingSubsystem;
+    }
+
     view AgentVisionToolView {
         expose AgentVisionToolSystem;
     }

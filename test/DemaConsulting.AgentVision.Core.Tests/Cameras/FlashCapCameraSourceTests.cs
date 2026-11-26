@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 using DemaConsulting.AgentVision.Core.Cameras;
+using DemaConsulting.AgentVision.Core.Capture;
 using DemaConsulting.AgentVision.Core.Tests.TestSupport;
 using FlashCap;
 using FlashCap.Utilities;
@@ -43,6 +44,116 @@ public class FlashCapCameraSourceTests
     /// <returns>The source.</returns>
     private static FlashCapCameraSource SourceOf(params CaptureDeviceDescriptor[] descriptors) =>
         new(() => descriptors);
+
+    /// <summary>
+    ///     Creates a descriptor of a camera with two characteristics whose device is the given fake.
+    /// </summary>
+    /// <param name="device">The device that opening the descriptor yields.</param>
+    /// <returns>The descriptor.</returns>
+    private static FakeCaptureDeviceDescriptor OpenableDescriptor(FakeFlashCapDevice device) =>
+        new(
+            DeviceTypes.V4L2,
+            "/dev/video0",
+            "Desk Camera",
+            "Desk Camera (V4L2)",
+            new VideoCharacteristics(PixelFormats.JPEG, 1280, 720, new Fraction(30, 1)),
+            new VideoCharacteristics(PixelFormats.YUYV, 640, 480, new Fraction(15, 1)))
+        {
+            OpenDevice = () => device
+        };
+
+    /// <summary>
+    ///     Test that opening a camera opens the descriptor with the characteristics that match the chosen format.
+    /// </summary>
+    [Fact]
+    public void FlashCapCameraSource_Open_MatchingDescriptor_OpensWithChosenCharacteristics()
+    {
+        // Arrange: a source with one openable descriptor, and the camera and format as the listing reports them
+        var fake = new FakeFlashCapDevice("/dev/video0", "Desk Camera");
+        var source = SourceOf(OpenableDescriptor(fake));
+        var camera = source.GetCameras()[0];
+        var format = new CameraFormat(640, 480, "YUYV", 15);
+
+        // Act: open the camera
+        using var handle = source.Open(camera, format, _ => { }, _ => { });
+
+        // Assert: FlashCap opened the 640x480 YUYV characteristics and started the device
+        Assert.NotNull(fake.InitializedWith);
+        Assert.Equal((640, 480, PixelFormats.YUYV), (fake.InitializedWith.Width, fake.InitializedWith.Height, fake.InitializedWith.PixelFormat));
+        Assert.Equal(1, fake.StartCount);
+    }
+
+    /// <summary>
+    ///     Test that disposing the handle stops the FlashCap device.
+    /// </summary>
+    [Fact]
+    public void FlashCapCameraSource_Open_DisposeHandle_StopsAndDisposesDevice()
+    {
+        // Arrange: an open camera
+        var fake = new FakeFlashCapDevice("/dev/video0", "Desk Camera");
+        var source = SourceOf(OpenableDescriptor(fake));
+        var handle = source.Open(source.GetCameras()[0], new CameraFormat(1280, 720, "JPEG", 30), _ => { }, _ => { });
+
+        // Act: dispose the handle
+        handle.Dispose();
+
+        // Assert: the device was stopped and disposed
+        Assert.Equal(1, fake.StopCount);
+        Assert.Equal(1, fake.DisposeCount);
+    }
+
+    /// <summary>
+    ///     Test that a camera that FlashCap no longer reports cannot be opened.
+    /// </summary>
+    [Fact]
+    public void FlashCapCameraSource_Open_UnknownId_ThrowsCameraOpen()
+    {
+        // Arrange: a source, and a camera description with an identifier that FlashCap does not report
+        var fake = new FakeFlashCapDevice("/dev/video0", "Desk Camera");
+        var source = SourceOf(OpenableDescriptor(fake));
+        var gone = new CameraInfo("V4L2:/dev/video9", "Gone Camera", "Gone", "V4L2", []);
+
+        // Act / Assert: opening fails with a message that names the camera, and nothing was started
+        var exception = Assert.Throws<CameraOpenException>(
+            () => source.Open(gone, new CameraFormat(640, 480, "YUYV", 15), _ => { }, _ => { }));
+        Assert.Contains("'Gone Camera'", exception.Message);
+        Assert.Equal(0, fake.StartCount);
+    }
+
+    /// <summary>
+    ///     Test that a format that the camera does not offer cannot be opened.
+    /// </summary>
+    [Fact]
+    public void FlashCapCameraSource_Open_UnknownFormat_ThrowsCameraOpen()
+    {
+        // Arrange: a source and a format that the camera does not have
+        var fake = new FakeFlashCapDevice("/dev/video0", "Desk Camera");
+        var source = SourceOf(OpenableDescriptor(fake));
+
+        // Act / Assert: opening fails with a message that names the format, and nothing was started
+        var exception = Assert.Throws<CameraOpenException>(
+            () => source.Open(source.GetCameras()[0], new CameraFormat(800, 600, "JPEG", 30), _ => { }, _ => { }));
+        Assert.Contains("800x600", exception.Message);
+        Assert.Equal(0, fake.StartCount);
+    }
+
+    /// <summary>
+    ///     Test that null arguments of the open call are rejected.
+    /// </summary>
+    [Fact]
+    public void FlashCapCameraSource_Open_NullArguments_ThrowsArgumentNullException()
+    {
+        // Arrange: a source and valid arguments
+        var source = SourceOf();
+        var camera = new CameraInfo("V4L2:x", "x", "x", "V4L2", []);
+        var format = new CameraFormat(1, 1, "JPEG", 1);
+
+        // Act / Assert: each null argument is rejected
+        Assert.Throws<ArgumentNullException>(() => source.Open(null!, format, _ => { }, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => source.Open(camera, null!, _ => { }, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => source.Open(camera, format, null!, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => source.Open(camera, format, _ => { }, null!));
+    }
 
     /// <summary>
     ///     Test that a null enumeration function is rejected.

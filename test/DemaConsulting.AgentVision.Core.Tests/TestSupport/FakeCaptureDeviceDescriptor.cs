@@ -28,8 +28,10 @@ namespace DemaConsulting.AgentVision.Core.Tests.TestSupport;
 /// </summary>
 /// <remarks>
 ///     FlashCap's descriptor is abstract only because opening a device is device-specific. Enumeration reads
-///     the identity, device type, name, description, and characteristics, all of which this fake provides;
-///     opening is never part of enumeration, so it is not supported here.
+///     the identity, device type, name, description, and characteristics, all of which this fake provides.
+///     Opening works only when a test supplies <see cref="OpenDevice"/>, which then provides the FlashCap
+///     device (usually a <see cref="FakeFlashCapDevice"/>), so the real FlashCap open, start, stop, and dispose
+///     sequence can be exercised without a camera.
 /// </remarks>
 internal sealed class FakeCaptureDeviceDescriptor : CaptureDeviceDescriptor
 {
@@ -63,6 +65,12 @@ internal sealed class FakeCaptureDeviceDescriptor : CaptureDeviceDescriptor
         _identity = identity;
     }
 
+    /// <summary>
+    ///     Gets the function that provides the FlashCap device when the descriptor is opened, or
+    ///     <see langword="null"/> when opening is not supported.
+    /// </summary>
+    public Func<CaptureDevice>? OpenDevice { get; init; }
+
     /// <inheritdoc />
     public override object Identity => _identity!;
 
@@ -74,6 +82,21 @@ internal sealed class FakeCaptureDeviceDescriptor : CaptureDeviceDescriptor
         VideoCharacteristics characteristics,
         TranscodeFormats transcodeFormat,
         FrameProcessor frameProcessor,
-        CancellationToken ct) =>
-        throw new NotSupportedException("The fake descriptor describes a device and cannot open it.");
+        CancellationToken ct)
+    {
+        // A real descriptor creates and initializes its device here; the fake hands its device the three things a
+        // real device receives when it is initialized
+        if (OpenDevice == null)
+        {
+            throw new NotSupportedException("The fake descriptor describes a device and cannot open it.");
+        }
+
+        var device = OpenDevice();
+        if (device is FakeFlashCapDevice fake)
+        {
+            fake.Attach(characteristics, transcodeFormat, frameProcessor);
+        }
+
+        return Task.FromResult(device);
+    }
 }

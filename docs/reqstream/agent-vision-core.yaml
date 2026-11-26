@@ -6,9 +6,10 @@
 #   library package need from it
 # - The library owns ALL camera logic; the tool is a thin front-end that depends on it, never the
 #   reverse
-# - The library is the foundation of AgentVision: low-latency webcam capture for AI agents. The first
-#   camera capability is enumeration (Cameras subsystem); further capabilities are added, top-down,
-#   with their own requirements, design, and verification
+# - The library is the foundation of AgentVision: low-latency webcam capture for AI agents. Camera
+#   enumeration (Cameras subsystem), hot capture (Capture subsystem), and image operations (Imaging
+#   subsystem) are available; further capabilities are added, top-down, with their own requirements,
+#   design, and verification
 # - Package requirements are validated by FileAssert checks of the produced NuGet package
 #   (.fileassert.yaml, run by build.yaml) and by assembly-level tests in AgentVisionCoreTests.cs
 
@@ -87,3 +88,151 @@ sections:
           - AgentVisionCore-Cameras-SourceAbstraction
         tests:
           - AgentVisionCore_Cameras_CustomSource_Enumerated_ReportsCameras
+
+      - id: AgentVisionCore-System-HotCapture
+        title: >-
+          The library shall keep a camera streaming in the background and hold its latest frame, so that a
+          snapshot returns that frame without waiting for the camera.
+        tags: [system]
+        justification: |
+          The purpose of the product is low-latency capture for AI agents. Starting a camera takes a second
+          or more, so a caller that opens the camera for every picture is slow; a camera that stays open
+          ("hot") makes every picture after the first a read of a value already in memory. A long-running
+          application, such as a background service, relies on this.
+        children:
+          - AgentVisionCore-Capture-HotFrame
+          - AgentVisionCore-Cameras-Streaming
+        tests:
+          - AgentVisionCore_Capture_FakeCamera_Snapshot_ReturnsLatestFrameImmediately
+
+      - id: AgentVisionCore-System-OpenByReference
+        title: >-
+          The library shall open a camera by the index, the identifier, or the name that the camera enumeration
+          reports.
+        tags: [system]
+        justification: |
+          A person or an AI agent first lists the cameras and then names one of them. The three forms are the
+          ones that the listing shows, so what the caller read is what the caller can type, and an index
+          is the shortest form while an identifier and a name survive a change of the order of the cameras.
+        children:
+          - AgentVisionCore-Capture-Selection
+        tests:
+          - AgentVisionCore_Capture_FakeCamera_OpenByIndexIdAndName_OpensSameCamera
+
+      - id: AgentVisionCore-System-FormatRequest
+        title: >-
+          The library shall let a caller request a frame size and frame rate, shall open the camera with the
+          format that comes closest to the request, and shall choose a sensible format when nothing is requested.
+        tags: [system]
+        justification: |
+          Cameras offer many formats, and which one is right depends on the use: a small picture is enough to
+          read a gauge, a large one is needed for text. A request that the camera cannot meet exactly must still
+          give a picture, and a caller that states no wish must get a format that is fast, bright, and not
+          needlessly large.
+        children:
+          - AgentVisionCore-Capture-FormatSelection
+        tests:
+          - AgentVisionCore_Capture_FakeCamera_RequestedFormat_IsOpened
+          - AgentVisionCore_Capture_FakeCamera_NoRequest_OpensDefaultFormat
+
+      - id: AgentVisionCore-System-WarmUp
+        title: >-
+          The library shall discard the frames that a camera delivers during a configurable warm-up after it starts
+          streaming, so that the first picture that is served is a settled one.
+        tags: [system]
+        justification: |
+          Most webcams deliver dark, unfocused, or badly exposed frames for a moment after they start while
+          auto exposure and white balance settle. A picture of such a frame misleads an agent that looks at it,
+          so the library must not serve one; the warm-up is configurable because cameras differ and a
+          background service may have kept the camera open for hours.
+        children:
+          - AgentVisionCore-Capture-WarmUp
+        tests:
+          - AgentVisionCore_Capture_FakeCamera_WarmUp_DarkFramesAreNotServed
+
+      - id: AgentVisionCore-System-MultipleCameras
+        title: >-
+          The library shall keep several cameras open at the same time, each independent of the others, so that
+          closing one leaves the others streaming.
+        tags: [system]
+        justification: |
+          Machines that serve an AI agent often have several cameras (a desk, a door, a workbench). The agent must
+          be able to look at any of them at once, and a camera that is unplugged or closed must not affect the
+          others.
+        children:
+          - AgentVisionCore-Capture-Independence
+        tests:
+          - AgentVisionCore_Capture_TwoFakeCameras_CloseOne_OtherKeepsStreaming
+
+      - id: AgentVisionCore-System-ConcurrentSnapshots
+        title: >-
+          The library shall allow snapshots of an open camera from any number of threads at the same time.
+        tags: [system]
+        justification: |
+          A background service answers many requests at once, each on its own thread. Every request must get a
+          frame without waiting for the others and without any caller having to add locking of its own.
+        children:
+          - AgentVisionCore-Capture-ThreadSafety
+        tests:
+          - AgentVisionCore_Capture_FakeCamera_ConcurrentSnapshots_AllReturnFrames
+
+      - id: AgentVisionCore-System-Disposal
+        title: >-
+          The library shall stop a camera deterministically when the caller closes it, so that the camera is free
+          for other applications as soon as the close returns.
+        tags: [system]
+        justification: |
+          A camera that stays open after the caller is done blocks every other application and keeps its light on,
+          which users notice and distrust. Closing must therefore be explicit, immediate, and safe to repeat.
+        children:
+          - AgentVisionCore-Capture-Close
+          - AgentVisionCore-Cameras-Streaming
+        tests:
+          - AgentVisionCore_Capture_FakeCamera_Dispose_StopsDeviceAndRejectsSnapshot
+
+      - id: AgentVisionCore-System-CaptureErrors
+        title: >-
+          The library shall report a camera that does not exist, cannot be opened, stops working, or delivers no frame
+          with a documented exception type whose message says what happened and what to do.
+        tags: [system]
+        justification: |
+          The caller is often an AI agent or an unattended service that cannot look at the machine. A distinct
+          exception for each situation lets it react (retry, choose another camera, or report), and a message
+          that names the camera and lists the alternatives lets it do so without another round trip.
+        children:
+          - AgentVisionCore-Capture-Errors
+        tests:
+          - AgentVisionCore_Capture_UnknownCamera_ThrowsCameraNotFound
+          - AgentVisionCore_Capture_OpenFails_ThrowsCameraOpen
+          - AgentVisionCore_Capture_DeviceFaults_ThrowsCameraDisconnected
+          - AgentVisionCore_Capture_NoFrame_ThrowsCameraTimeout
+
+      - id: AgentVisionCore-System-ImageOperations
+        title: >-
+          The library shall turn a captured frame into an image, crop a region of it, and save it as a PNG, JPEG,
+          or BMP file chosen by the file extension.
+        tags: [system]
+        justification: |
+          A frame is only useful once it can be looked at: an agent usually needs one region of the picture (a
+          gauge, a screen) and a file in a format that every tool reads. These operations belong in the library so
+          that every consumer, and not only the command-line tool, gets them.
+        children:
+          - AgentVisionCore-Imaging-Decode
+          - AgentVisionCore-Imaging-Crop
+          - AgentVisionCore-Imaging-Save
+        tests:
+          - AgentVisionCore_Imaging_CapturedFrame_CropAndSave_WritesPngAndJpeg
+
+      - id: AgentVisionCore-System-Snapshot
+        title: >-
+          The library shall take one picture with a single call: open a camera, let it warm up, save one frame
+          (optionally cropped) to a file, and close the camera again, also when a step fails.
+        tags: [system]
+        justification: |
+          Many uses need one picture and nothing more, and the command-line tool must stay a thin front-end. A
+          single library call that owns the whole sequence, including the cleanup, keeps that logic in one tested
+          place and guarantees that a failed attempt never leaves a camera open.
+        children:
+          - AgentVisionCore-Capture-OneShot
+        tests:
+          - AgentVisionCore_Snap_FakeCamera_SavesCroppedPng

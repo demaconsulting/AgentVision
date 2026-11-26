@@ -1,0 +1,61 @@
+---
+# CameraSnapper Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the CameraSnapper unit of the Capture subsystem
+# - The unit takes one picture: it checks the request, opens the camera, waits for the warm-up, takes one frame,
+#   crops it, saves it, and always closes the camera
+# - Unit requirements are validated by CameraSnapperTests.cs, which uses a hand-written camera source that streams
+#   synthetic pictures, so no camera hardware is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Capture Subsystem Requirements
+        sections:
+          - title: CameraSnapper Unit Requirements
+            requirements:
+              - id: AgentVisionCore-CameraSnapper-Snap
+                title: >-
+                  The CameraSnapper shall save one frame of the requested camera to the requested file, keep only the
+                  requested region when a crop is given, and report the saved file, its size, the camera, and the
+                  format that was used.
+                justification: |
+                  This is the whole job of a one-shot snapshot, and the caller (the command-line tool) needs the size
+                  and the camera to tell the user what happened without any camera logic of its own.
+                tests:
+                  - CameraSnapper_Snap_Valid_WritesImageAndReturnsResult
+                  - CameraSnapper_Snap_WithCrop_SavesCroppedSize
+                  - CameraSnapper_Snap_UnknownCamera_ThrowsNotFoundAndWritesNothing
+                  - CameraSnapper_Constructor_Default_CreatesSnapper
+                  - CameraSnapper_Snap_NullArguments_ThrowsArgumentNullException
+
+              - id: AgentVisionCore-CameraSnapper-EarlyValidation
+                title: >-
+                  The CameraSnapper shall reject an empty output path, an unsupported file extension, a missing output
+                  folder, invalid options, an invalid crop, and a crop that does not fit the chosen format, before it
+                  opens the camera.
+                justification: |
+                  Opening a camera and waiting for the warm-up takes seconds. A request that can be seen to fail
+                  without the camera must fail at once, with the reason, not after the camera was started.
+                tests:
+                  - CameraSnapper_Snap_UnsupportedExtension_ThrowsBeforeOpen
+                  - CameraSnapper_Snap_EmptyOutputPath_ThrowsBeforeOpen
+                  - CameraSnapper_Snap_MissingFolder_ThrowsBeforeOpen
+                  - CameraSnapper_Snap_CropOutsideFormat_ThrowsBeforeOpen
+                  - CameraSnapper_Snap_InvalidCrop_ThrowsBeforeOpen
+                  - CameraSnapper_Snap_InvalidOptions_ThrowsBeforeOpen
+
+              - id: AgentVisionCore-CameraSnapper-AlwaysCloses
+                title: >-
+                  The CameraSnapper shall close the camera before it returns or throws, whatever step fails, and shall
+                  check the crop again against the size of the frame that was actually delivered.
+                justification: |
+                  A snapshot that fails must not leave the camera open and blocked. The size announced by a camera
+                  can differ from the size it delivers, so the crop is verified against the real picture before it
+                  is applied.
+                tests:
+                  - CameraSnapper_Snap_CropOutsideDecodedFrame_ThrowsAndDisposesDevice
+                  - CameraSnapper_Snap_SaveFails_StillDisposesDevice
+                  - CameraSnapper_Snap_Timeout_StillDisposesDevice
+                  - CameraSnapper_Snap_DamagedFrame_ThrowsInvalidDataAndDisposesDevice

@@ -26,6 +26,7 @@ sections:
           # Tests link to "windows" to ensure results come from Windows platform
           - "windows@AgentVisionCore_Assembly_Loaded_HasPackageName"
           - "windows@AgentVisionCore_Cameras_DefaultSource_Enumerated_DoesNotThrow"
+          - "windows@AgentVisionCore_Snap_FakeCamera_SavesCroppedPng"
 
       - id: AgentVisionCore-Platform-Linux
         title: The library shall build and run on Linux platforms.
@@ -36,6 +37,7 @@ sections:
           # Tests link to "ubuntu" to ensure results come from Linux platform
           - "ubuntu@AgentVisionCore_Assembly_Loaded_HasPackageName"
           - "ubuntu@AgentVisionCore_Cameras_DefaultSource_Enumerated_DoesNotThrow"
+          - "ubuntu@AgentVisionCore_Snap_FakeCamera_SavesCroppedPng"
 
       - id: AgentVisionCore-Platform-Net10
         title: The library shall support .NET 10 runtime.

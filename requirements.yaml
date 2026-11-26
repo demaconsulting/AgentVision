@@ -13,6 +13,15 @@ includes:
   - docs/reqstream/agent-vision-core/cameras.yaml
   - docs/reqstream/agent-vision-core/cameras/camera-enumerator.yaml
   - docs/reqstream/agent-vision-core/cameras/flash-cap-camera-source.yaml
+  - docs/reqstream/agent-vision-core/cameras/flash-cap-camera-device.yaml
+  - docs/reqstream/agent-vision-core/capture.yaml
+  - docs/reqstream/agent-vision-core/capture/camera-selector.yaml
+  - docs/reqstream/agent-vision-core/capture/camera-opener.yaml
+  - docs/reqstream/agent-vision-core/capture/camera-session.yaml
+  - docs/reqstream/agent-vision-core/capture/camera-snapper.yaml
+  - docs/reqstream/agent-vision-core/imaging.yaml
+  - docs/reqstream/agent-vision-core/imaging/camera-image.yaml
+  - docs/reqstream/agent-vision-core/imaging/frame-decoder.yaml
   - docs/reqstream/agent-vision-tool.yaml
   - docs/reqstream/agent-vision-tool/program.yaml
   - docs/reqstream/agent-vision-tool/cameras-command.yaml
@@ -26,6 +35,7 @@ includes:
   - docs/reqstream/agent-vision-tool/platform-requirements.yaml
   - docs/reqstream/ots/help-cards.yaml
   - docs/reqstream/ots/flashcap.yaml
+  - docs/reqstream/ots/canvasnet.yaml
   - docs/reqstream/ots/xunit.yaml
   - docs/reqstream/ots/reqstream.yaml
   - docs/reqstream/ots/buildmark.yaml

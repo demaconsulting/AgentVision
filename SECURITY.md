@@ -93,12 +93,15 @@ AgentVision reads and writes files on the local file system. Users should:
 ### Webcam Access
 
 AgentVision exists to give AI agents access to webcams, so its camera features read video frames from capture devices
-and save them as image files. This release only lists the cameras that are present and the formats they support; it
-never starts capturing from a camera or reads a frame. Once the capture features are available, users should:
+and save them as image files. The `agentvision` command-line tool only lists the cameras that are present and the
+formats they support; it never starts capturing from a camera or reads a frame. The `DemaConsulting.AgentVision.Core`
+library can open a camera, keep it streaming, hand out its frames, and save a frame as an image file, which is what an
+application that uses the library does with it. When the capture features are used, users should:
 
 - Treat saved frames as sensitive data, because they can show people and private spaces
 - Grant the AI agents and processes that use AgentVision access only to the cameras and folders they need
-- Be aware that a camera kept open by a background process is in use until that process stops
+- Be aware that a camera kept open by a background process, or by a library session that was not disposed, is in use
+  until that process stops or the session is disposed
 
 ## Security Disclosure Policy
 

@@ -1,0 +1,141 @@
+---
+# Capture Subsystem Requirements
+#
+# PURPOSE:
+# - Define requirements for the AgentVisionCore Capture subsystem
+# - The Capture subsystem spans CameraSelector (which camera and format a request means), CameraOpener (opens a
+#   camera), CameraSession (the open, "hot" camera that holds the latest frame), and CameraSnapper (the one-shot
+#   open, snap, crop, save, and close)
+# - Subsystem requirements decompose the system requirements for hot capture; they are validated by
+#   CaptureSubsystemTests.cs, which uses a hand-written camera source, so no camera hardware is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Capture Subsystem Requirements
+        requirements:
+          - id: AgentVisionCore-Capture-HotFrame
+            title: >-
+              The Capture subsystem shall hold the newest frame of an open camera and return it to a snapshot
+              without waiting, except that the first snapshot waits for the first frame.
+            justification: |
+              Low latency means that the work of getting a frame is done in the background, before the caller asks.
+              The session keeps the newest frame, and the snapshot only reads it; only the very first snapshot of a
+              session can have to wait, because no frame exists yet.
+            children:
+              - AgentVisionCore-CameraSession-HoldLatest
+              - AgentVisionCore-CameraSession-FirstFrame
+            tests:
+              - CaptureSubsystem_HotFrame_SnapshotAfterEmit_ReturnsNewestFrame
+
+          - id: AgentVisionCore-Capture-Selection
+            title: >-
+              The Capture subsystem shall open the camera that an index, an identifier, or a name selects, and
+              shall treat a name that is shared by several cameras of one backend as an error.
+            justification: |
+              The selector decides which camera the caller means, and the opener opens exactly that camera. The
+              three forms match the camera listing, and an ambiguous name is refused instead of guessed, because
+              opening the wrong camera shows an agent the wrong room.
+            children:
+              - AgentVisionCore-CameraSelector-ByIndex
+              - AgentVisionCore-CameraSelector-ById
+              - AgentVisionCore-CameraSelector-ByName
+              - AgentVisionCore-CameraSelector-AmbiguousName
+            tests:
+              - CaptureSubsystem_Selection_IndexIdName_ReachDeviceOfSameCamera
+
+          - id: AgentVisionCore-Capture-FormatSelection
+            title: >-
+              The Capture subsystem shall open a camera with the format that comes closest to the requested size and
+              frame rate, with a sensible default when nothing is requested, and shall reject invalid options.
+            justification: |
+              The selector chooses the format, the options say what was asked, and the opener passes the choice
+              to the device. A request that the camera cannot meet exactly still gives a picture, and a request
+              that makes no sense is refused before any camera is touched.
+            children:
+              - AgentVisionCore-CameraSelector-FormatDefault
+              - AgentVisionCore-CameraSelector-FormatBestMatch
+              - AgentVisionCore-CameraSelector-FormatUsable
+              - AgentVisionCore-CameraOpener-Options
+            tests:
+              - CaptureSubsystem_FormatSelection_RequestAndDefault_PassChosenFormatToSource
+
+          - id: AgentVisionCore-Capture-WarmUp
+            title: >-
+              The Capture subsystem shall not serve frames that arrive before the end of the warm-up that was
+              configured for the camera.
+            justification: |
+              The warm-up is applied where the frames arrive, in the session, with the time that the opener's options
+              gave it; a frame inside the warm-up is dropped, so no caller can receive a dark first frame.
+            children:
+              - AgentVisionCore-CameraSession-WarmUp
+            tests:
+              - CaptureSubsystem_WarmUp_FramesBeforeWarmUp_AreNotServed
+
+          - id: AgentVisionCore-Capture-Independence
+            title: >-
+              The Capture subsystem shall open any number of cameras, each in its own session, and closing one
+              session shall not affect another.
+            justification: |
+              One opener serves every camera, and each session owns only its own device. This is what lets a
+              service keep a desk camera and a door camera open and close one without interrupting the other.
+            children:
+              - AgentVisionCore-CameraOpener-Open
+              - AgentVisionCore-CameraSession-Dispose
+            tests:
+              - CaptureSubsystem_Independence_TwoSessions_CloseOneKeepsOther
+
+          - id: AgentVisionCore-Capture-ThreadSafety
+            title: >-
+              The Capture subsystem shall allow snapshots from many threads while frames keep arriving.
+            justification: |
+              Frames arrive on the thread of the device while callers snapshot on their own threads. The session
+              publishes each frame with one atomic write and snapshots only read it, so neither side waits for the
+              other.
+            children:
+              - AgentVisionCore-CameraSession-ConcurrentSnapshots
+            tests:
+              - CaptureSubsystem_ThreadSafety_ConcurrentSnapshotsWhileFramesArrive_AllSucceed
+
+          - id: AgentVisionCore-Capture-Close
+            title: >-
+              The Capture subsystem shall stop the device of a session when the session is closed, and a closed
+              session shall refuse snapshots.
+            justification: |
+              Closing the session is the only way to release a camera, so it must reach the device. A closed
+              session that still served an old frame would hide the fact that the camera is gone.
+            children:
+              - AgentVisionCore-CameraSession-Dispose
+            tests:
+              - CaptureSubsystem_Close_DisposeStopsDevice
+
+          - id: AgentVisionCore-Capture-Errors
+            title: >-
+              The Capture subsystem shall report an unknown camera, a camera that cannot be opened, a camera that
+              stops delivering, and a camera that delivers no frame with distinct documented exceptions.
+            justification: |
+              Each failure has a different cause and a different remedy, so each has its own exception type; the
+              selector reports what exists, the opener reports why opening failed, and the session reports what
+              happened to a camera that was open.
+            children:
+              - AgentVisionCore-CameraSelector-NotFound
+              - AgentVisionCore-CameraOpener-OpenFailure
+              - AgentVisionCore-CameraSession-Disconnect
+              - AgentVisionCore-CameraSession-FirstFrame
+            tests:
+              - CaptureSubsystem_Errors_EachFailure_ThrowsDocumentedException
+
+          - id: AgentVisionCore-Capture-OneShot
+            title: >-
+              The Capture subsystem shall take one picture in a single call: check the request, open the camera,
+              snapshot, crop, save, and close the camera on every path.
+            justification: |
+              The one-shot snapshot composes the other parts of the subsystem (select, open, snapshot, close) with
+              the image operations. It validates first so that a wrong request fails at once, and it always closes
+              the camera so that a failure never leaves one open.
+            children:
+              - AgentVisionCore-CameraSnapper-Snap
+              - AgentVisionCore-CameraSnapper-EarlyValidation
+              - AgentVisionCore-CameraSnapper-AlwaysCloses
+            tests:
+              - CaptureSubsystem_OneShot_Snap_OpensSavesAndCloses
