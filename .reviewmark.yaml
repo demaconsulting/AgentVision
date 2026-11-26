@@ -78,6 +78,7 @@ reviews:
       - "docs/reqstream/agent-vision-core/platform-requirements.yaml"
       - "docs/design/introduction.md"
       - "docs/design/agent-vision-core.md"
+      - "docs/design/agent-vision-core/**/*.md"
       - "docs/design/ots.md"
 
   - id: AgentVisionCore-Verification
@@ -87,6 +88,7 @@ reviews:
     paths:
       - "docs/verification/introduction.md"
       - "docs/verification/agent-vision-core.md"
+      - "docs/verification/agent-vision-core/**/*.md"
       - "docs/verification/ots.md"
 
   - id: AgentVisionCore-AllRequirements
@@ -96,6 +98,58 @@ reviews:
       - docs/reqstream/agent-vision-core.yaml
     paths:
       - "docs/reqstream/agent-vision-core/**/*.yaml"
+
+  # AgentVisionCore - Cameras
+  - id: AgentVisionCore-Cameras
+    title: Review that AgentVisionCore Cameras Satisfies Subsystem Requirements
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/cameras.yaml"
+      - "docs/design/agent-vision-core/cameras.md"
+      - "docs/verification/agent-vision-core/cameras.md"
+      - "test/**/Cameras/CamerasSubsystemTests.cs"
+
+  - id: AgentVisionCore-Cameras-CameraEnumerator
+    title: Review that AgentVisionCore Cameras CameraEnumerator Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/cameras.md
+      - docs/reqstream/agent-vision-core/cameras.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/cameras/camera-enumerator.yaml"
+      - "docs/design/agent-vision-core/cameras/camera-enumerator.md"
+      - "docs/verification/agent-vision-core/cameras/camera-enumerator.md"
+      - "src/DemaConsulting.AgentVision.Core/Cameras/CameraEnumerator.cs"
+      - "src/DemaConsulting.AgentVision.Core/Cameras/CameraInfo.cs"
+      - "src/DemaConsulting.AgentVision.Core/Cameras/CameraFormat.cs"
+      - "src/DemaConsulting.AgentVision.Core/Cameras/ICameraSource.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Cameras/CameraEnumeratorTests.cs"
+
+  - id: AgentVisionCore-Cameras-FlashCapCameraSource
+    title: Review that AgentVisionCore Cameras FlashCapCameraSource Implementation is Correct
+    context:
+      - docs/design/agent-vision-core.md
+      - docs/reqstream/agent-vision-core.yaml
+      - docs/design/agent-vision-core/cameras.md
+      - docs/reqstream/agent-vision-core/cameras.yaml
+    paths:
+      - "docs/reqstream/agent-vision-core/cameras/flash-cap-camera-source.yaml"
+      - "docs/design/agent-vision-core/cameras/flash-cap-camera-source.md"
+      - "docs/verification/agent-vision-core/cameras/flash-cap-camera-source.md"
+      - "src/DemaConsulting.AgentVision.Core/Cameras/FlashCapCameraSource.cs"
+      - "test/DemaConsulting.AgentVision.Core.Tests/Cameras/FlashCapCameraSourceTests.cs"
+
+  # AgentVisionCore - Test support
+  - id: AgentVisionCore-TestSupport
+    title: Review that AgentVisionCore Test Support Doubles are Correct
+    context:
+      - docs/verification/agent-vision-core.md
+      - docs/verification/agent-vision-core/cameras.md
+    paths:
+      - "test/DemaConsulting.AgentVision.Core.Tests/TestSupport/*.cs"
 
   # AgentVisionTool - Specials
   - id: AgentVisionTool-Architecture
@@ -154,6 +208,19 @@ reviews:
       - "docs/verification/agent-vision-tool/program.md"
       - "src/**/Program.cs"
       - "test/**/ProgramTests.cs"
+
+  # AgentVisionTool - CamerasCommand
+  - id: AgentVisionTool-CamerasCommand
+    title: Review that AgentVisionTool CamerasCommand Implementation is Correct
+    context:
+      - docs/design/agent-vision-tool.md
+      - docs/reqstream/agent-vision-tool.yaml
+    paths:
+      - "docs/reqstream/agent-vision-tool/cameras-command.yaml"
+      - "docs/design/agent-vision-tool/cameras-command.md"
+      - "docs/verification/agent-vision-tool/cameras-command.md"
+      - "src/**/CamerasCommand.cs"
+      - "test/**/CamerasCommandTests.cs"
 
   # AgentVisionTool - Cli
   - id: AgentVisionTool-Cli
@@ -248,6 +315,15 @@ reviews:
       - "src/**/Utilities/PathHelpers.cs"
       - "test/**/Utilities/PathHelpersTests.cs"
 
+  # AgentVisionTool - Test support
+  - id: AgentVisionTool-TestSupport
+    title: Review that AgentVisionTool Test Support Doubles are Correct
+    context:
+      - docs/verification/agent-vision-tool.md
+      - docs/verification/agent-vision-tool/cameras-command.md
+    paths:
+      - "test/DemaConsulting.AgentVision.Tool.Tests/TestSupport/*.cs"
+
   # OTS Items
   - id: OTS-BuildMark
     title: Review that BuildMark Provides Required Functionality
@@ -262,6 +338,13 @@ reviews:
       - "docs/reqstream/ots/fileassert.yaml"
       - "docs/design/ots/fileassert.md"
       - "docs/verification/ots/fileassert.md"
+
+  - id: OTS-FlashCap
+    title: Review that FlashCap Provides Required Functionality
+    paths:
+      - "docs/reqstream/ots/flashcap.yaml"
+      - "docs/design/ots/flashcap.md"
+      - "docs/verification/ots/flashcap.md"
 
   - id: OTS-HelpCards
     title: Review that HelpCards Provides Required Functionality

@@ -42,7 +42,7 @@ internal sealed class HelpCommand
     ///     Ids of the root cards: the topics that <c>agentvision help</c> lists. A missing or extra root card
     ///     fails the catalog.
     /// </summary>
-    internal static readonly string[] RootCardIds = ["getting-started", "command-line", "self-validation"];
+    internal static readonly string[] RootCardIds = ["getting-started", "command-line", "cameras", "self-validation"];
 
     /// <summary>
     ///     The closed tag vocabulary: every card carries one of these purpose tags, and no other tag.

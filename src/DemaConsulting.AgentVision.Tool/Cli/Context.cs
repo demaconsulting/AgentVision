@@ -56,6 +56,11 @@ internal sealed class Context : IDisposable
     public bool Validate { get; private init; }
 
     /// <summary>
+    ///     Gets a value indicating whether the <c>cameras</c> command was specified.
+    /// </summary>
+    public bool Cameras { get; private init; }
+
+    /// <summary>
     ///     Gets the validation results file path.
     /// </summary>
     public string? ResultsFile { get; private init; }
@@ -98,6 +103,7 @@ internal sealed class Context : IDisposable
             Help = parser.Help,
             Silent = parser.Silent,
             Validate = parser.Validate,
+            Cameras = parser.Cameras,
             ResultsFile = parser.ResultsFile,
             HeadingDepth = parser.HeadingDepth
         };
@@ -156,6 +162,11 @@ internal sealed class Context : IDisposable
         ///     Gets a value indicating whether the validate flag was specified.
         /// </summary>
         public bool Validate { get; private set; }
+
+        /// <summary>
+        ///     Gets a value indicating whether the <c>cameras</c> command was specified.
+        /// </summary>
+        public bool Cameras { get; private set; }
 
         /// <summary>
         ///     Gets the log file path.
@@ -217,6 +228,16 @@ internal sealed class Context : IDisposable
 
                 case "--validate":
                     Validate = true;
+                    return index;
+
+                case "cameras":
+                    // A command may be given only once; repeating it is almost certainly a mistake
+                    if (Cameras)
+                    {
+                        throw new ArgumentException("The 'cameras' command can be given only once", nameof(args));
+                    }
+
+                    Cameras = true;
                     return index;
 
                 case "--log":

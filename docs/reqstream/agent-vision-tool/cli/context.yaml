@@ -32,6 +32,25 @@ sections:
                   - Context_Create_DepthFlag_SetsHeadingDepth
                   - Context_Create_NoDepthFlag_ReturnsDefaultHeadingDepth
 
+              - id: AgentVisionTool-Context-Cameras
+                title: The Context class shall expose whether the `cameras` command was given.
+                justification: |
+                  The `cameras` command is a word among the options. The Context class recognizes it, so
+                  the rest of the tool reads one flag and never parses the command line itself.
+                tests:
+                  - Context_Create_CamerasCommand_SetsCamerasTrue
+                  - Context_Create_CamerasCommandAmongOptions_SetsCamerasAndOptions
+
+              - id: AgentVisionTool-Context-CommandValidation
+                title: The Context class shall reject a command that is given more than once, and any unknown command.
+                justification: |
+                  A repeated command is almost certainly a mistake, and an unknown word is a misspelled
+                  command or option. Rejecting both with a clear message prevents a run that silently does
+                  something other than what was typed.
+                tests:
+                  - Context_Create_RepeatedCamerasCommand_ThrowsArgumentException
+                  - Context_Create_UnknownCommand_ThrowsArgumentException
+
               - id: AgentVisionTool-Context-InvalidArgs
                 title: >-
                   The Context class shall reject unknown or malformed command-line arguments with a descriptive

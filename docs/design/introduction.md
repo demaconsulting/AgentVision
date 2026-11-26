@@ -19,16 +19,19 @@ requirements; it explains how they are realized.
 Local items:
 
 - **AgentVisionCore**: system design for the `DemaConsulting.AgentVision.Core` library, which owns all camera
-  logic. The library currently holds the package and assembly identity only; its subsystems and units are added
-  together with the capabilities they provide.
+  logic. It holds the **Cameras** subsystem (camera enumeration), made of the **CameraEnumerator** and
+  **FlashCapCameraSource** units. Further subsystems and units are added together with the capabilities they
+  provide.
 - **AgentVisionTool**: system, subsystem, and unit design for all local components of the command-line tool
   (command `agentvision`): the **Cli** subsystem (argument parsing and output, and **HelpCommand**, which answers the
-  built-in `help` command), the **SelfTest** subsystem, the **Utilities** subsystem, and the **Program** unit.
+  built-in `help` command), the **SelfTest** subsystem, the **Utilities** subsystem, the **Program** unit, and the
+  **CamerasCommand** unit (the `cameras` command).
 
 OTS items:
 
 - **BuildMark**: integration and usage design.
 - **FileAssert**: integration and usage design.
+- **FlashCap**: integration and usage design.
 - **HelpCards**: integration and usage design.
 - **Pandoc**: integration and usage design.
 - **ReqStream**: integration and usage design.
@@ -51,7 +54,7 @@ The software structure is modeled in SysML2 under `docs/sysml2/` and rendered to
 below by SysML2Tools as part of the build pipeline. AI agents should query the SysML2 model
 directly (see the `sysml2tools-query` skill) rather than parsing this diagram or the prose
 elsewhere in this document. The model captures the shipped systems' runtime composition only.
-HelpCards, the one runtime OTS library, is modeled in `docs/sysml2/model/ots.sysml` and drawn in
+HelpCards and FlashCap, the runtime OTS libraries, are modeled in `docs/sysml2/model/ots.sysml` and drawn in
 the OTS view rather than in the overview below. The other OTS items listed in Scope above are
 build-time/pipeline tooling, documented separately (see `docs/design/ots.md`) rather than modeled
 as SysML2 parts.
@@ -83,6 +86,7 @@ design, and verification, and the tool only gains the command-line options and o
 
 - **src/** - source files and projects
   - **DemaConsulting.AgentVision.Core/** - library source
+    - **Cameras/** - camera enumeration subsystem
   - **DemaConsulting.AgentVision.Tool/** - command-line tool source
     - **Cli/** - command-line interface subsystem, including `HelpCommand.cs` for the built-in help
     - **Help/** - built-in help cards (Markdown with front matter), embedded in the assembly

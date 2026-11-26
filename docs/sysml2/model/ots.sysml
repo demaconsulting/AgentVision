@@ -12,4 +12,14 @@ package OtsDependencies {
             requirementFiles = ("docs/reqstream/ots/help-cards.yaml");
         }
     }
+
+    part def FlashCap {
+        doc /* OTS: FlashCap, which discovers the video capture devices of the host and describes their formats. */
+
+        metadata info : SoftwareInfo {
+            designFiles = ("docs/design/ots/flashcap.md");
+            verificationFiles = ("docs/verification/ots/flashcap.md");
+            requirementFiles = ("docs/reqstream/ots/flashcap.yaml");
+        }
+    }
 }

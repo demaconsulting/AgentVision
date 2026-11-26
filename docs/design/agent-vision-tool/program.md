@@ -6,7 +6,7 @@
 
 `Program` is the entry point and execution orchestrator for the AgentVisionTool system. Its single
 responsibility is to hand the `help` command to `HelpCommand`, otherwise create a `Context`
-from the command-line arguments, dispatch to the appropriate handler based on the parsed flags,
+from the command-line arguments, dispatch to the appropriate handler based on the parsed flags and command,
 and return the exit code.
 
 ### Data Model
@@ -43,21 +43,24 @@ and returns `context.ExitCode`. Catches `ArgumentException` and `InvalidOperatio
 Inspects flags in priority order: (1) if `context.Version` is true, calls
 `context.WriteLine(Version)` and returns; (2) calls `PrintBanner`; (3) if `context.Help` is
 true, calls `PrintHelp` and returns; (4) if `context.Validate` is true, calls
-`Validation.Run(context)`; (5) otherwise calls `RunToolLogic(context)`.
+`Validation.Run(context)`; (5) if `context.Cameras` is true, calls `CamerasCommand.Run(context)`;
+(6) otherwise calls `RunToolLogic(context)`.
 
 **PrintBanner**: Writes the tool name, version, and copyright line to `context`.
 
 - *Parameters*: `Context context` — output target.
 - *Returns*: `void`.
 
-**PrintHelp**: Writes the usage synopsis (including `agentvision help [topic]`) and options
-table to `context`, and ends with `HelpCommand.Default.Footer`, the pointer to the help command.
+**PrintHelp**: Writes the usage synopsis (`agentvision [options] [command]` and
+`agentvision help [topic]`), the commands table (`cameras`), and the options table to `context`, and
+ends with `HelpCommand.Default.Footer`, the pointer to the help command.
 
 - *Parameters*: `Context context` — output target.
 - *Returns*: `void`.
 
-**RunToolLogic**: Default behavior when no action flag is given. The tool has no webcam commands yet, so it
-writes a one-line product description and a pointer to the usage text and the help topics to `context`.
+**RunToolLogic**: Default behavior when neither an action flag nor a command is given. It writes one line of
+guidance that points to the usage text (`agentvision --help`) and the help topics (`agentvision help`) to
+`context`. It is not an error, so the exit code stays 0.
 
 - *Parameters*: `Context context` — output target.
 - *Returns*: `void`.
@@ -79,6 +82,8 @@ propagate to `Main`.
   `Context.WriteError` for all output.
 - **Validation** — `Program.Run` calls `Validation.Run(context)` when the `--validate` flag is
   set.
+- **CamerasCommand** — `Program.Run` calls `CamerasCommand.Run(context)` when the `cameras` command
+  is given.
 
 ### Callers
 

@@ -10,6 +10,7 @@ tags:
 order: 1
 see-also:
   - command-line
+  - cameras
   - self-validation
 examples:
   - name: install-local
@@ -53,9 +54,15 @@ examples:
     description: Print a help topic, here the list of options.
     content: '{{tool}} help command-line'
     expect: '--validate'
+  - name: cameras
+    kind: command
+    language: shell
+    description: List the cameras of this machine. Exits 0, also when there is no camera.
+    content: '{{tool}} cameras'
 ---
 {{tool}} {{version}} is a .NET tool.
 It reads and writes only the files that options name, apart from a temporary folder that `--validate` uses.
+It looks at the video capture devices of the machine when you run `cameras`.
 
 1. **Install it.** The tool needs the .NET 10 SDK or later. For a
    repository or CI, install it as a local tool. Run the commands
@@ -74,9 +81,12 @@ It reads and writes only the files that options name, apart from a temporary fol
 2. **Check it.** The command that [[#version]] prints shows the version.
    The command from [[#validate]] runs the built-in self-tests and exits 0
    when all pass; see [[self-validation]].
-3. **Learn the options.** [[command-line]] lists every option. With no
-   arguments, the tool prints a banner, a short description of AgentVision,
-   and a pointer to the usage text and the help topics.
+3. **Learn the options.** [[command-line]] lists every option and
+   command. With no arguments, the tool prints a banner and one line
+   that points to the usage text and the help topics.
+4. **List your cameras.** The command that [[#cameras]] prints lists
+   the cameras of the machine and the video formats each one
+   supports. It exits 0 when there is no camera too; see [[cameras]].
 
 Print any help topic with `{{tool}} help <topic>`, as in the command that
 [[#topic]] prints. Add `--search <words>` to find a topic, and `--json` to

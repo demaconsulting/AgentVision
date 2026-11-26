@@ -17,9 +17,9 @@ front-end for the library. The goal of the project is low-latency webcam capture
 [FlashCap][link-flashcap] and [DemaConsulting.CanvasNet][link-canvasnet], with the command-line tool optionally
 running through a background daemon.
 
-**Status**: under active development. The repository currently provides the two package skeletons: the library
-has no camera features yet, and the tool offers the standard command-line options, built-in help, and
-self-validation. The capture features described above are planned and are not available yet.
+**Status**: under active development. The first camera feature is available: both packages can list the cameras of
+a machine and the video formats each one supports (`agentvision cameras`, or `CameraEnumerator` in the library).
+Opening a camera and capturing frames are planned and are not available yet.
 
 The diagram below is a placeholder workflow diagram: replace its TODO boxes (in `docs/images/workflow.svg`,
 then re-render `docs/images/workflow.png`) to show how users prepare inputs, run the tool, get its outputs,
@@ -32,6 +32,9 @@ its outputs, and use them][workflow]
 
 AgentVision provides:
 
+- **Camera Enumeration**: `agentvision cameras` lists the video capture devices of the machine with their stable
+  identifiers, names, and supported formats (resolution, pixel format, and frame rate), using [FlashCap][link-flashcap];
+  a machine without a camera is reported plainly and is not an error
 - **Standardized Command-Line Interface**: Context class handling common arguments
   (`--version`, `--help`, `--silent`, `--validate`, `--results`, `--depth`, `--log`)
 - **Self-Validation**: Built-in validation tests with TRX/JUnit output
@@ -71,6 +74,9 @@ dotnet add package DemaConsulting.AgentVision.Core
 # Default behavior (no arguments) — displays banner, copyright, and a pointer to the help
 agentvision
 
+# List the cameras of this machine and the formats they support
+agentvision cameras
+
 # Display version
 agentvision --version
 
@@ -80,6 +86,7 @@ agentvision --help
 # List the built-in help topics, then read one
 agentvision help
 agentvision help getting-started
+agentvision help cameras
 
 # Run self-validation
 agentvision --validate
@@ -92,10 +99,53 @@ agentvision --validate --result results.xml
 agentvision --validate --depth 2
 
 # Silent mode with logging
-agentvision --silent --log output.log
+agentvision --silent --log output.log cameras
 ```
 
+## Listing Cameras
+
+`agentvision cameras` lists the video capture devices that the machine reports. It only looks at the devices and does
+not start capturing from any of them. It exits with code 0 also when it finds no camera, which is a normal answer on
+servers and build agents.
+
+```text
+Cameras found: 1
+
+Camera 0: Integrated Webcam
+  Id:          DirectShow:\\?\usb#vid_0c45&pid_674f&mi_00#...
+  Backend:     DirectShow
+  Description: Integrated Webcam (DirectShow)
+  Formats (2):
+    1920x1080  JPEG  30 fps
+    640x480    YUYV  30 fps
+```
+
+When no camera is found, the output is `No cameras found.` Windows can report one physical camera through several
+backends (DirectShow, Media Foundation, and Video for Windows), so it may appear more than once, each time with its
+own `Id`. On Linux, cameras are reported through V4L2 and your account needs access to the `/dev/video*` devices,
+normally through the `video` group. Run `agentvision help cameras` for troubleshooting.
+
+The same list is available to any .NET application through the library:
+
+```csharp
+using DemaConsulting.AgentVision.Core.Cameras;
+
+var cameras = new CameraEnumerator().Enumerate();
+foreach (var camera in cameras)
+{
+    Console.WriteLine($"{camera.Id}: {camera.Name} ({camera.Formats.Count} formats)");
+}
+```
+
+An application or a test can supply its own `ICameraSource` to `new CameraEnumerator(source)` instead, so that
+enumeration runs without camera hardware.
+
 ## Command-Line Options
+
+| Command | Description |
+| --- | --- |
+| `cameras` | List the available cameras and the formats they support |
+| `help [topic]` | Display the built-in help topics |
 
 | Option | Description |
 | --- | --- |
@@ -109,8 +159,8 @@ agentvision --silent --log output.log
 
 ## Error Handling
 
-Unrecognized arguments cause the tool to print an error message to standard error and exit
-with a non-zero exit code. For example:
+Unrecognized arguments, and a command that is given twice, cause the tool to print an error message to standard
+error and exit with a non-zero exit code. For example:
 
 ```text
 Error: Unsupported argument '--unknown'
@@ -136,9 +186,10 @@ Running self-validation produces a report containing the following information:
 
 ✓ AgentVisionTool_VersionDisplay - Passed
 ✓ AgentVisionTool_HelpDisplay - Passed
+✓ AgentVisionTool_CamerasList - Passed
 
-Total Tests: 2
-Passed: 2
+Total Tests: 3
+Passed: 3
 Failed: 0
 ```
 
@@ -146,6 +197,8 @@ Each test in the report proves:
 
 - **`AgentVisionTool_VersionDisplay`** - `--version` outputs a valid version string.
 - **`AgentVisionTool_HelpDisplay`** - `--help` outputs usage and options information.
+- **`AgentVisionTool_CamerasList`** - `cameras` exits with code 0 and reports the cameras or that none were
+  found. It passes on a machine without a camera.
 
 Use `--depth <#>` to control the heading level of the validation output (default: `1`).
 This is useful when embedding validation output into a larger markdown document:

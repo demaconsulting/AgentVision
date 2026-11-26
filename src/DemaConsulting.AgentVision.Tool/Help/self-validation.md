@@ -5,9 +5,10 @@ aliases:
   - validate
 tags:
   - reference
-order: 3
+order: 4
 see-also:
   - command-line
+  - cameras
 examples:
   - name: run
     kind: command
@@ -57,5 +58,8 @@ extension is an error after the tests ran ([[#bad-extension]]). The folder
 of the file must exist.
 
 **Evidence.** The tests have stable names, such as
-`AgentVisionTool_VersionDisplay`, so a requirements file can list them as the
-tests that prove the tool works in its environment.
+`AgentVisionTool_VersionDisplay`, `AgentVisionTool_HelpDisplay`, and
+`AgentVisionTool_CamerasList`, so a requirements file can list them as the
+tests that prove the tool works in its environment. The camera test passes on
+a machine without a camera: it proves that the `cameras` command runs and
+reports its result, not that a camera is present.

@@ -5,15 +5,15 @@
 ## Architecture
 
 The AgentVisionTool system is the `agentvision` command-line application built on .NET. It is the thin
-front-end of the AgentVision product: it handles arguments, output, exit codes, help, and self-validation, while
-all camera logic belongs in the *AgentVisionCore* library, which never depends on the tool. The tool has no
-webcam commands yet and does not call the library. It is structured as one
-system containing one top-level unit (`Program`) and three subsystems (`Cli`, `SelfTest`,
-`Utilities`):
+front-end of the AgentVision product: it handles arguments, output, exit codes, help, and self-validation, and
+calls the *AgentVisionCore* library for everything to do with cameras, which never depends on the tool. It is
+structured as one system containing two top-level units (`Program` and `CamerasCommand`) and three subsystems
+(`Cli`, `SelfTest`, `Utilities`):
 
 ```mermaid
 flowchart TD
     Program
+    CamerasCommand
     subgraph Cli
         Context
         HelpCommand
@@ -24,18 +24,25 @@ flowchart TD
     subgraph Utilities
         PathHelpers
     end
+    subgraph AgentVisionCore
+        CameraEnumerator
+    end
     Program --> HelpCommand
     Program --> Context
     Program --> Validation
+    Program --> CamerasCommand
+    CamerasCommand --> CameraEnumerator
+    CamerasCommand --> Context
     Validation --> Program
     Validation --> PathHelpers
 ```
 
 `Program` is the entry point. It first offers the arguments to `HelpCommand`, which answers the
 `help` command from the built-in help cards; otherwise it creates a `Context` from the `Cli`
-subsystem, dispatches to `Validation` when `--validate` is passed, and returns the exit code from
-`Context`. `Validation` calls `Program.Run` recursively to exercise the tool during self-testing,
-and uses `PathHelpers` to construct safe temporary file paths.
+subsystem, dispatches to `Validation` when `--validate` is passed or to `CamerasCommand` when the
+`cameras` command is given, and returns the exit code from `Context`. `CamerasCommand` prints the
+cameras that the library's `CameraEnumerator` lists. `Validation` calls `Program.Run` recursively to
+exercise the tool during self-testing, and uses `PathHelpers` to construct safe temporary file paths.
 
 ## External Interfaces
 
@@ -44,10 +51,13 @@ and uses `PathHelpers` to construct safe temporary file paths.
 - *Type*: CLI.
 - *Role*: Consumer (the host environment invokes the system with command-line arguments).
 - *Contract*: Accepts the `help` command as the first argument (see Help Command below), or the
+  `cameras` command, which may stand among the options, and the
   arguments `-v`/`--version`, `-?`/`-h`/`--help`, `--silent`, `--validate`,
   `--results <file>`, `--result <file>` (legacy alias for `--results`), `--depth <n>`, and
-  `--log <file>`. Returns exit code 0 for success and 1 for failures.
-- *Constraints*: Unknown arguments cause exit code 1 and an error message on stderr. Argument
+  `--log <file>`. Returns exit code 0 for success and 1 for failures. The `cameras` command
+  returns 0 also when no camera is found.
+- *Constraints*: Unknown arguments, and a `cameras` command given twice, cause exit code 1 and an
+  error message on stderr. Argument
   errors are found before `--silent` and `--log` take effect, so they are always printed and never
   logged.
 
@@ -66,8 +76,9 @@ and uses `PathHelpers` to construct safe temporary file paths.
 
 - *Type*: Standard I/O.
 - *Role*: Provider.
-- *Contract*: Writes version, banner, help text, validation summary, or the default message depending
-  on the flags provided. Suppressed when `--silent` is active; the log file still receives all
+- *Contract*: Writes version, banner, help text, the camera list, validation summary, or the default
+  guidance message depending
+  on the flags and command provided. Suppressed when `--silent` is active; the log file still receives all
   output.
 - *Constraints*: Human-readable text; no machine-parseable format contract.
 
@@ -99,6 +110,9 @@ and uses `PathHelpers` to construct safe temporary file paths.
 
 ## Dependencies
 
+- **AgentVisionCore** (the `DemaConsulting.AgentVision.Core` library, produced in this repository): the
+  `CamerasCommand` unit uses its `CameraEnumerator` to list the cameras. The tool package bundles the
+  library, and through it FlashCap (see *FlashCap Integration Design*), which only the library uses.
 - **DemaConsulting.TestResults**: provides `TestResults`, `TestResult`, and `TestOutcome` for
   accumulating self-validation results.
 - **DemaConsulting.TestResults.IO**: provides `TrxSerializer` and `JUnitSerializer` for writing
@@ -127,7 +141,8 @@ N/A - not a safety-classified software item.
      - `--help` flag → `PrintHelp(context)`, which ends with the pointer to the help command,
        then return.
      - `--validate` flag → `Validation.Run(context)`.
-     - No flags → `RunToolLogic(context)`.
+     - `cameras` command → `CamerasCommand.Run(context)`.
+     - Neither → `RunToolLogic(context)`, which writes one line of guidance.
 5. `Program.Main` returns `context.ExitCode` (0 if no errors were reported, 1 otherwise).
 
 ## Design Constraints

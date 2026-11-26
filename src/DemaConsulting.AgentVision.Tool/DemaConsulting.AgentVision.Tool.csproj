@@ -53,6 +53,12 @@
     <PackageReference Include="DemaConsulting.TestResults" Version="1.10.0" />
   </ItemGroup>
 
+  <!-- Project References -->
+  <ItemGroup>
+    <!-- The library owns all camera logic; the tool is a thin front-end for it. -->
+    <ProjectReference Include="..\DemaConsulting.AgentVision.Core\DemaConsulting.AgentVision.Core.csproj" />
+  </ItemGroup>
+
   <!-- Build Tool Dependencies -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Sbom.Targets" Version="4.1.13" PrivateAssets="All" />

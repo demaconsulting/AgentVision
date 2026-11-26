@@ -1,0 +1,66 @@
+---
+# CameraEnumerator Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the CameraEnumerator unit of the Cameras subsystem
+# - The unit turns what a camera source reports into one ordered, independent list, and owns the
+#   policy of that list (order, duplicates, empty answer)
+# - Unit requirements are validated by CameraEnumeratorTests.cs and use a hand-written source,
+#   so no camera hardware is needed
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Cameras Subsystem Requirements
+        sections:
+          - title: CameraEnumerator Unit Requirements
+            requirements:
+              - id: AgentVisionCore-CameraEnumerator-Report
+                title: >-
+                  The CameraEnumerator shall report every camera of its source with its identifier, name,
+                  description, backend, and formats, in a list that is independent of the source's own list.
+                justification: |
+                  A caller must see everything the source knows about a camera and must be able to keep the
+                  list, because cameras can be attached and removed while the list is in use. A private copy
+                  means a later change by the source cannot alter a list the caller already holds.
+                tests:
+                  - CameraEnumerator_Enumerate_SourceWithCameras_ReportsEveryCameraWithDetails
+                  - CameraEnumerator_Enumerate_ResultIsIndependentOfSourceList_KeepsReportedCameras
+                  - CameraEnumerator_Enumerate_CalledTwice_ReturnsEqualResultsFromFreshQueries
+
+              - id: AgentVisionCore-CameraEnumerator-Order
+                title: >-
+                  The CameraEnumerator shall order the cameras by backend and then identifier, and each
+                  camera's formats from the largest frame size and then the highest frame rate, without
+                  duplicates.
+                justification: |
+                  The same cameras must give the same list on every machine, so that a position in the list
+                  or a log of it means the same thing each time. The largest and fastest formats are the ones
+                  a caller most often wants, so they come first, and a format reported twice would only
+                  confuse a choice between formats.
+                tests:
+                  - CameraEnumerator_Enumerate_UnorderedSource_SortsByBackendThenId
+                  - CameraEnumerator_Enumerate_UnorderedFormats_SortsLargestAndFastestFirst
+                  - CameraEnumerator_Enumerate_DuplicateFormats_ReportsOnce
+
+              - id: AgentVisionCore-CameraEnumerator-EmptyIsValid
+                title: >-
+                  The CameraEnumerator shall return an empty list, and not an error, when its source reports no
+                  camera.
+                justification: |
+                  A machine without a camera is an ordinary case. Callers should be able to test for an empty
+                  list instead of handling an exception.
+                tests:
+                  - CameraEnumerator_Enumerate_EmptySource_ReturnsEmptyList
+
+              - id: AgentVisionCore-CameraEnumerator-CustomSource
+                title: >-
+                  The CameraEnumerator shall list the cameras of the source it is given, and shall reject a
+                  missing source with an ArgumentNullException.
+                justification: |
+                  A supplied source lets applications and tests list cameras without camera hardware and
+                  without the default capture library. A missing source is a programming mistake that is
+                  best reported where it was made.
+                tests:
+                  - CameraEnumerator_Constructor_NullSource_ThrowsArgumentNullException
+                  - CameraEnumerator_Enumerate_SourceWithCameras_ReportsEveryCameraWithDetails

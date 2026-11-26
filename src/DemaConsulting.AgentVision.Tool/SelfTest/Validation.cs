@@ -58,8 +58,7 @@ internal static class Validation
         // Run core functionality tests
         RunVersionTest(context, testResults);
         RunHelpTest(context, testResults);
-
-        // Calculate totals
+        RunCamerasTest(context, testResults);
         var totalTests = testResults.Results.Count;
         var passedTests = testResults.Results.Count(t => t.Outcome == DemaConsulting.TestResults.TestOutcome.Passed);
         var failedTests = testResults.Results.Count(t => t.Outcome == DemaConsulting.TestResults.TestOutcome.Failed);
@@ -237,6 +236,78 @@ internal static class Validation
         catch (Exception ex)
         {
             HandleTestException(test, context, "AgentVisionTool_HelpDisplay", ex);
+        }
+
+        FinalizeTestResult(test, startTime, testResults);
+    }
+
+    /// <summary>
+    ///     Runs a test for the cameras listing.
+    /// </summary>
+    /// <param name="context">The context for output.</param>
+    /// <param name="testResults">The test results collection.</param>
+    /// <remarks>
+    ///     The test passes with or without a camera: it proves that the command runs to completion, exits
+    ///     with code 0, and reports either the cameras it found or that it found none. Passing therefore says
+    ///     nothing about the presence of a camera, which a validation machine often lacks.
+    /// </remarks>
+    private static void RunCamerasTest(Context context, DemaConsulting.TestResults.TestResults testResults)
+    {
+        var startTime = DateTime.UtcNow;
+        var test = CreateTestResult("AgentVisionTool_CamerasList");
+
+        try
+        {
+            using var tempDir = new TemporaryDirectory();
+            var logFile = PathHelpers.SafePathCombine(tempDir.DirectoryPath, "cameras-test.log");
+
+            // Build command line arguments
+            var args = new List<string>
+            {
+                "--silent",
+                "--log", logFile,
+                "cameras"
+            };
+
+            // Run the program
+            int exitCode;
+            using (var testContext = Context.Create([.. args]))
+            {
+                Program.Run(testContext);
+                exitCode = testContext.ExitCode;
+            }
+
+            // Check if execution succeeded
+            if (exitCode == 0)
+            {
+                // Read log content
+                var logContent = File.ReadAllText(logFile);
+
+                // Verify that the command reported either the cameras or that there are none
+                if (logContent.Contains("No cameras found.") || logContent.Contains("Cameras found:"))
+                {
+                    test.Outcome = DemaConsulting.TestResults.TestOutcome.Passed;
+                    context.WriteLine($"✓ AgentVisionTool_CamerasList - Passed");
+                }
+                else
+                {
+                    test.Outcome = DemaConsulting.TestResults.TestOutcome.Failed;
+                    test.ErrorMessage = "Camera list not found in log";
+                    context.WriteError($"✗ AgentVisionTool_CamerasList - Failed: Camera list not found in log");
+                }
+            }
+            else
+            {
+                test.Outcome = DemaConsulting.TestResults.TestOutcome.Failed;
+                test.ErrorMessage = $"Program exited with code {exitCode}";
+                context.WriteError($"✗ AgentVisionTool_CamerasList - Failed: Exit code {exitCode}");
+            }
+        }
+        // Generic catch is justified here as this is a test framework - any exception should be
+        // recorded as a test failure to ensure robust test execution and reporting.
+        catch (Exception ex)
+        {
+            HandleTestException(test, context, "AgentVisionTool_CamerasList", ex);
         }
 
         FinalizeTestResult(test, startTime, testResults);

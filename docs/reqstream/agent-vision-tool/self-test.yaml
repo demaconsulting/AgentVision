@@ -23,6 +23,7 @@ sections:
               without requiring a separate test harness.
             children:
               - AgentVisionTool-Validation-Run
+              - AgentVisionTool-Validation-CamerasList
             tests:
               - SelfTestSubsystem_ValidationWorkflow_NoResultFiles_CompletesSuccessfully
 

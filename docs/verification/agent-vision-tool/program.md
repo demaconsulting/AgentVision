@@ -17,8 +17,10 @@ N/A - standard test environment.
 - Exit code 0 is returned for all valid flag combinations.
 - Exit code 1 is returned when invalid arguments are supplied to `Program.Main`.
 - `Program.Version` returns a non-empty, non-null string.
-- `Program.Main` answers the `help` command before the options are parsed, and the usage
-  information ends with the pointer to the help command.
+- The `help` command is answered before the options are parsed, and the usage information ends
+  with the pointer to the help command.
+- The `cameras` command is dispatched to the cameras command, and a run without a command prints
+  the guidance.
 
 ### Test Scenarios
 
@@ -27,10 +29,10 @@ created from `["--version"]`; the output contains the version string, "Copyright
 appear, the banner prefix does not appear, and exit code is 0, confirming version-only output
 with no banner. This scenario is tested by `Program_Run_WithVersionFlag_DisplaysVersionOnly`.
 
-**Program_Run_WithHelpFlag_DisplaysUsageInformation**: `Program.Run` is called with a context
-from `["--help"]`; the output contains "Usage:", "Options:", "--version", "--help", and the
-`help [topic]` usage line, ends with the pointer to the help command, and exit code is 0. This
-scenario is tested by `Program_Run_WithHelpFlag_DisplaysUsageInformation`.
+**Program_Run_WithHelpFlag_DisplaysUsageInformation**: `Program.Run` is called with a context from `["--help"]`; the
+output contains "Usage:", "Commands:", the `cameras` command, "Options:", "--version", "--help", and the `help [topic]`
+usage line, ends with the pointer to the help command, and exit code is 0. This scenario is tested by
+`Program_Run_WithHelpFlag_DisplaysUsageInformation`.
 
 **Program_Run_WithValidateFlag_RunsValidation**: `Program.Run` is called with a context from
 `["--validate"]`; the output contains "Total Tests:" and exit code is 0, confirming the
@@ -38,8 +40,19 @@ self-validation suite is invoked and completes successfully. This scenario is te
 `Program_Run_WithValidateFlag_RunsValidation`.
 
 **Program_Run_NoArguments_DisplaysDefaultBehavior**: `Program.Run` is called with an empty
-argument array; the output contains the tool name and copyright notice and exit code is 0.
-This scenario is tested by `Program_Run_NoArguments_DisplaysDefaultBehavior`.
+argument array; the output contains the tool name, the copyright notice, and the guidance that no
+command was given, and exit code is 0. This scenario is tested by
+`Program_Run_NoArguments_DisplaysDefaultBehavior`.
+
+**Program_Run_CamerasCommand_ListsOrReportsNone**: `Program.Run` is called with a context from
+`["cameras"]`, using the real camera source; the output contains the banner and either
+`No cameras found.` or `Cameras found:` depending on the machine, and exit code is 0. This
+scenario is tested by `Program_Run_CamerasCommand_ListsOrReportsNone`.
+
+**Program_Run_NoCommand_DisplaysGuidance**: `Program.Run` is called with an empty argument array;
+the output names the usage text (`agentvision --help`) and the help topics (`agentvision help`),
+contains no camera listing, and exit code is 0. This scenario is tested by
+`Program_Run_NoCommand_DisplaysGuidance`.
 
 **Program_Version_ReturnsNonEmptyString**: The `Program.Version` static property is read; the
 returned string is non-empty and non-null, confirming the version is resolvable from the

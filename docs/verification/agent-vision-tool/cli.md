@@ -92,3 +92,9 @@ correctly parsed and propagated through `Context`. This scenario is tested by
 **CliSubsystem_HelpCommand_TopicRequested_PrintsTopic**: Arguments `["help", "command-line"]` are
 offered to `HelpCommand.TryRun`, which answers with the command-line topic and exit code 0. This
 scenario is tested by `CliSubsystem_HelpCommand_TopicRequested_PrintsTopic`.
+
+**CliSubsystem_CamerasFlow_ContextAndProgram_ListsCameras**: Arguments `["cameras"]` are passed
+through `Context.Create` and `Program.Run` with the real camera source; the context records the
+command, standard output contains either `No cameras found.` or `Cameras found:` depending on
+the machine, and exit code is 0. This scenario is tested by
+`CliSubsystem_CamerasFlow_ContextAndProgram_ListsCameras`.

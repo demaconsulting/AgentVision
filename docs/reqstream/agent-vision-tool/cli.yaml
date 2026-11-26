@@ -117,12 +117,15 @@ sections:
               - CliSubsystem_ErrorOutput_ContextAndProgram_WritesErrorToStderr
 
           - id: AgentVisionTool-Cli-InvalidArgs
-            title: The Cli subsystem shall reject unknown or malformed command-line arguments with a descriptive error.
+            title: >-
+              The Cli subsystem shall reject unknown or malformed command-line arguments, and a command given
+              more than once, with a descriptive error.
             justification: |
               Providing clear feedback for invalid arguments helps users quickly correct
               mistakes and prevents silent misconfiguration.
             children:
               - AgentVisionTool-Context-InvalidArgs
+              - AgentVisionTool-Context-CommandValidation
             tests:
               - CliSubsystem_InvalidArgs_ContextAndProgram_RejectsUnknownArgumentsAndExitsNonZero
 
@@ -143,6 +146,16 @@ sections:
               prevents breakage when upgrading to newer tool versions.
             tests:
               - CliSubsystem_ResultAliasFlow_ContextAndProgram_WritesResultsFile
+
+          - id: AgentVisionTool-Cli-Cameras
+            title: The Cli subsystem shall support the `cameras` command to signal that the cameras are to be listed.
+            justification: |
+              Users and AI agents ask which cameras a machine offers with a command, not an option. The
+              Cli subsystem parses it so that the rest of the tool reads one flag.
+            children:
+              - AgentVisionTool-Context-Cameras
+            tests:
+              - CliSubsystem_CamerasFlow_ContextAndProgram_ListsCameras
 
           - id: AgentVisionTool-Cli-HelpTopics
             title: The Cli subsystem shall answer the `help` command from built-in help cards.

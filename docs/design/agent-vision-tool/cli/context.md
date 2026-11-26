@@ -24,6 +24,8 @@ to `false` within the same invocation.
 
 **Validate**: `bool` — `true` when `--validate` was present in the argument list.
 
+**Cameras**: `bool` — `true` when the `cameras` command was present in the argument list.
+
 **ResultsFile**: `string?` — Path supplied after `--results` or `--result`, or `null` if
 neither flag was present.
 
@@ -42,7 +44,9 @@ supplied via `--depth`.
 - *Postconditions*: All flag properties reflect the parsed argument state; the log file is open
   if `--log` was supplied.
 
-Delegates to the private `ArgumentParser` helper to parse flags, then opens the log file by
+Delegates to the private `ArgumentParser` helper to parse flags and the `cameras` command (a
+positional word, recognized by an ordinal comparison, that may stand among the options and may
+be given only once), then opens the log file by
 calling `OpenLogFile` if `--log` was present. Throws `ArgumentException` for unknown or
 malformed arguments; throws `InvalidOperationException` if the log file cannot be opened.
 
@@ -72,7 +76,8 @@ malformed arguments; throws `InvalidOperationException` if the log file cannot b
 #### Error Handling
 
 `Create` throws `ArgumentException` ("Unsupported argument '{arg}'") for any unrecognized flag
-or missing required value. It throws `InvalidOperationException`
+or command, or missing required value, and ("The 'cameras' command can be given only once")
+when the `cameras` command is repeated. It throws `InvalidOperationException`
 ("Failed to open log file '{path}': {detail}") when the `--log` file cannot be opened. Both
 exceptions propagate to `Program.Main`.
 

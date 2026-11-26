@@ -65,6 +65,22 @@ created and contains the test message. This scenario is tested by
 `["--unknown"]`; an `ArgumentException` containing "Unsupported argument" is thrown. This
 scenario is tested by `Context_Create_UnknownArgument_ThrowsArgumentException`.
 
+**Context_Create_CamerasCommand_SetsCamerasTrue**: `Context.Create` is called with `["cameras"]`;
+the `Cameras` property is true, no action flag is set, and the exit code is 0. This scenario is
+tested by `Context_Create_CamerasCommand_SetsCamerasTrue`.
+
+**Context_Create_CamerasCommandAmongOptions_SetsCamerasAndOptions**: `Context.Create` is called
+with `["--silent", "cameras", "--depth", "2"]`; the command and both options are recorded. This
+scenario is tested by `Context_Create_CamerasCommandAmongOptions_SetsCamerasAndOptions`.
+
+**Context_Create_RepeatedCamerasCommand_ThrowsArgumentException**: `Context.Create` is called with
+`["cameras", "cameras"]`; an `ArgumentException` that says the command can be given only once is
+thrown. This scenario is tested by `Context_Create_RepeatedCamerasCommand_ThrowsArgumentException`.
+
+**Context_Create_UnknownCommand_ThrowsArgumentException**: `Context.Create` is called with
+`["list"]`; an `ArgumentException` for the unsupported argument `list` is thrown. This scenario is
+tested by `Context_Create_UnknownCommand_ThrowsArgumentException`.
+
 **Context_Create_LogFlag_WithoutValue_ThrowsArgumentException**: `Context.Create` is called
 with `["--log"]` (value missing); an `ArgumentException` is thrown. This scenario is tested by
 `Context_Create_LogFlag_WithoutValue_ThrowsArgumentException`.

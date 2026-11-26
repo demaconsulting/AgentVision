@@ -414,6 +414,14 @@ jobs:
           agentvision --help || { echo "✗ Help command failed"; exit 1; }
           echo "✓ Help command succeeded"
 
+      # A CI runner has no camera, so the command must report that none was found and still succeed.
+      - name: Test cameras listing
+        shell: bash
+        run: |
+          echo "Testing agentvision cameras..."
+          agentvision cameras || { echo "✗ Cameras command failed"; exit 1; }
+          echo "✓ Cameras command succeeded"
+
       - name: Run self-validation
         shell: bash
         run: |

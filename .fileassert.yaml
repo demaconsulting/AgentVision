@@ -160,6 +160,12 @@ tests:
         xml:
           - query: "//*[local-name()='svg']"
             count: 1
+      - pattern: "docs/design/generated/CamerasView.svg"
+        count: 1
+        min-size: 100
+        xml:
+          - query: "//*[local-name()='svg']"
+            count: 1
       - pattern: "docs/design/generated/AgentVisionToolView.svg"
         count: 1
         min-size: 100
@@ -413,6 +419,8 @@ tests:
                 - contains: '<license type="expression">MIT</license>'
                 - contains: "<readme>README.md</readme>"
                 - contains: "<icon>Icon.png</icon>"
+                # The runtime dependency flows to consumers as a package dependency.
+                - contains: '<dependency id="FlashCap"'
             - pattern: "README.md"
               min: 1
               max: 1

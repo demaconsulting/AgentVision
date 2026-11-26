@@ -1,0 +1,50 @@
+---
+# FlashCap OTS Software Requirements
+#
+# Requirements for FlashCap, the .NET library that AgentVisionCore uses at run time to enumerate the
+# video capture devices of the host (DirectShow, Media Foundation, and Video for Windows on Windows;
+# V4L2 on Linux). It ships as a package dependency of the library.
+#
+# EVIDENCE: there is no dedicated OTS test project. The evidence is the Core test suite, which calls
+# the real FlashCap (the tests named RealFlashCap) and feeds FlashCap's own value types through the
+# FlashCapCameraSource translation. These tests assert invariants, never camera counts, so they pass
+# with and without a camera.
+#
+# Each requirement is a child of the requirement of the unit that uses FlashCap
+# (AgentVisionCore-FlashCapCameraSource-*), not of a root requirement.
+
+sections:
+  - title: OTS Software Requirements
+    sections:
+      - title: FlashCap Requirements
+        requirements:
+          - id: AgentVision-OTS-FlashCap-EnumerateDevices
+            title: >-
+              FlashCap shall enumerate the video capture devices of the host (DirectShow, Media Foundation,
+              and Video for Windows on Windows; V4L2 on Linux), and shall return an empty set, without
+              failing, when none is present.
+            justification: |
+              AgentVision lists the cameras of the host through FlashCap. The list must work on every
+              supported platform, and a machine without a camera, such as a build agent, must get an empty
+              answer instead of an exception.
+            tags: [ots]
+            tests:
+              - FlashCapCameraSource_GetCameras_RealFlashCap_EnumeratesWithoutCamerasPresent
+              - FlashCapCameraSource_GetCameras_RealFlashCap_BackendMatchesPlatform
+
+          - id: AgentVision-OTS-FlashCap-DescribeDevices
+            title: >-
+              FlashCap shall describe each device with its identity, name, description, and backend type,
+              and each video characteristic with its pixel format, size, and frame rate, and shall mark the
+              formats that it cannot capture as unknown.
+            justification: |
+              The library reports cameras and their formats to its callers from FlashCap's descriptions. It
+              needs a stable identity to name a camera, the size, pixel format, and frame rate to describe a
+              format, and the unknown marker to tell the formats that can be captured from those that
+              cannot.
+            tags: [ots]
+            tests:
+              - FlashCapCameraSource_GetCameras_RealFlashCap_EnumeratesWithoutCamerasPresent
+              - FlashCapCameraSource_GetCameras_Characteristics_MapSizePixelFormatAndFrameRate
+              - FlashCapCameraSource_GetCameras_UnknownPixelFormat_IsExcluded
+              - FlashCapCameraSource_GetCameras_FractionalFrameRate_IsReportedAsDouble

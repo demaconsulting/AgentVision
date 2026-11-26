@@ -1,0 +1,44 @@
+---
+# Software Unit Requirements for the CamerasCommand Class
+#
+# The CamerasCommand unit implements the `cameras` command: it prints the cameras that the
+# AgentVision.Core library lists. It is a thin front-end; discovery and ordering belong to the library.
+
+sections:
+  - title: AgentVisionTool Requirements
+    sections:
+      - title: CamerasCommand Unit Requirements
+        requirements:
+          - id: AgentVisionTool-CamerasCommand-List
+            title: >-
+              The CamerasCommand class shall print each camera with its index, name, identifier, backend,
+              description, and its supported formats (resolution, pixel format, and frame rate).
+            justification: |
+              A person or an AI agent chooses a camera from this listing, so it must show everything needed
+              to tell the cameras apart and to see what each can deliver. The index is the position in the
+              list, the identifier is the stable name for the camera, and the formats say what it supports.
+            tests:
+              - CamerasCommand_Run_WithCameras_ListsCamerasAndFormats
+              - CamerasCommand_Run_FractionalFrameRate_FormatsWithoutTrailingZeros
+
+          - id: AgentVisionTool-CamerasCommand-NoCameras
+            title: >-
+              The CamerasCommand class shall print a message that no camera was found, and shall not report an
+              error, when the library lists no camera.
+            justification: |
+              Machines without a camera, such as build agents and servers, are ordinary. A plain message
+              answers the question, and a successful exit code lets a script continue.
+            tests:
+              - CamerasCommand_Run_NoCameras_WritesNoCamerasFoundAndExitCodeZero
+
+          - id: AgentVisionTool-CamerasCommand-Output
+            title: >-
+              The CamerasCommand class shall write the listing through the context, so that the silent and
+              log options apply to it.
+            justification: |
+              Scripts and AI agents use the same output options for every command, and the listing must
+              follow them: hidden from the console under the silent option, and kept in the log file when
+              one is given.
+            tests:
+              - CamerasCommand_Run_SilentContext_WritesNothingToConsole
+              - CamerasCommand_Run_LogFile_ReceivesOutput

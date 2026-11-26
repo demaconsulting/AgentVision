@@ -1,5 +1,6 @@
 package AgentVisionTool {
     public import AgentVisionTool_Program::*;
+    public import AgentVisionTool_CamerasCommand::*;
     public import AgentVisionTool_CliSubsystem::*;
     public import AgentVisionTool_SelfTestSubsystem::*;
     public import AgentVisionTool_UtilitiesSubsystem::*;
@@ -25,8 +26,12 @@ package AgentVisionTool {
         }
 
         part program : Program;
+        part camerasCommand : CamerasCommand;
         part cli : CliSubsystem;
         part selfTest : SelfTestSubsystem;
         part utilities : UtilitiesSubsystem;
     }
+
+    // The tool is a thin front-end for the AgentVisionCore library, which never depends on the tool.
+    dependency AgentVisionToolUsesAgentVisionCore from AgentVisionToolSystem to AgentVisionCore::AgentVisionCoreSystem;
 }

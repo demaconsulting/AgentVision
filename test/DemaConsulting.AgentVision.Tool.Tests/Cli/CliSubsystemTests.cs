@@ -465,4 +465,37 @@ public class CliSubsystemTests
         Assert.Equal(0, exitCode);
         Assert.Contains("# Command-line options", output.ToString());
     }
+
+    /// <summary>
+    ///     Test that Context and Program work together to handle the cameras command workflow.
+    /// </summary>
+    [Fact]
+    public void CliSubsystem_CamerasFlow_ContextAndProgram_ListsCameras()
+    {
+        // Arrange: the cameras command; capture console output
+        var args = new[] { "cameras" };
+        var originalOut = Console.Out;
+        using var capturedOut = new StringWriter();
+
+        try
+        {
+            Console.SetOut(capturedOut);
+
+            // Act: create context and run program logic; the real source is used, so the list depends on the machine
+            using var context = Context.Create(args);
+            Program.Run(context);
+
+            // Assert: the command is parsed, one of the two camera results is displayed, and the exit code is success
+            Assert.True(context.Cameras, "Context should parse the cameras command");
+            Assert.Equal(0, context.ExitCode);
+            var output = capturedOut.ToString();
+            Assert.True(
+                output.Contains("No cameras found.") || output.Contains("Cameras found:"),
+                $"Neither camera result was reported: {output}");
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
+    }
 }

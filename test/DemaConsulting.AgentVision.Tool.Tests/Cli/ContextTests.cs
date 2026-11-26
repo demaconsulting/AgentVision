@@ -42,6 +42,7 @@ public class ContextTests
         Assert.False(context.Help);
         Assert.False(context.Silent);
         Assert.False(context.Validate);
+        Assert.False(context.Cameras);
         Assert.Null(context.ResultsFile);
         Assert.Equal(1, context.HeadingDepth);
         Assert.Equal(0, context.ExitCode);
@@ -205,6 +206,60 @@ public class ContextTests
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => Context.Create(["--unknown"]));
         Assert.Contains("Unsupported argument", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test creating a context with the cameras command sets the cameras flag.
+    /// </summary>
+    [Fact]
+    public void Context_Create_CamerasCommand_SetsCamerasTrue()
+    {
+        // Act: create a context from the cameras command
+        using var context = Context.Create(["cameras"]);
+
+        // Assert: the command is recorded, no action flag is set, and there is no error
+        Assert.True(context.Cameras);
+        Assert.False(context.Version);
+        Assert.False(context.Help);
+        Assert.False(context.Validate);
+        Assert.Equal(0, context.ExitCode);
+    }
+
+    /// <summary>
+    ///     Test that the cameras command may stand among the options.
+    /// </summary>
+    [Fact]
+    public void Context_Create_CamerasCommandAmongOptions_SetsCamerasAndOptions()
+    {
+        // Act: create a context with options before and after the command
+        using var context = Context.Create(["--silent", "cameras", "--depth", "2"]);
+
+        // Assert: the command and both options are recorded
+        Assert.True(context.Cameras);
+        Assert.True(context.Silent);
+        Assert.Equal(2, context.HeadingDepth);
+    }
+
+    /// <summary>
+    ///     Test creating a context with the cameras command twice throws exception.
+    /// </summary>
+    [Fact]
+    public void Context_Create_RepeatedCamerasCommand_ThrowsArgumentException()
+    {
+        // Act & Assert: the command can be given only once
+        var exception = Assert.Throws<ArgumentException>(() => Context.Create(["cameras", "cameras"]));
+        Assert.Contains("only once", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test creating a context with an unknown command throws exception.
+    /// </summary>
+    [Fact]
+    public void Context_Create_UnknownCommand_ThrowsArgumentException()
+    {
+        // Act & Assert: a word that is not a known command is an unsupported argument
+        var exception = Assert.Throws<ArgumentException>(() => Context.Create(["list"]));
+        Assert.Contains("Unsupported argument 'list'", exception.Message);
     }
 
     /// <summary>

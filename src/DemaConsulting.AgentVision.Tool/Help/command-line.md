@@ -8,6 +8,7 @@ tags:
   - reference
 order: 2
 see-also:
+  - cameras
   - self-validation
 examples:
   - name: usage
@@ -16,6 +17,11 @@ examples:
     description: Print the short usage text. It ends with a pointer to this help.
     content: '{{tool}} --help'
     expect: "Run '{{tool}} help' for topics and examples."
+  - name: cameras
+    kind: command
+    language: shell
+    description: List the cameras. Exits 0, also when there is no camera.
+    content: '{{tool}} cameras'
   - name: silent-log
     kind: command
     language: shell
@@ -30,7 +36,11 @@ examples:
     expect: "Error: Unsupported argument '--unknown'"
 ---
 Options start with `--` (or a single letter after `-`) and may be given in
-any order.
+any order. The command `cameras` may stand among them.
+
+| Command | Meaning |
+| --- | --- |
+| `cameras` | List the cameras and their formats; see [[cameras]]. |
 
 | Option | Meaning |
 | --- | --- |
@@ -44,12 +54,14 @@ any order.
 
 **Order.** `--version`, when all arguments are valid, prints only the
 version and skips everything else. Without it, the tool prints a banner,
-then handles the first of `--help`, `--validate`, or its default behavior.
-The command that [[#silent-log]] prints writes the version to the log
-file only.
+then handles the first of `--help`, `--validate`, the `cameras`
+command, or its default behavior, which is one line that points to the
+usage text and the help topics. The command that [[#silent-log]]
+prints writes the version to the log file only.
 
-**Errors.** An unknown argument, or an option without its value, prints
-`Error: ...` and exits 1 ([[#unknown-option]]). These errors are found
+**Errors.** An unknown argument, an option without its value, or the
+`cameras` command given twice prints `Error: ...` and exits 1
+([[#unknown-option]]). These errors are found
 before `--silent` and `--log` take effect, so they are always printed and
 never logged.
 

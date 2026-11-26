@@ -25,7 +25,7 @@ tool's requirements; it verifies that the tool behaves correctly in the deployme
   file has been written or an error has been recorded for an unsupported extension.
 
 Calls `PrintValidationHeader`, constructs a `TestResults` object named
-`"AgentVision Tool Self-Validation"`, calls `RunVersionTest` and `RunHelpTest`, prints
+`"AgentVision Tool Self-Validation"`, calls `RunVersionTest`, `RunHelpTest`, and `RunCamerasTest`, prints
 totals (using `WriteError` if any tests failed), and calls `WriteResultsFile` if
 `context.ResultsFile` is set.
 
@@ -48,6 +48,19 @@ Creates a `TemporaryDirectory`, constructs a log path with `PathHelpers.SafePath
 invokes `Program.Run` with `["--silent", "--log", logFile, "--help"]`, reads the log, and
 asserts the content contains both `"Usage:"` and `"Options:"`. Records pass or fail. Any
 exception is caught by a broad `catch (Exception)` and recorded via `HandleTestException`.
+
+**RunCamerasTest**: Verifies that the `cameras` command completes and reports its result, with or
+without a camera.
+
+- *Parameters*: `Context context`, `DemaConsulting.TestResults.TestResults testResults`.
+- *Returns*: `void`.
+
+Creates a `TemporaryDirectory`, constructs a log path with `PathHelpers.SafePathCombine`,
+invokes `Program.Run` with `["--silent", "--log", logFile, "cameras"]`, reads the log, and
+asserts that the exit code is 0 and that the content contains either `"No cameras found."` or
+`"Cameras found:"`. Records pass or fail under the name `AgentVisionTool_CamerasList`. Passing
+therefore says nothing about whether a camera is present, which a validation machine often lacks.
+Any exception is caught by a broad `catch (Exception)` and recorded via `HandleTestException`.
 
 **WriteResultsFile**: Serializes `testResults` to `context.ResultsFile`.
 

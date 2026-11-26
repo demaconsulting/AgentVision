@@ -20,6 +20,8 @@
 
 using System.Reflection;
 using System.Runtime.Versioning;
+using DemaConsulting.AgentVision.Core.Cameras;
+using DemaConsulting.AgentVision.Core.Tests.TestSupport;
 
 namespace DemaConsulting.AgentVision.Core.Tests;
 
@@ -109,5 +111,154 @@ public class AgentVisionCoreTests
 
         // Assert: the library never depends on the tool, keeping the tool a thin front-end
         Assert.DoesNotContain("DemaConsulting.AgentVision.Tool", references);
+    }
+
+    /// <summary>
+    ///     Test that an application can enumerate the cameras of its own source through the public API.
+    /// </summary>
+    [Fact]
+    public void AgentVisionCore_Cameras_CustomSource_Enumerated_ReportsCameras()
+    {
+        // Arrange: a custom source with one camera, and an enumerator that uses it
+        var source = new FakeCameraSource(
+        [
+            new CameraInfo(
+                "Custom:1",
+                "Custom Camera",
+                "Custom Camera (custom)",
+                "Custom",
+                [new CameraFormat(1280, 720, "NV12", 30), new CameraFormat(640, 480, "YUYV", 15)])
+        ]);
+        var enumerator = new CameraEnumerator(source);
+
+        // Act: enumerate the cameras
+        var cameras = enumerator.Enumerate();
+
+        // Assert: the identifier, name, and every format with its size, pixel format, and frame rate are reported
+        var camera = Assert.Single(cameras);
+        Assert.Equal("Custom:1", camera.Id);
+        Assert.Equal("Custom Camera", camera.Name);
+        Assert.Equal(
+            [new CameraFormat(1280, 720, "NV12", 30), new CameraFormat(640, 480, "YUYV", 15)],
+            camera.Formats);
+    }
+
+    /// <summary>
+    ///     Test that a source without cameras gives an empty list and not an error.
+    /// </summary>
+    [Fact]
+    public void AgentVisionCore_Cameras_NoneAttached_ReturnsEmptyList()
+    {
+        // Arrange: an enumerator whose source has no camera
+        var enumerator = new CameraEnumerator(new FakeCameraSource([]));
+
+        // Act: enumerate the cameras
+        var cameras = enumerator.Enumerate();
+
+        // Assert: the list is empty, which is a valid answer and not an error
+        Assert.NotNull(cameras);
+        Assert.Empty(cameras);
+    }
+
+    /// <summary>
+    ///     Test that the default enumerator, which asks the real FlashCap of this machine, completes with
+    ///     or without a camera.
+    /// </summary>
+    [Fact]
+    public void AgentVisionCore_Cameras_DefaultSource_Enumerated_DoesNotThrow()
+    {
+        // Arrange: the default enumerator; the result depends on the machine's cameras
+        var enumerator = new CameraEnumerator();
+
+        // Act: enumerate the cameras
+        var exception = Record.Exception(() => enumerator.Enumerate());
+
+        // Assert: enumeration completed; a machine without a camera gives an empty list, not a failure
+        Assert.Null(exception);
+    }
+
+    /// <summary>
+    ///     Test that no FlashCap type appears in the public API of the library, so a FlashCap upgrade
+    ///     cannot break consumers.
+    /// </summary>
+    [Fact]
+    public void AgentVisionCore_Assembly_Loaded_PublicApiExposesNoFlashCapTypes()
+    {
+        // Arrange: load the library and collect every type used in its public signatures
+        var assembly = LoadLibrary();
+        var used = new List<Type>();
+        foreach (var type in assembly.GetExportedTypes())
+        {
+            // An interface has no base type
+            if (type.BaseType != null)
+            {
+                used.Add(type.BaseType);
+            }
+
+            used.AddRange(type.GetInterfaces());
+            foreach (var member in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+            {
+                // Non-public members are not part of the API, so only visible signatures count
+                switch (member)
+                {
+                    case PropertyInfo property when property.GetMethod?.IsPublic == true:
+                        used.Add(property.PropertyType);
+                        break;
+                    case MethodBase { IsPublic: true } method:
+                        used.AddRange(method.GetParameters().Select(parameter => parameter.ParameterType));
+                        if (method is MethodInfo info)
+                        {
+                            used.Add(info.ReturnType);
+                        }
+
+                        break;
+                    case FieldInfo { IsPublic: true } field:
+                        used.Add(field.FieldType);
+                        break;
+                }
+            }
+        }
+
+        // Act: find any used type, including the type arguments of generic types, that belongs to FlashCap
+        var leaked = used
+            .SelectMany(ExpandType)
+            .Where(type => type.Namespace?.StartsWith("FlashCap", StringComparison.Ordinal) == true)
+            .Select(type => type.FullName)
+            .ToList();
+
+        // Assert: none are exposed
+        Assert.Empty(leaked);
+    }
+
+    /// <summary>
+    ///     Expands a type into itself and every type it is built from: element types of arrays and
+    ///     references, and the type arguments of generic types.
+    /// </summary>
+    /// <param name="type">The type to expand.</param>
+    /// <returns>The type and the types it is built from.</returns>
+    private static IEnumerable<Type> ExpandType(Type type)
+    {
+        yield return type;
+
+        // Arrays, references, and pointers are built from their element type
+        if (type.HasElementType)
+        {
+            foreach (var inner in ExpandType(type.GetElementType()!))
+            {
+                yield return inner;
+            }
+        }
+
+        // Generic types are built from their type arguments
+        if (type.IsGenericType)
+        {
+            foreach (var argument in type.GetGenericArguments())
+            {
+                foreach (var inner in ExpandType(argument))
+                {
+                    yield return inner;
+                }
+            }
+        }
     }
 }

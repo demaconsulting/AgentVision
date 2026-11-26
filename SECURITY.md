@@ -92,9 +92,9 @@ AgentVision reads and writes files on the local file system. Users should:
 
 ### Webcam Access
 
-AgentVision exists to give AI agents access to webcams, so its camera features read video frames from capture
-devices and save them as image files. This release does not access any camera yet. Once camera features are
-available, users should:
+AgentVision exists to give AI agents access to webcams, so its camera features read video frames from capture devices
+and save them as image files. This release only lists the cameras that are present and the formats they support; it
+never starts capturing from a camera or reads a frame. Once the capture features are available, users should:
 
 - Treat saved frames as sensitive data, because they can show people and private spaces
 - Grant the AI agents and processes that use AgentVision access only to the cameras and folders they need

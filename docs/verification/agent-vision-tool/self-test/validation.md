@@ -37,6 +37,12 @@ context (output captured separately); the summary contains "Total Tests:", "Pass
 context; `context.ExitCode` is 0 after the run, confirming all sub-tests pass in the standard
 environment. This scenario is tested by `Validation_Run_WithSilentContext_ExitCodeIsZero`.
 
+**Validation_Run_WithSilentContext_IncludesCamerasTest**: `Validation.Run` is called with a silent
+context that has a log file; the exit code is 0 and the log reports
+`AgentVisionTool_CamerasList - Passed`. The scenario passes on machines with and without a camera,
+because the cameras test checks that the command completes and reports its result. This scenario
+is tested by `Validation_Run_WithSilentContext_IncludesCamerasTest`.
+
 **Validation_Run_WithTrxResultsFile_WritesTrxFile**: `Validation.Run` is called with a context
 whose `ResultsFile` points to a temporary `.trx` path; a file is created at the specified path
 and it contains a `<TestRun` XML element. This scenario is tested by

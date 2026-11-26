@@ -55,6 +55,25 @@ sections:
             tests:
               - Program_Run_WithHelpFlag_DisplaysUsageInformation
 
+          - id: AgentVisionTool-Program-Cameras
+            title: The Program class shall run the cameras command when the `cameras` command is given.
+            justification: |
+              The `cameras` command is how users and AI agents ask which cameras the machine offers. The
+              Program class is the dispatcher that routes the parsed command to the code that answers it.
+            tests:
+              - Program_Run_CamerasCommand_ListsOrReportsNone
+
+          - id: AgentVisionTool-Program-NoCommand
+            title: >-
+              The Program class shall display guidance to the usage text and the help topics, and succeed,
+              when neither an action flag nor a command is given.
+            justification: |
+              A run that asks for nothing is not an error, but it must not end silently either. One line of
+              guidance tells a new user or an AI agent how to find out what the tool can do.
+            tests:
+              - Program_Run_NoCommand_DisplaysGuidance
+              - Program_Run_NoArguments_DisplaysDefaultBehavior
+
           - id: AgentVisionTool-Program-ExitCode
             title: The Program class shall return a non-zero exit code on failure.
             justification: |

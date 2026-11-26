@@ -20,6 +20,10 @@ package AgentVisionDesignViews {
         expose AgentVisionCoreSystem;
     }
 
+    view CamerasView {
+        expose CamerasSubsystem;
+    }
+
     view AgentVisionToolView {
         expose AgentVisionToolSystem;
     }

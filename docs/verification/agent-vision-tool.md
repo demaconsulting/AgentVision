@@ -32,6 +32,7 @@ combinations. Temporary files and directories are created and cleaned up within 
 - Silent mode (`--silent`) produces empty combined output.
 - The `help` command lists the topics with exit code 0, and exits with code 2 for an unknown
   topic.
+- The `cameras` command exits with code 0 and reports the cameras or that none were found.
 - Every command example in the help cards gives the exit code and output that its card states.
 
 ## Test Scenarios
@@ -81,8 +82,16 @@ the tool exits with code 0. This scenario is tested by
 `AgentVisionTool_ValidateWithDepth_DepthThree_OutputsCorrectHeadingLevel`.
 
 **AgentVisionTool_NoArguments_Invoked_DisplaysBanner**: The tool is invoked with no
-arguments; the combined output contains the tool name and copyright notice and the exit code is
-0. This scenario is tested by `AgentVisionTool_NoArguments_Invoked_DisplaysBanner`.
+arguments; the combined output contains the tool name, the copyright notice, and the guidance
+that no command was given, and the exit code is 0. This scenario is tested by
+`AgentVisionTool_NoArguments_Invoked_DisplaysBanner`.
+
+**AgentVisionTool_Cameras_CamerasCommand_ExitsSuccessfully**: The `cameras` command is passed
+as the sole argument; the combined output contains either `No cameras found.` or
+`Cameras found:`, and the tool exits with code 0. The scenario passes on a machine with cameras
+and on a machine without any, because the result depends on the machine and finding no camera
+is not an error. This scenario is tested by
+`AgentVisionTool_Cameras_CamerasCommand_ExitsSuccessfully`.
 
 **AgentVisionTool_ResultAlias_LegacyFlag_WritesResultsFile**: The `--validate` flag is
 combined with `--result <path>.trx` (the legacy alias); a TRX file is created at the specified

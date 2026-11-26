@@ -23,6 +23,17 @@ sections:
                   - Validation_Run_WithSilentContext_PrintsSummary
                   - Validation_Run_WithSilentContext_ExitCodeIsZero
 
+              - id: AgentVisionTool-Validation-CamerasList
+                title: >-
+                  The Validation class shall include a self-validation test that runs the cameras command and
+                  passes when the command exits with code 0 and reports the cameras or that none were found.
+                justification: |
+                  Tool qualification must prove that the camera listing works in the deployment environment,
+                  including environments without a camera, such as a build agent. The test checks that the
+                  command completes and reports its result, so it passes with and without a camera.
+                tests:
+                  - Validation_Run_WithSilentContext_IncludesCamerasTest
+
               - id: AgentVisionTool-Validation-TrxResults
                 title: >-
                   The Validation class shall write test results to a `.trx` file in TRX

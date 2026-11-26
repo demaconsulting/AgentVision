@@ -1,0 +1,58 @@
+---
+# FlashCapCameraSource Unit Requirements
+#
+# PURPOSE:
+# - Define requirements for the FlashCapCameraSource unit of the Cameras subsystem
+# - The unit is the only place that references FlashCap: it asks FlashCap for the devices of the host
+#   and translates each descriptor into the library's own camera types
+# - The FlashCap requirements it depends on are linked as children, so the evidence for the runtime
+#   OTS item traces to the requirement of the unit that uses it
+# - Unit requirements are validated by FlashCapCameraSourceTests.cs
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Cameras Subsystem Requirements
+        sections:
+          - title: FlashCapCameraSource Unit Requirements
+            requirements:
+              - id: AgentVisionCore-FlashCapCameraSource-ReportDevices
+                title: >-
+                  The FlashCapCameraSource shall report each device that FlashCap finds as a camera with an
+                  identifier made of the backend and the device identity, its name, its description, and its
+                  backend.
+                justification: |
+                  A device identity is only unique within its backend, so the identifier carries both. The
+                  backend is reported because one physical camera can appear through several backends and
+                  the entries must stay distinguishable.
+                children:
+                  - AgentVision-OTS-FlashCap-EnumerateDevices
+                tests:
+                  - FlashCapCameraSource_GetCameras_Descriptor_MapsIdNameDescriptionAndBackend
+                  - FlashCapCameraSource_GetCameras_NullIdentity_GivesIdWithBackendOnly
+
+              - id: AgentVisionCore-FlashCapCameraSource-ReportFormats
+                title: >-
+                  The FlashCapCameraSource shall report the resolution, pixel format, and frame rate of each
+                  video format that FlashCap can capture, and shall leave out the formats that it cannot.
+                justification: |
+                  A caller can only use formats that can be captured, so formats that FlashCap marks as
+                  unknown are not offered. The frame rate is reported as a number so that a rate such as
+                  29.97 is not lost to rounding.
+                children:
+                  - AgentVision-OTS-FlashCap-DescribeDevices
+                tests:
+                  - FlashCapCameraSource_GetCameras_Characteristics_MapSizePixelFormatAndFrameRate
+                  - FlashCapCameraSource_GetCameras_UnknownPixelFormat_IsExcluded
+                  - FlashCapCameraSource_GetCameras_FractionalFrameRate_IsReportedAsDouble
+                  - FlashCapCameraSource_GetCameras_ZeroFrameRate_IsReportedAsZero
+
+              - id: AgentVisionCore-FlashCapCameraSource-NoDevices
+                title: >-
+                  The FlashCapCameraSource shall report an empty list, and not an error, when FlashCap finds no
+                  device.
+                justification: |
+                  Machines without a camera are common, and the empty answer must reach the callers as an
+                  empty list so that they need no special handling.
+                tests:
+                  - FlashCapCameraSource_GetCameras_NoDescriptors_ReturnsEmptyList

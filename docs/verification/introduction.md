@@ -18,10 +18,13 @@ This document covers the verification design for the following software items:
 
 **Local items:**
 
-- **AgentVisionCore** — system verification of the `DemaConsulting.AgentVision.Core` library, which has no
-  subsystems or units yet
+- **AgentVisionCore** — system verification of the `DemaConsulting.AgentVision.Core` library, with the
+  **Cameras** subsystem
+  - **CameraEnumerator** — camera list policy and camera types
+  - **FlashCapCameraSource** — FlashCap adapter
 - **AgentVisionTool** — system, subsystem, and unit verification of the command-line tool:
   - **Program** — entry point and execution orchestrator
+  - **CamerasCommand** — the `cameras` command
   - **Cli** subsystem
     - **Context** — argument parser and I/O owner
     - **HelpCommand** — built-in help command
@@ -34,6 +37,7 @@ This document covers the verification design for the following software items:
 
 - **BuildMark** — build-notes documentation tool
 - **FileAssert** — document assertion tool
+- **FlashCap** — video capture device enumeration library
 - **HelpCards** — built-in help library
 - **Pandoc** — Markdown-to-HTML conversion tool
 - **ReqStream** — requirements traceability tool

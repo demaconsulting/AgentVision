@@ -78,6 +78,8 @@ public class ProgramTests
             // Assert: verify expected behavior
             var output = outWriter.ToString();
             Assert.Contains("Usage:", output);
+            Assert.Contains("Commands:", output);
+            Assert.Contains("cameras", output);
             Assert.Contains("Options:", output);
             Assert.Contains("--version", output);
             Assert.Contains("--help", output);
@@ -120,7 +122,7 @@ public class ProgramTests
     }
 
     /// <summary>
-    ///     Test that Run with no arguments displays default behavior.
+    ///     Test that Run with no arguments displays the banner and the guidance for a missing command.
     /// </summary>
     [Fact]
     public void Program_Run_NoArguments_DisplaysDefaultBehavior()
@@ -140,6 +142,68 @@ public class ProgramTests
             var output = outWriter.ToString();
             Assert.Contains("AgentVision Tool version", output);
             Assert.Contains("Copyright", output);
+            Assert.Contains("No command given.", output);
+            Assert.Equal(0, context.ExitCode);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
+    }
+
+    /// <summary>
+    ///     Test that Run with the cameras command lists the cameras or reports that there are none.
+    /// </summary>
+    [Fact]
+    public void Program_Run_CamerasCommand_ListsOrReportsNone()
+    {
+        // Arrange: setup test conditions; the real source is used, so the result depends on the machine
+        var originalOut = Console.Out;
+        try
+        {
+            using var outWriter = new StringWriter();
+            Console.SetOut(outWriter);
+            using var context = Context.Create(["cameras"]);
+
+            // Act: execute the operation being tested
+            Program.Run(context);
+
+            // Assert: the banner is printed, one of the two results is reported, and the run succeeds
+            var output = outWriter.ToString();
+            Assert.Contains("AgentVision Tool version", output);
+            Assert.True(
+                output.Contains("No cameras found.") || output.Contains("Cameras found:"),
+                $"Neither camera result was reported: {output}");
+            Assert.Equal(0, context.ExitCode);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
+    }
+
+    /// <summary>
+    ///     Test that Run without a command points to the usage text and the help topics.
+    /// </summary>
+    [Fact]
+    public void Program_Run_NoCommand_DisplaysGuidance()
+    {
+        // Arrange: setup test conditions
+        var originalOut = Console.Out;
+        try
+        {
+            using var outWriter = new StringWriter();
+            Console.SetOut(outWriter);
+            using var context = Context.Create([]);
+
+            // Act: execute the operation being tested
+            Program.Run(context);
+
+            // Assert: the guidance names both the usage text and the help topics, and is not an error
+            var output = outWriter.ToString();
+            Assert.Contains($"{HelpCommand.ToolName} --help", output);
+            Assert.Contains($"{HelpCommand.ToolName} help", output);
+            Assert.DoesNotContain("Cameras found", output);
             Assert.Equal(0, context.ExitCode);
         }
         finally

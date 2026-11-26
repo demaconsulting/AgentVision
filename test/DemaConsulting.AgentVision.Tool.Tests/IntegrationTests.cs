@@ -105,10 +105,33 @@ public class IntegrationTests
             "dotnet",
             _dllPath);
 
-        // Assert: banner is displayed with tool name and copyright; exit code is success
+        // Assert: banner is displayed with tool name and copyright, the guidance names the help, and the exit code is success
         Assert.Equal(0, exitCode);
         Assert.Contains("AgentVision Tool version", output);
         Assert.Contains("Copyright", output);
+        Assert.Contains("No command given.", output);
+    }
+
+    /// <summary>
+    ///     Test that the cameras command lists the cameras or reports that there are none, and succeeds.
+    /// </summary>
+    [Fact]
+    public void AgentVisionTool_Cameras_CamerasCommand_ExitsSuccessfully()
+    {
+        // Arrange: (none — constructor initializes _dllPath)
+
+        // Act: run the tool with the cameras command; the result depends on the machine's cameras
+        var exitCode = Runner.Run(
+            out var output,
+            "dotnet",
+            _dllPath,
+            "cameras");
+
+        // Assert: one of the two results is reported, and finding no camera is not an error
+        Assert.Equal(0, exitCode);
+        Assert.True(
+            output.Contains("No cameras found.") || output.Contains("Cameras found:"),
+            $"Neither camera result was reported: {output}");
     }
 
     /// <summary>

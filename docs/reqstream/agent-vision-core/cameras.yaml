@@ -1,0 +1,56 @@
+---
+# Cameras Subsystem Requirements
+#
+# PURPOSE:
+# - Define requirements for the AgentVisionCore Cameras subsystem
+# - The Cameras subsystem spans CameraEnumerator (the policy: the ordered list) and
+#   FlashCapCameraSource (the adapter that asks FlashCap, the only unit that references it)
+# - Subsystem requirements decompose the system requirements for camera enumeration; they are
+#   validated by CamerasSubsystemTests.cs
+
+sections:
+  - title: AgentVisionCore Requirements
+    sections:
+      - title: Cameras Subsystem Requirements
+        requirements:
+          - id: AgentVisionCore-Cameras-Enumeration
+            title: >-
+              The Cameras subsystem shall list the cameras that its source reports, each with its identifier,
+              name, and supported formats, in a deterministic order.
+            justification: |
+              The system promise to enumerate cameras is met by two parts working together: the source that
+              discovers the devices and describes them, and the enumerator that turns what the source reports
+              into one ordered list. A fixed order lets an application refer to a camera by its position and
+              lets two runs be compared.
+            children:
+              - AgentVisionCore-CameraEnumerator-Report
+              - AgentVisionCore-CameraEnumerator-Order
+              - AgentVisionCore-FlashCapCameraSource-ReportDevices
+              - AgentVisionCore-FlashCapCameraSource-ReportFormats
+            tests:
+              - CamerasSubsystem_Enumeration_FlashCapDescriptorThroughEnumerator_ReportsOrderedCameras
+
+          - id: AgentVisionCore-Cameras-NoCameras
+            title: The Cameras subsystem shall return an empty list, and not an error, when no camera is found.
+            justification: |
+              Finding no camera is an ordinary answer on machines without cameras. Both the source, which
+              may find no device, and the enumerator, which lists what the source found, must treat the
+              empty answer as valid, so that no caller has to handle a failure for it.
+            children:
+              - AgentVisionCore-CameraEnumerator-EmptyIsValid
+              - AgentVisionCore-FlashCapCameraSource-NoDevices
+            tests:
+              - CamerasSubsystem_Enumeration_FlashCapReportsNone_ReturnsEmptyList
+
+          - id: AgentVisionCore-Cameras-SourceAbstraction
+            title: >-
+              The Cameras subsystem shall list the cameras of a source supplied by the application instead of
+              the default source.
+            justification: |
+              Applications and tests need to supply their own descriptions of cameras, so that everything
+              that depends on the list can run without camera hardware and without the default capture
+              library.
+            children:
+              - AgentVisionCore-CameraEnumerator-CustomSource
+            tests:
+              - CamerasSubsystem_Enumeration_CustomSource_IsUsedInsteadOfFlashCap

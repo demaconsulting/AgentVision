@@ -178,16 +178,38 @@ sections:
         tests:
           - AgentVisionTool_ValidateWithBadExtension_ExtensionInvalid_ReturnsNonZero
 
-      - id: AgentVisionTool-System-DefaultBehavior
-        title: The tool shall display a banner then run the default tool logic when invoked without any action flags.
+      - id: AgentVisionTool-System-Cameras
+        title: >-
+          The tool shall list the available cameras, with their identifiers, names, and supported formats,
+          when run with the `cameras` command, and shall report that no camera was found, and exit with
+          code 0, when there is none.
         tags: [system]
         justification: |
-          When a user invokes the tool without any recognized action flag, the tool shall
-          display a banner identifying itself and run its primary logic so that the
+          Users and AI agents need to know which cameras a machine offers and what each can deliver before
+          they can use one. A machine without a camera, such as a build agent, is an ordinary case, so
+          finding none is reported plainly and is not a failure that stops a script.
+        children:
+          - AgentVisionTool-Program-Cameras
+          - AgentVisionTool-Cli-Cameras
+          - AgentVisionTool-CamerasCommand-List
+          - AgentVisionTool-CamerasCommand-NoCameras
+          - AgentVisionTool-CamerasCommand-Output
+        tests:
+          - AgentVisionTool_Cameras_CamerasCommand_ExitsSuccessfully
+
+      - id: AgentVisionTool-System-DefaultBehavior
+        title: >-
+          The tool shall display a banner, then guidance to the usage text and the help topics, when invoked
+          without any action flag or command.
+        tags: [system]
+        justification: |
+          When a user invokes the tool without any recognized action flag or command, the tool shall
+          display a banner identifying itself and say how to find out what it can do, so that the
           invocation is never silently empty.
         children:
           - AgentVisionTool-Cli-ArgumentParsing
           - AgentVisionTool-Cli-OutputChannels
+          - AgentVisionTool-Program-NoCommand
         tests:
           - AgentVisionTool_NoArguments_Invoked_DisplaysBanner
 

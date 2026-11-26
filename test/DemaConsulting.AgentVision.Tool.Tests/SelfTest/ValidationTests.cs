@@ -148,6 +148,38 @@ public class ValidationTests
     }
 
     /// <summary>
+    ///     Test that Run includes the cameras listing test and that it passes without any camera.
+    /// </summary>
+    [Fact]
+    public void Validation_Run_WithSilentContext_IncludesCamerasTest()
+    {
+        // Arrange: setup unique log file path to capture silent context output
+        var logFile = Path.Combine(Path.GetTempPath(), $"validation_test_{Guid.NewGuid()}.log");
+        try
+        {
+            using (var context = Context.Create(["--silent", "--log", logFile]))
+            {
+                // Act: run validation with silent context and log file
+                Validation.Run(context);
+
+                // Assert context state while still valid: the cameras test did not fail the run
+                Assert.Equal(0, context.ExitCode);
+            }
+
+            // Assert: the cameras test is listed as passed, with or without a camera on the machine
+            var logContent = File.ReadAllText(logFile);
+            Assert.Contains("AgentVisionTool_CamerasList - Passed", logContent);
+        }
+        finally
+        {
+            if (File.Exists(logFile))
+            {
+                File.Delete(logFile);
+            }
+        }
+    }
+
+    /// <summary>
     ///     Test that Run does not write a results file when the extension is unsupported.
     /// </summary>
     [Fact]

@@ -6,8 +6,9 @@
 #   library package need from it
 # - The library owns ALL camera logic; the tool is a thin front-end that depends on it, never the
 #   reverse
-# - The library is the foundation of AgentVision: low-latency webcam capture for AI agents. The camera
-#   capabilities themselves are added, top-down, with their own requirements, design, and verification
+# - The library is the foundation of AgentVision: low-latency webcam capture for AI agents. The first
+#   camera capability is enumeration (Cameras subsystem); further capabilities are added, top-down,
+#   with their own requirements, design, and verification
 # - Package requirements are validated by FileAssert checks of the produced NuGet package
 #   (.fileassert.yaml, run by build.yaml) and by assembly-level tests in AgentVisionCoreTests.cs
 
@@ -42,3 +43,47 @@ sections:
           the tool (and its console, argument-parsing, and exit-code concerns) with it.
         tests:
           - AgentVisionCore_Assembly_Loaded_DoesNotReferenceTool
+
+      - id: AgentVisionCore-System-CameraEnumeration
+        title: >-
+          The library shall enumerate the video capture devices of the host and report, for each, its
+          identifier, its name, and the video formats (resolution, pixel format, and frame rate) it supports.
+        tags: [system]
+        justification: |
+          Every camera feature of AgentVision starts with knowing which cameras exist and what each can
+          deliver, and the AI agent or application that uses the library needs that answer in plain values,
+          not in the types of a capture library. A stable identifier lets later operations name one camera
+          reliably, and the supported formats let a caller choose a size and frame rate that the camera
+          really offers.
+        children:
+          - AgentVisionCore-Cameras-Enumeration
+        tests:
+          - AgentVisionCore_Cameras_CustomSource_Enumerated_ReportsCameras
+
+      - id: AgentVisionCore-System-NoCameras
+        title: The library shall report an empty list, and not an error, when no camera is available.
+        tags: [system]
+        justification: |
+          Many machines, such as servers, containers, and build agents, have no camera. Callers must be able
+          to treat "no camera" as an ordinary answer, so that an automated run on such a machine completes
+          and can report that nothing was found.
+        children:
+          - AgentVisionCore-Cameras-NoCameras
+        tests:
+          - AgentVisionCore_Cameras_NoneAttached_ReturnsEmptyList
+          - AgentVisionCore_Cameras_DefaultSource_Enumerated_DoesNotThrow
+
+      - id: AgentVisionCore-System-InjectableSource
+        title: >-
+          The library shall let an application supply its own source of camera descriptions, so that
+          enumeration can run without camera hardware.
+        tags: [system]
+        justification: |
+          Applications and test suites need to exercise everything that depends on the list of cameras on
+          machines that have none, and need a seam where a different capture mechanism can be plugged in
+          later. A supplied source also keeps the public API free of the types of the capture library, so a
+          change of that library cannot break consumers.
+        children:
+          - AgentVisionCore-Cameras-SourceAbstraction
+        tests:
+          - AgentVisionCore_Cameras_CustomSource_Enumerated_ReportsCameras

@@ -26,6 +26,7 @@ sections:
           # Tests link to "windows" to ensure results come from Windows platform
           - "windows@AgentVisionTool_VersionDisplay"
           - "windows@AgentVisionTool_HelpDisplay"
+          - "windows@AgentVisionTool_CamerasList"
 
       - id: AgentVisionTool-Platform-Linux
         title: The tool shall execute successfully on Linux platforms.
@@ -36,6 +37,7 @@ sections:
           # Tests link to "ubuntu" to ensure results come from Linux platform
           - "ubuntu@AgentVisionTool_VersionDisplay"
           - "ubuntu@AgentVisionTool_HelpDisplay"
+          - "ubuntu@AgentVisionTool_CamerasList"
 
       - id: AgentVisionTool-Platform-Net10
         title: The tool shall support .NET 10 runtime.
@@ -46,6 +48,7 @@ sections:
         tests:
           - "dotnet10.x@AgentVisionTool_VersionDisplay"
           - "dotnet10.x@AgentVisionTool_HelpDisplay"
+          - "dotnet10.x@AgentVisionTool_CamerasList"
 
       - id: AgentVisionTool-Platform-Net11
         title: The tool shall support .NET 11 runtime.
@@ -56,3 +59,4 @@ sections:
         tests:
           - "dotnet11.x@AgentVisionTool_VersionDisplay"
           - "dotnet11.x@AgentVisionTool_HelpDisplay"
+          - "dotnet11.x@AgentVisionTool_CamerasList"

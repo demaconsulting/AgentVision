@@ -114,8 +114,9 @@ internal static class Program
     /// </summary>
     /// <param name="context">The context containing command line arguments and program state.</param>
     /// <remarks>
-    ///     Dispatch is priority-ordered: version check first, then help, then self-validation,
-    ///     then the default tool behavior. Only the highest-priority matching action is executed per invocation.
+    ///     Dispatch is priority-ordered: version check first, then help, then self-validation, then the
+    ///     <c>cameras</c> command, then the default tool behavior. Only the highest-priority matching action
+    ///     is executed per invocation.
     /// </remarks>
     public static void Run(Context context)
     {
@@ -143,7 +144,14 @@ internal static class Program
             return;
         }
 
-        // Priority 4: Default behavior when no action flag was given
+        // Priority 4: The cameras command
+        if (context.Cameras)
+        {
+            CamerasCommand.Run(context);
+            return;
+        }
+
+        // Priority 5: Default behavior when no action flag or command was given
         RunToolLogic(context);
     }
 
@@ -164,8 +172,11 @@ internal static class Program
     /// <param name="context">The context for output.</param>
     private static void PrintHelp(Context context)
     {
-        context.WriteLine($"Usage: {HelpCommand.ToolName} [options]");
+        context.WriteLine($"Usage: {HelpCommand.ToolName} [options] [command]");
         context.WriteLine($"       {HelpCommand.ToolName} help [topic]");
+        context.WriteLine("");
+        context.WriteLine("Commands:");
+        context.WriteLine("  cameras                    List the available cameras and the formats they support");
         context.WriteLine("");
         context.WriteLine("Options:");
         context.WriteLine("  -v, --version              Display version information");
@@ -180,18 +191,15 @@ internal static class Program
     }
 
     /// <summary>
-    ///     Runs the default tool behavior, used when no action flag is given.
+    ///     Runs the default tool behavior, used when neither an action flag nor a command is given.
     /// </summary>
     /// <param name="context">The context containing command line arguments and program state.</param>
     /// <remarks>
-    ///     The tool has no webcam commands yet, so the default behavior describes the product and
-    ///     points to the usage text and the built-in help topics.
+    ///     Nothing was asked for, so the default behavior is guidance: one line that points to the usage text
+    ///     and the built-in help topics. It is not an error, so the exit code stays 0.
     /// </remarks>
     private static void RunToolLogic(Context context)
     {
-        context.WriteLine("AgentVision gives AI agents low-latency access to webcams.");
-        context.WriteLine("This release has no webcam commands yet.");
-        context.WriteLine("");
-        context.WriteLine($"Run '{HelpCommand.ToolName} --help' for usage or '{HelpCommand.ToolName} help' for help topics.");
+        context.WriteLine($"No command given. Run '{HelpCommand.ToolName} --help' for usage or '{HelpCommand.ToolName} help' for help topics.");
     }
 }

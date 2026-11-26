@@ -10,8 +10,12 @@ includes:
   - docs/reqstream/quality.yaml
   - docs/reqstream/agent-vision-core.yaml
   - docs/reqstream/agent-vision-core/platform-requirements.yaml
+  - docs/reqstream/agent-vision-core/cameras.yaml
+  - docs/reqstream/agent-vision-core/cameras/camera-enumerator.yaml
+  - docs/reqstream/agent-vision-core/cameras/flash-cap-camera-source.yaml
   - docs/reqstream/agent-vision-tool.yaml
   - docs/reqstream/agent-vision-tool/program.yaml
+  - docs/reqstream/agent-vision-tool/cameras-command.yaml
   - docs/reqstream/agent-vision-tool/cli.yaml
   - docs/reqstream/agent-vision-tool/cli/context.yaml
   - docs/reqstream/agent-vision-tool/cli/help-command.yaml
@@ -21,6 +25,7 @@ includes:
   - docs/reqstream/agent-vision-tool/utilities/path-helpers.yaml
   - docs/reqstream/agent-vision-tool/platform-requirements.yaml
   - docs/reqstream/ots/help-cards.yaml
+  - docs/reqstream/ots/flashcap.yaml
   - docs/reqstream/ots/xunit.yaml
   - docs/reqstream/ots/reqstream.yaml
   - docs/reqstream/ots/buildmark.yaml
