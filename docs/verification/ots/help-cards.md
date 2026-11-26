@@ -5,7 +5,7 @@ Requirements for this OTS item are defined in the HelpCards OTS Software Require
 
 ### Required Functionality
 
-HelpCards (`Template-OTS-HelpCards-Cli` and `Template-OTS-HelpCards-Testing`) shall answer the
+HelpCards (`AgentVision-OTS-HelpCards-Cli` and `AgentVision-OTS-HelpCards-Testing`) shall answer the
 help command of the tool from the cards embedded in the tool assembly, and report card defects and
 example results to the tests of the tool.
 
@@ -19,9 +19,9 @@ tool assembly.
 
 **Help Command**: The help verb is answered from the embedded cards, in-process and by the built
 tool. This scenario is tested by `HelpCommand_TryRun_HelpVerb_PrintsTopicIndexAndReturnsZero` and
-`TemplateDotNetTool_HelpTopics_HelpVerb_ListsTopics`.
+`AgentVisionTool_HelpTopics_HelpVerb_ListsTopics`.
 
 **Test Helpers**: The validator accepts the shipped cards, and the example runner runs every
 command example against the built tool. This scenario is tested by
 `HelpCommand_CreateOptions_ShippedCatalog_PassesValidation` and
-`TemplateDotNetTool_HelpExamples_AllCommandExamples_GiveStatedResults`.
+`AgentVisionTool_HelpExamples_AllCommandExamples_GiveStatedResults`.

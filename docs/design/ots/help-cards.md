@@ -6,7 +6,7 @@ This document describes the integration and usage design for the `HelpCards` OTS
 ### Purpose
 
 HelpCards provides the built-in help of the tool. It turns Markdown help cards embedded in the
-tool assembly into a validated catalog, serves `templatetool help` from that catalog for people
+tool assembly into a validated catalog, serves `agentvision help` from that catalog for people
 and AI agents, and supplies the test helpers that prove the cards are valid and that their
 examples work. Like the other DEMA Consulting tools that this repository uses, it is produced by
 another repository and is treated as an OTS item.

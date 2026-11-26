@@ -3,7 +3,7 @@
 ![OTS Items](OtsView.svg)
 
 This document provides the integration and usage design for all Off-The-Shelf (OTS) software
-items used by the Template DotNet Tool.
+items used by the AgentVision.
 
 ## Scope
 

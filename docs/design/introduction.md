@@ -1,13 +1,13 @@
 # Introduction
 
-This document provides the detailed design for the Template DotNet Tool, a .NET command-line
+This document provides the detailed design for the AgentVision, a .NET command-line
 application demonstrating best practices for DEMA Consulting DotNet Tools. It covers local
 software items (systems, subsystems, and units) and the OTS software items they consume.
 
 ## Purpose
 
 The purpose of this document is to describe the internal design of each software unit that
-comprises the Template DotNet Tool. It captures data models, algorithms, key methods, and
+comprises the AgentVision. It captures data models, algorithms, key methods, and
 inter-unit interactions at a level of detail sufficient for formal code review, compliance
 verification, and future maintenance. A reviewer should be able to understand how each item
 satisfies its requirements without reading source code. The document does not restate
@@ -17,7 +17,7 @@ requirements; it explains how they are realized.
 
 Local items:
 
-- **TemplateDotNetTool**: system, subsystem, and unit design for all local components.
+- **AgentVision**: system, subsystem, and unit design for all local components.
 
 OTS items:
 
@@ -62,7 +62,7 @@ subsystems, support units, dependencies, inputs, and outputs with the real ones]
 ## Folder Layout
 
 - **src/** - source files and projects
-  - **DemaConsulting.TemplateDotNetTool/** - main application source
+  - **DemaConsulting.AgentVision.Tool/** - main application source
     - **Cli/** - command-line interface subsystem, including `HelpCommand.cs` for the built-in help
     - **Help/** - built-in help cards (Markdown with front matter), embedded in the assembly
     - **SelfTest/** - self-validation subsystem
@@ -98,5 +98,5 @@ Review-sets: defined in `.reviewmark.yaml`
 
 ## References
 
-- Template DotNet Tool User Guide
-- Template DotNet Tool Repository (<https://github.com/demaconsulting/TemplateDotNetTool>)
+- AgentVision User Guide
+- AgentVision Repository (<https://github.com/demaconsulting/AgentVision>)

@@ -9,20 +9,20 @@ sections:
     sections:
       - title: HelpCards Requirements
         requirements:
-          - id: Template-OTS-HelpCards-Cli
+          - id: AgentVision-OTS-HelpCards-Cli
             title: >-
               HelpCards shall answer the help command of a tool from the help cards embedded in the
               tool assembly.
             justification: |
-              The tool serves `templatetool help` to people and AI agents through the command-line
+              The tool serves `agentvision help` to people and AI agents through the command-line
               helper of DemaConsulting.HelpCards, whose build targets embed the cards in the
               assembly so the tool package needs no loose files.
             tags: [ots]
             tests:
               - HelpCommand_TryRun_HelpVerb_PrintsTopicIndexAndReturnsZero
-              - TemplateDotNetTool_HelpTopics_HelpVerb_ListsTopics
+              - AgentVisionTool_HelpTopics_HelpVerb_ListsTopics
 
-          - id: Template-OTS-HelpCards-Testing
+          - id: AgentVision-OTS-HelpCards-Testing
             title: >-
               HelpCards shall report defects in help cards, and differences between the stated and the
               actual results of their command examples, to the tests of a tool.
@@ -33,4 +33,4 @@ sections:
             tags: [ots]
             tests:
               - HelpCommand_CreateOptions_ShippedCatalog_PassesValidation
-              - TemplateDotNetTool_HelpExamples_AllCommandExamples_GiveStatedResults
+              - AgentVisionTool_HelpExamples_AllCommandExamples_GiveStatedResults

@@ -1,4 +1,4 @@
-# Template DotNet Tool
+# AgentVision
 
 [![GitHub forks][badge-forks]][link-forks]
 [![GitHub stars][badge-stars]][link-stars]
@@ -26,7 +26,7 @@ This template demonstrates:
 - **Standardized Command-Line Interface**: Context class handling common arguments
   (`--version`, `--help`, `--silent`, `--validate`, `--results`, `--depth`, `--log`)
 - **Self-Validation**: Built-in validation tests with TRX/JUnit output
-- **Built-in Help**: `templatetool help` serves Markdown help cards ([DemaConsulting.HelpCards][link-helpcards])
+- **Built-in Help**: `agentvision help` serves Markdown help cards ([DemaConsulting.HelpCards][link-helpcards])
   with runnable examples, search, and JSON output for AI agents
 - **Multi-Platform Support**: Builds and runs on Windows, Linux, and macOS
 - **Multi-Runtime Support**: Targets .NET 10 and 11
@@ -45,37 +45,37 @@ This template demonstrates:
 Install the tool globally using the .NET CLI:
 
 ```bash
-dotnet tool install -g DemaConsulting.TemplateDotNetTool
+dotnet tool install -g DemaConsulting.AgentVision.Tool
 ```
 
 ## Usage
 
 ```bash
 # Default behavior (no arguments) — displays banner and copyright
-templatetool
+agentvision
 
 # Display version
-templatetool --version
+agentvision --version
 
 # Display help
-templatetool --help
+agentvision --help
 
 # List the built-in help topics, then read one
-templatetool help
-templatetool help getting-started
+agentvision help
+agentvision help getting-started
 
 # Run self-validation
-templatetool --validate
+agentvision --validate
 
 # Save validation results (--result is an accepted alias for --results)
-templatetool --validate --results results.trx
-templatetool --validate --result results.xml
+agentvision --validate --results results.trx
+agentvision --validate --result results.xml
 
 # Set heading depth for embedded validation output
-templatetool --validate --depth 2
+agentvision --validate --depth 2
 
 # Silent mode with logging
-templatetool --silent --log output.log
+agentvision --silent --log output.log
 ```
 
 ## Command-Line Options
@@ -107,7 +107,7 @@ automatically.
 Running self-validation produces a report containing the following information:
 
 ```text
-# DEMA Consulting Template DotNet Tool
+# DEMA Consulting AgentVision Tool
 
 | Information         | Value                                              |
 | :------------------ | :------------------------------------------------- |
@@ -117,8 +117,8 @@ Running self-validation produces a report containing the following information:
 | DotNet Runtime      | <dotnet-runtime-version>                           |
 | Time Stamp          | <timestamp> UTC                                    |
 
-✓ TemplateTool_VersionDisplay - Passed
-✓ TemplateTool_HelpDisplay - Passed
+✓ AgentVisionTool_VersionDisplay - Passed
+✓ AgentVisionTool_HelpDisplay - Passed
 
 Total Tests: 2
 Passed: 2
@@ -127,15 +127,15 @@ Failed: 0
 
 Each test in the report proves:
 
-- **`TemplateTool_VersionDisplay`** - `--version` outputs a valid version string.
-- **`TemplateTool_HelpDisplay`** - `--help` outputs usage and options information.
+- **`AgentVisionTool_VersionDisplay`** - `--version` outputs a valid version string.
+- **`AgentVisionTool_HelpDisplay`** - `--help` outputs usage and options information.
 
 Use `--depth <#>` to control the heading level of the validation output (default: `1`).
 This is useful when embedding validation output into a larger markdown document:
 
 ```bash
 # Embed validation at heading level 2
-templatetool --validate --depth 2
+agentvision --validate --depth 2
 ```
 
 See the [User Guide][link-guide] for more details on the self-validation tests.
@@ -155,7 +155,7 @@ Generated documentation includes:
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/demaconsulting/TemplateDotNetTool/blob/main/CONTRIBUTING.md) for
+See [CONTRIBUTING.md](https://github.com/demaconsulting/AgentVision/blob/main/CONTRIBUTING.md) for
 guidelines on reporting bugs, suggesting features, and submitting pull requests.
 
 ## License
@@ -165,25 +165,25 @@ Copyright (c) DEMA Consulting. Licensed under the MIT License. See [LICENSE][lin
 By contributing to this project, you agree that your contributions will be licensed under the MIT License.
 
 <!-- Badge References -->
-[workflow]: https://raw.githubusercontent.com/demaconsulting/TemplateDotNetTool/main/docs/images/workflow.png
-[badge-forks]: https://img.shields.io/github/forks/demaconsulting/TemplateDotNetTool?style=plastic
-[badge-stars]: https://img.shields.io/github/stars/demaconsulting/TemplateDotNetTool?style=plastic
-[badge-contributors]: https://img.shields.io/github/contributors/demaconsulting/TemplateDotNetTool?style=plastic
-[badge-license]: https://img.shields.io/github/license/demaconsulting/TemplateDotNetTool?style=plastic
-[badge-build]: https://img.shields.io/github/actions/workflow/status/demaconsulting/TemplateDotNetTool/build_on_push.yaml?style=plastic
-[badge-quality]: https://sonarcloud.io/api/project_badges/measure?project=demaconsulting_TemplateDotNetTool&metric=alert_status
-[badge-security]: https://sonarcloud.io/api/project_badges/measure?project=demaconsulting_TemplateDotNetTool&metric=security_rating
-[badge-nuget]: https://img.shields.io/nuget/v/DemaConsulting.TemplateDotNetTool?style=plastic
+[workflow]: https://raw.githubusercontent.com/demaconsulting/AgentVision/main/docs/images/workflow.png
+[badge-forks]: https://img.shields.io/github/forks/demaconsulting/AgentVision?style=plastic
+[badge-stars]: https://img.shields.io/github/stars/demaconsulting/AgentVision?style=plastic
+[badge-contributors]: https://img.shields.io/github/contributors/demaconsulting/AgentVision?style=plastic
+[badge-license]: https://img.shields.io/github/license/demaconsulting/AgentVision?style=plastic
+[badge-build]: https://img.shields.io/github/actions/workflow/status/demaconsulting/AgentVision/build_on_push.yaml?style=plastic
+[badge-quality]: https://sonarcloud.io/api/project_badges/measure?project=demaconsulting_AgentVision&metric=alert_status
+[badge-security]: https://sonarcloud.io/api/project_badges/measure?project=demaconsulting_AgentVision&metric=security_rating
+[badge-nuget]: https://img.shields.io/nuget/v/DemaConsulting.AgentVision.Tool?style=plastic
 
 <!-- Link References -->
-[link-forks]: https://github.com/demaconsulting/TemplateDotNetTool/network/members
-[link-stars]: https://github.com/demaconsulting/TemplateDotNetTool/stargazers
-[link-contributors]: https://github.com/demaconsulting/TemplateDotNetTool/graphs/contributors
-[link-license]: https://github.com/demaconsulting/TemplateDotNetTool/blob/main/LICENSE
-[link-build]: https://github.com/demaconsulting/TemplateDotNetTool/actions/workflows/build_on_push.yaml
-[link-quality]: https://sonarcloud.io/dashboard?id=demaconsulting_TemplateDotNetTool
-[link-security]: https://sonarcloud.io/dashboard?id=demaconsulting_TemplateDotNetTool
-[link-nuget]: https://www.nuget.org/packages/DemaConsulting.TemplateDotNetTool
-[link-guide]: https://github.com/demaconsulting/TemplateDotNetTool/blob/main/docs/user_guide/introduction.md
+[link-forks]: https://github.com/demaconsulting/AgentVision/network/members
+[link-stars]: https://github.com/demaconsulting/AgentVision/stargazers
+[link-contributors]: https://github.com/demaconsulting/AgentVision/graphs/contributors
+[link-license]: https://github.com/demaconsulting/AgentVision/blob/main/LICENSE
+[link-build]: https://github.com/demaconsulting/AgentVision/actions/workflows/build_on_push.yaml
+[link-quality]: https://sonarcloud.io/dashboard?id=demaconsulting_AgentVision
+[link-security]: https://sonarcloud.io/dashboard?id=demaconsulting_AgentVision
+[link-nuget]: https://www.nuget.org/packages/DemaConsulting.AgentVision.Tool
+[link-guide]: https://github.com/demaconsulting/AgentVision/blob/main/docs/user_guide/introduction.md
 [link-continuous-compliance]: https://github.com/demaconsulting/ContinuousCompliance
 [link-helpcards]: https://www.nuget.org/packages/DemaConsulting.HelpCards

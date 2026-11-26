@@ -8,7 +8,7 @@ its outputs, and use them](workflow.svg)
 
 ## Purpose
 
-Template DotNet Tool is a demonstration project that showcases best practices for DEMA
+AgentVision is a demonstration project that showcases best practices for DEMA
 Consulting DotNet Tools.
 
 ## Scope
@@ -17,7 +17,7 @@ This user guide covers:
 
 - Installation instructions
 - Usage examples for common tasks
-- The built-in `templatetool help` command
+- The built-in `agentvision help` command
 - Command-line options reference
 - Practical examples for various scenarios
 
@@ -41,7 +41,7 @@ compliance evidence is generated automatically on every CI run.
 Install the tool globally using the .NET CLI:
 
 ```bash
-dotnet tool install -g DemaConsulting.TemplateDotNetTool
+dotnet tool install -g DemaConsulting.AgentVision.Tool
 ```
 
 # Usage
@@ -51,7 +51,7 @@ dotnet tool install -g DemaConsulting.TemplateDotNetTool
 Display the tool version:
 
 ```bash
-templatetool --version
+agentvision --version
 ```
 
 ## Default Behavior
@@ -59,7 +59,7 @@ templatetool --version
 When invoked with no arguments, the tool displays the banner and copyright notice:
 
 ```bash
-templatetool
+agentvision
 ```
 
 ## Display Help
@@ -67,7 +67,7 @@ templatetool
 Display usage information:
 
 ```bash
-templatetool --help
+agentvision --help
 ```
 
 The usage information ends with a pointer to the built-in help.
@@ -78,8 +78,8 @@ The `help` command prints help topics that explain each task with worked example
 for AI agents that have only the installed tool. List the topics, then print one with its examples:
 
 ```bash
-templatetool help
-templatetool help getting-started
+agentvision help
+agentvision help getting-started
 ```
 
 Add `--search <words>` to find a topic, `--example <name>` to print one example of a topic, and
@@ -89,7 +89,7 @@ code 2 after printing a hint for an unknown topic or a wrong help argument.
 
 ## Self-Validation
 
-Self-validation produces a report demonstrating that Template DotNet Tool is functioning
+Self-validation produces a report demonstrating that AgentVision is functioning
 correctly. This is useful in regulated industries where tool validation evidence is required.
 
 ### Running Validation
@@ -97,13 +97,13 @@ correctly. This is useful in regulated industries where tool validation evidence
 To perform self-validation:
 
 ```bash
-templatetool --validate
+agentvision --validate
 ```
 
 To save validation results to a file:
 
 ```bash
-templatetool --validate --results results.trx
+agentvision --validate --results results.trx
 ```
 
 The `--result` option is an accepted alias for `--results`.
@@ -118,7 +118,7 @@ This is useful when embedding the validation report into a larger markdown docum
 
 ```bash
 # Embed validation at heading level 2
-templatetool --validate --depth 2
+agentvision --validate --depth 2
 ```
 
 ### Validation Report
@@ -129,7 +129,7 @@ The validation report contains the tool version, machine name, operating system 
 Example validation report:
 
 ```text
-# DEMA Consulting Template DotNet Tool
+# DEMA Consulting AgentVision Tool
 
 | Information         | Value                                              |
 | :------------------ | :------------------------------------------------- |
@@ -139,8 +139,8 @@ Example validation report:
 | DotNet Runtime      | .NET 10.0.0                                        |
 | Time Stamp          | 2024-01-15 10:30:00 UTC                            |
 
-✓ TemplateTool_VersionDisplay - Passed
-✓ TemplateTool_HelpDisplay - Passed
+✓ AgentVisionTool_VersionDisplay - Passed
+✓ AgentVisionTool_HelpDisplay - Passed
 
 Total Tests: 2
 Passed: 2
@@ -151,15 +151,15 @@ Failed: 0
 
 Each test proves specific functionality works correctly:
 
-- **`TemplateTool_VersionDisplay`** - `--version` outputs a valid version string.
-- **`TemplateTool_HelpDisplay`** - `--help` outputs usage and options information.
+- **`AgentVisionTool_VersionDisplay`** - `--version` outputs a valid version string.
+- **`AgentVisionTool_HelpDisplay`** - `--help` outputs usage and options information.
 
 ## Silent Mode
 
 Suppress console output:
 
 ```bash
-templatetool --silent
+agentvision --silent
 ```
 
 ## Logging
@@ -167,7 +167,7 @@ templatetool --silent
 Write output to a log file:
 
 ```bash
-templatetool --log output.log
+agentvision --log output.log
 ```
 
 ## Error Handling
@@ -202,19 +202,19 @@ The following command-line options are supported:
 ## Example 1: Basic Usage
 
 ```bash
-templatetool
+agentvision
 ```
 
 ## Example 2: Self-Validation with Results
 
 ```bash
-templatetool --validate --results validation-results.trx
+agentvision --validate --results validation-results.trx
 ```
 
 ## Example 3: Silent Mode with Logging
 
 ```bash
-templatetool --silent --log tool-output.log
+agentvision --silent --log tool-output.log
 ```
 
 ## References

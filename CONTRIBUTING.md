@@ -1,6 +1,6 @@
-# Contributing to Template DotNet Tool
+# Contributing to AgentVision
 
-Thank you for your interest in contributing to Template DotNet Tool! We welcome contributions from the community and
+Thank you for your interest in contributing to AgentVision! We welcome contributions from the community and
 appreciate your help in making this project better.
 
 ## Code of Conduct
@@ -18,7 +18,7 @@ If you find a bug, please create an issue on GitHub with the following informati
 - **Steps to Reproduce**: Detailed steps to reproduce the issue
 - **Expected Behavior**: What you expected to happen
 - **Actual Behavior**: What actually happened
-- **Environment**: Operating system, .NET version, Template DotNet Tool version
+- **Environment**: Operating system, .NET version, AgentVision Tool version
 - **Logs**: Any relevant error messages or logs
 
 ### Suggesting Features
@@ -57,8 +57,8 @@ We follow a standard GitHub workflow for contributions:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/demaconsulting/TemplateDotNetTool.git
-   cd TemplateDotNetTool
+   git clone https://github.com/demaconsulting/AgentVision.git
+   cd AgentVision
    ```
 
 2. Restore dependencies:
@@ -168,7 +168,7 @@ dotnet test --collect "XPlat Code Coverage"
 
 ```bash
 # Run self-validation tests
-dotnet run --project src/DemaConsulting.TemplateDotNetTool \
+dotnet run --project src/DemaConsulting.AgentVision.Tool \
   --configuration Release --framework net10.0 --no-build -- --validate
 ```
 
@@ -199,8 +199,8 @@ spell-checking failure. Doing so defeats the purpose of spell-checking and reduc
 
 ### Help Cards
 
-The built-in help (`templatetool help`) is served from Markdown help cards in
-`src/DemaConsulting.TemplateDotNetTool/Help/`, which the DemaConsulting.HelpCards package embeds in the tool
+The built-in help (`agentvision help`) is served from Markdown help cards in
+`src/DemaConsulting.AgentVision.Tool/Help/`, which the DemaConsulting.HelpCards package embeds in the tool
 assembly. `Cli/HelpCommand.cs` is the only code that uses the package.
 
 - **One file per topic.** The path below `Help/`, without `.md`, is the card id. `_source.md` names the source
@@ -254,7 +254,7 @@ the built tool and compares the result with the card.
    - `Program.Main` (the `TryRun` call before `Context.Create`) and `Program.PrintHelp` (the `help [topic]` usage
      line and the footer).
    - The `DemaConsulting.HelpCards` package reference, the `src/**/Help/**` pattern in `needs-review`, and the
-     `TemplateTool-Cli-HelpCommand` and `OTS-HelpCards` review sets.
+     `AgentVisionTool-Cli-HelpCommand` and `OTS-HelpCards` review sets.
    - The help requirements of the system, Cli, and Program; the *Help Command* interface of the system design,
      which is the design documents' one statement of the exit codes and of `--silent`/`--log` not applying; the
      Cli and Program design and verification docs; and the file lists in `requirements.yaml`, `definition.yaml`,
@@ -359,7 +359,7 @@ When creating a pull request, include:
 
 ## Requirements Management
 
-Template DotNet Tool uses [DemaConsulting.ReqStream][reqstream] for requirements traceability:
+AgentVision uses [DemaConsulting.ReqStream][reqstream] for requirements traceability:
 
 - All requirements are defined in `requirements.yaml`
 - Each requirement should be linked to test cases
@@ -384,14 +384,14 @@ Releases are managed by project maintainers. The process includes:
 
 ## License
 
-By contributing to Template DotNet Tool, you agree that your contributions will be licensed under the MIT License.
+By contributing to AgentVision, you agree that your contributions will be licensed under the MIT License.
 
-Thank you for contributing to Template DotNet Tool!
+Thank you for contributing to AgentVision!
 
-[code-of-conduct]: https://github.com/demaconsulting/TemplateDotNetTool/blob/main/CODE_OF_CONDUCT.md
+[code-of-conduct]: https://github.com/demaconsulting/AgentVision/blob/main/CODE_OF_CONDUCT.md
 [dotnet-download]: https://dotnet.microsoft.com/download
 [csharp-conventions]: https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions
 [reqstream]: https://github.com/demaconsulting/ReqStream
-[discussions]: https://github.com/demaconsulting/TemplateDotNetTool/discussions
-[issues]: https://github.com/demaconsulting/TemplateDotNetTool/issues
-[security]: https://github.com/demaconsulting/TemplateDotNetTool/blob/main/SECURITY.md
+[discussions]: https://github.com/demaconsulting/AgentVision/discussions
+[issues]: https://github.com/demaconsulting/AgentVision/issues
+[security]: https://github.com/demaconsulting/AgentVision/blob/main/SECURITY.md

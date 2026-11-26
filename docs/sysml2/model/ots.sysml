@@ -1,7 +1,7 @@
 package OtsDependencies {
     private import SoftwareItemMetadata::*;
 
-    doc /* Off-the-shelf (OTS) runtime dependencies used by TemplateDotNetTool. */
+    doc /* Off-the-shelf (OTS) runtime dependencies used by AgentVision. */
 
     part def HelpCards {
         doc /* OTS: DemaConsulting.HelpCards. */

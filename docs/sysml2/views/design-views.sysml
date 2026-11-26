@@ -2,16 +2,16 @@
 // Per SysML2Tools syntax, 'expose' is only valid inside a named 'view' usage
 // (not a 'view def' definition), and it - not 'render' - is what scopes the
 // rendered diagram content.
-package TemplateDotNetToolDesignViews {
+package AgentVisionDesignViews {
     private import StandardViewDefinitions::*;
-    private import TemplateDotNetTool::*;
+    private import AgentVisionTool::*;
 
     view SoftwareStructureView : InterconnectionView {
-        expose TemplateDotNetTool::TemplateDotNetToolSystem;
+        expose AgentVisionTool::AgentVisionToolSystem;
     }
 
-    view TemplateDotNetToolView {
-        expose TemplateDotNetToolSystem;
+    view AgentVisionToolView {
+        expose AgentVisionToolSystem;
     }
 
     view CliView {

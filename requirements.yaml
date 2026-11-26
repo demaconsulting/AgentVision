@@ -8,16 +8,16 @@
 root-tags: [system, quality]
 includes:
   - docs/reqstream/quality.yaml
-  - docs/reqstream/template-dot-net-tool.yaml
-  - docs/reqstream/template-dot-net-tool/program.yaml
-  - docs/reqstream/template-dot-net-tool/cli.yaml
-  - docs/reqstream/template-dot-net-tool/cli/context.yaml
-  - docs/reqstream/template-dot-net-tool/cli/help-command.yaml
-  - docs/reqstream/template-dot-net-tool/self-test.yaml
-  - docs/reqstream/template-dot-net-tool/self-test/validation.yaml
-  - docs/reqstream/template-dot-net-tool/utilities.yaml
-  - docs/reqstream/template-dot-net-tool/utilities/path-helpers.yaml
-  - docs/reqstream/template-dot-net-tool/platform-requirements.yaml
+  - docs/reqstream/agent-vision-tool.yaml
+  - docs/reqstream/agent-vision-tool/program.yaml
+  - docs/reqstream/agent-vision-tool/cli.yaml
+  - docs/reqstream/agent-vision-tool/cli/context.yaml
+  - docs/reqstream/agent-vision-tool/cli/help-command.yaml
+  - docs/reqstream/agent-vision-tool/self-test.yaml
+  - docs/reqstream/agent-vision-tool/self-test/validation.yaml
+  - docs/reqstream/agent-vision-tool/utilities.yaml
+  - docs/reqstream/agent-vision-tool/utilities/path-helpers.yaml
+  - docs/reqstream/agent-vision-tool/platform-requirements.yaml
   - docs/reqstream/ots/help-cards.yaml
   - docs/reqstream/ots/xunit.yaml
   - docs/reqstream/ots/reqstream.yaml

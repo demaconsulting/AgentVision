@@ -10,9 +10,9 @@
 #   pwsh ./build.ps1 -All                      Full local build and all tests
 #   pwsh ./build.ps1 -Changed [-Base <ref>]    Only the test projects affected by the changes since <ref>
 #                                              (default origin/main, else main) plus uncommitted changes
-#   pwsh ./build.ps1 -Project DemaConsulting.TemplateDotNetTool.Tests
+#   pwsh ./build.ps1 -Project DemaConsulting.AgentVision.Tool.Tests
 #                                              Only the test projects affected by the named projects (full or short
-#                                              names: Tests finds DemaConsulting.TemplateDotNetTool.Tests, Core is the
+#                                              names: Tests finds DemaConsulting.AgentVision.Tool.Tests, Core is the
 #                                              core library; -Help lists this repository's names)
 #   Add -DryRun to any scope to print the selection without building anything.
 #   With no arguments the usage text is printed and the script exits 1 (a scope must be chosen).
@@ -72,7 +72,7 @@ Import-Module (Join-Path $PSScriptRoot 'scripts/ProjectScripts.psm1') -Force
 
 # [PROJECT-SPECIFIC] Repository files that tests read at run time (through the repository root, not through a
 # project item), mapped to the test project that reads them. Keep in step with the tests. Example:
-#   '^docs/user_guide/tool\.md$' = 'DemaConsulting.TemplateDotNetTool.Tests'
+#   '^docs/user_guide/tool\.md$' = 'DemaConsulting.AgentVision.Tool.Tests'
 $RuntimeReads = [ordered]@{}
 
 # [PROJECT-SPECIFIC] Short -Project names that no resolution rule can derive (exact name, unique dot-segment suffix,
@@ -123,7 +123,7 @@ function Show-Usage {
         }) `
         -ChecksLabel 'Projects and aliases (-Project names; short names such as Core or Tests also work)' `
         -Checks @(try { Get-ProjectNameList (Get-ProjectGraph -Root $ProjectRoots) $ProjectAliases } catch { }) `
-        -Examples @('-Changed', '-Project DemaConsulting.TemplateDotNetTool', '-Changed -DryRun', '-All')
+        -Examples @('-Changed', '-Project DemaConsulting.AgentVision.Tool', '-Changed -DryRun', '-All')
 }
 
 if ($Help) { Show-Usage; exit 0 }
