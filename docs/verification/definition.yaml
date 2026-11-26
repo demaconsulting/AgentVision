@@ -31,6 +31,7 @@ input-files:
   - docs/verification/agent-vision-tool.md
   - docs/verification/agent-vision-tool/program.md
   - docs/verification/agent-vision-tool/cameras-command.md
+  - docs/verification/agent-vision-tool/snap-command.md
   - docs/verification/agent-vision-tool/cli.md
   - docs/verification/agent-vision-tool/cli/context.md
   - docs/verification/agent-vision-tool/cli/help-command.md

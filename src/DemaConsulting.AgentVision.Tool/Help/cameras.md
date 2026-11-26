@@ -11,6 +11,7 @@ order: 3
 see-also:
   - getting-started
   - command-line
+  - snap
 examples:
   - name: list
     kind: command
@@ -69,7 +70,10 @@ Camera 0: Integrated Webcam
 **Backends.** Windows can report one physical camera through
 several backends: DirectShow, Media Foundation, and Video for
 Windows. The same camera may then appear more than once, each
-time with its own `Backend` and `Id`. Linux reports cameras
+time with its own `Backend` and `Id`. The Video for Windows entry
+(usually named `Default`) is a legacy backend that often cannot be
+opened; use the DirectShow or Media Foundation entry of the camera.
+Linux reports cameras
 through V4L2, which lists each video device node.
 
 **No camera found.** Check these in order:
@@ -87,4 +91,6 @@ through V4L2, which lists each video device node.
 The listing follows `--silent` and `--log`; the command that
 [[#log]] prints keeps it in a file. Giving the command twice is
 an error; the command that [[#repeated]] prints shows the
-message. See [[command-line]] for the other errors.
+message. To save a picture of a camera that you found, use the
+index or the `Id` with the `snap` command; see [[snap]]. See
+[[command-line]] for the other errors.

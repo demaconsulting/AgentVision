@@ -34,6 +34,7 @@ input-files:
   - docs/design/agent-vision-tool.md
   - docs/design/agent-vision-tool/program.md
   - docs/design/agent-vision-tool/cameras-command.md
+  - docs/design/agent-vision-tool/snap-command.md
   - docs/design/agent-vision-tool/cli.md
   - docs/design/agent-vision-tool/cli/context.md
   - docs/design/agent-vision-tool/cli/help-command.md

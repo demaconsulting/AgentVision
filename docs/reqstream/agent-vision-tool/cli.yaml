@@ -157,6 +157,18 @@ sections:
             tests:
               - CliSubsystem_CamerasFlow_ContextAndProgram_ListsCameras
 
+          - id: AgentVisionTool-Cli-Snap
+            title: >-
+              The Cli subsystem shall support the `snap` command and its options, and reject it when its required
+              options are missing.
+            justification: |
+              Users and AI agents take a picture with a command and options. The Cli subsystem parses them so
+              that the rest of the tool reads properties, and rejects an incomplete command before any camera
+              is switched on.
+            tests:
+              - CliSubsystem_Snap_ArgumentsAreParsed
+              - CliSubsystem_Snap_MissingRequiredOption_IsRejected
+
           - id: AgentVisionTool-Cli-HelpTopics
             title: The Cli subsystem shall answer the `help` command from built-in help cards.
             justification: |

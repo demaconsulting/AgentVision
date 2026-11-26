@@ -135,6 +135,80 @@ public class IntegrationTests
     }
 
     /// <summary>
+    ///     Test that the snap command reports an unknown camera on stderr and exits non-zero, on any machine.
+    /// </summary>
+    [Fact]
+    public void AgentVisionTool_Snap_UnknownCamera_ReportsErrorAndExitsNonZero()
+    {
+        // Arrange: an output file that must not be created
+        var path = Path.Combine(Path.GetTempPath(), $"integration_snap_{Guid.NewGuid()}.png");
+
+        // Act: snap camera 99, which no machine has, so no camera is opened
+        var exitCode = Runner.Run(
+            out var output,
+            "dotnet",
+            _dllPath,
+            "snap",
+            "--camera",
+            "99",
+            "--output",
+            path);
+
+        // Assert: a clear message, a non-zero exit code, and no file
+        Assert.NotEqual(0, exitCode);
+        Assert.Contains("Error: Camera '99' was not found", output);
+        Assert.False(File.Exists(path));
+    }
+
+    /// <summary>
+    ///     Test that the snap command rejects a crop that is not four integers.
+    /// </summary>
+    [Fact]
+    public void AgentVisionTool_Snap_InvalidCrop_ReportsErrorAndExitsNonZero()
+    {
+        // Arrange: (none — constructor initializes _dllPath)
+
+        // Act: run the snap command with a malformed crop
+        var exitCode = Runner.Run(
+            out var output,
+            "dotnet",
+            _dllPath,
+            "snap",
+            "--camera",
+            "0",
+            "--output",
+            "frame.png",
+            "--crop",
+            "10,20");
+
+        // Assert: the error names the option and the expected form
+        Assert.NotEqual(0, exitCode);
+        Assert.Contains("--crop requires four integers x,y,width,height", output);
+    }
+
+    /// <summary>
+    ///     Test that the snap command rejects a missing output file.
+    /// </summary>
+    [Fact]
+    public void AgentVisionTool_Snap_MissingOutput_ReportsErrorAndExitsNonZero()
+    {
+        // Arrange: (none — constructor initializes _dllPath)
+
+        // Act: run the snap command without --output
+        var exitCode = Runner.Run(
+            out var output,
+            "dotnet",
+            _dllPath,
+            "snap",
+            "--camera",
+            "0");
+
+        // Assert: the error names the missing option
+        Assert.NotEqual(0, exitCode);
+        Assert.Contains("requires --output", output);
+    }
+
+    /// <summary>
     ///     Test that validate flag runs self-validation and outputs summary.
     /// </summary>
     [Fact]

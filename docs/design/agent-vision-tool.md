@@ -7,13 +7,14 @@
 The AgentVisionTool system is the `agentvision` command-line application built on .NET. It is the thin
 front-end of the AgentVision product: it handles arguments, output, exit codes, help, and self-validation, and
 calls the *AgentVisionCore* library for everything to do with cameras, which never depends on the tool. It is
-structured as one system containing two top-level units (`Program` and `CamerasCommand`) and three subsystems
-(`Cli`, `SelfTest`, `Utilities`):
+structured as one system containing three top-level units (`Program`, `CamerasCommand`, and `SnapCommand`) and
+three subsystems (`Cli`, `SelfTest`, `Utilities`):
 
 ```mermaid
 flowchart TD
     Program
     CamerasCommand
+    SnapCommand
     subgraph Cli
         Context
         HelpCommand
@@ -26,6 +27,7 @@ flowchart TD
     end
     subgraph AgentVisionCore
         CameraEnumerator
+        CameraSnapper
     end
     Program --> HelpCommand
     Program --> Context
@@ -33,15 +35,20 @@ flowchart TD
     Program --> CamerasCommand
     CamerasCommand --> CameraEnumerator
     CamerasCommand --> Context
+    Program --> SnapCommand
+    SnapCommand --> CameraSnapper
+    SnapCommand --> Context
     Validation --> Program
     Validation --> PathHelpers
 ```
 
 `Program` is the entry point. It first offers the arguments to `HelpCommand`, which answers the
 `help` command from the built-in help cards; otherwise it creates a `Context` from the `Cli`
-subsystem, dispatches to `Validation` when `--validate` is passed or to `CamerasCommand` when the
-`cameras` command is given, and returns the exit code from `Context`. `CamerasCommand` prints the
-cameras that the library's `CameraEnumerator` lists. `Validation` calls `Program.Run` recursively to
+subsystem, dispatches to `Validation` when `--validate` is passed, to `CamerasCommand` when the
+`cameras` command is given, or to `SnapCommand` when the `snap` command is given, and returns the exit code
+from `Context`. `CamerasCommand` prints the cameras that the library's `CameraEnumerator` lists.
+`SnapCommand` maps the options to a request for the library's `CameraSnapper`, which opens the camera, saves one
+picture, and closes the camera, and reports the result or the error. `Validation` calls `Program.Run` recursively to
 exercise the tool during self-testing, and uses `PathHelpers` to construct safe temporary file paths.
 
 ## External Interfaces
@@ -51,13 +58,16 @@ exercise the tool during self-testing, and uses `PathHelpers` to construct safe 
 - *Type*: CLI.
 - *Role*: Consumer (the host environment invokes the system with command-line arguments).
 - *Contract*: Accepts the `help` command as the first argument (see Help Command below), or the
-  `cameras` command, which may stand among the options, and the
+  `cameras` or `snap` command, which may stand among the options, and the
   arguments `-v`/`--version`, `-?`/`-h`/`--help`, `--silent`, `--validate`,
   `--results <file>`, `--result <file>` (legacy alias for `--results`), `--depth <n>`, and
-  `--log <file>`. Returns exit code 0 for success and 1 for failures. The `cameras` command
-  returns 0 also when no camera is found.
-- *Constraints*: Unknown arguments, and a `cameras` command given twice, cause exit code 1 and an
-  error message on stderr. Argument
+  `--log <file>`; the `snap` command also takes `--camera <index|id|name>`, `--output <file>`,
+  `--crop <x,y,w,h>`, `--width <px>`, `--height <px>`, `--fps <n>`, and `--warmup <ms>`. Returns exit code 0
+  for success and 1 for failures. The `cameras` command returns 0 also when no camera is found; the `snap`
+  command returns 0 only when the picture was saved.
+- *Constraints*: Unknown arguments, a command given twice, the `cameras` and `snap` commands together, a `snap`
+  option without the `snap` command, a `snap` command without `--camera` or `--output`, and invalid option
+  values cause exit code 1 and an error message on stderr. Argument
   errors are found before `--silent` and `--log` take effect, so they are always printed and never
   logged.
 
@@ -76,19 +86,28 @@ exercise the tool during self-testing, and uses `PathHelpers` to construct safe 
 
 - *Type*: Standard I/O.
 - *Role*: Provider.
-- *Contract*: Writes version, banner, help text, the camera list, validation summary, or the default
-  guidance message depending
-  on the flags and command provided. Suppressed when `--silent` is active; the log file still receives all
-  output.
+- *Contract*: Writes version, banner, help text, the camera list, the saved-picture line, validation summary, or the
+  default guidance message depending on the flags and command provided. Suppressed when `--silent` is active; the log
+  file still receives all output.
 - *Constraints*: Human-readable text; no machine-parseable format contract.
 
 **Standard Error**: Error message output written to `Console.Error`.
 
 - *Type*: Standard I/O.
 - *Role*: Provider.
-- *Contract*: Writes error messages in red when a failure occurs. Suppressed when `--silent`
+- *Contract*: Writes error messages in red when a failure occurs, including the camera, file, and crop errors of
+  the `snap` command. Suppressed when `--silent`
   is active but the exit code is still set to 1.
 - *Constraints*: Color output requires a terminal that supports `ConsoleColor`.
+
+**Picture File**: The file that the `snap` command writes.
+
+- *Type*: File.
+- *Role*: Provider.
+- *Contract*: When the `snap` command succeeds, `--output <file>` holds one picture of the camera in the
+  format that the extension (`.png`, `.jpg`, `.jpeg`, `.bmp`) chooses, cropped when `--crop` was given.
+  An existing file is overwritten.
+- *Constraints*: The folder must exist. When the command fails, no new file is written.
 
 **Log File**: Optional persistent output file.
 
@@ -111,8 +130,9 @@ exercise the tool during self-testing, and uses `PathHelpers` to construct safe 
 ## Dependencies
 
 - **AgentVisionCore** (the `DemaConsulting.AgentVision.Core` library, produced in this repository): the
-  `CamerasCommand` unit uses its `CameraEnumerator` to list the cameras. The tool package bundles the
-  library, and through it FlashCap (see *FlashCap Integration Design*), which only the library uses.
+  `CamerasCommand` unit uses its `CameraEnumerator` to list the cameras, and the `SnapCommand` unit uses its
+  `CameraSnapper` to take a picture. The tool package bundles the library, and through it FlashCap (see
+  *FlashCap Integration Design*) and CanvasNet (see *CanvasNet Integration Design*), which only the library uses.
 - **DemaConsulting.TestResults**: provides `TestResults`, `TestResult`, and `TestOutcome` for
   accumulating self-validation results.
 - **DemaConsulting.TestResults.IO**: provides `TrxSerializer` and `JUnitSerializer` for writing
@@ -142,6 +162,7 @@ N/A - not a safety-classified software item.
        then return.
      - `--validate` flag → `Validation.Run(context)`.
      - `cameras` command → `CamerasCommand.Run(context)`.
+     - `snap` command → `SnapCommand.Run(context)`.
      - Neither → `RunToolLogic(context)`, which writes one line of guidance.
 5. `Program.Main` returns `context.ExitCode` (0 if no errors were reported, 1 otherwise).
 

@@ -16,6 +16,8 @@ N/A - standard test environment.
 - All unit tests pass with zero failures.
 - All flag properties are correctly set for each recognized argument.
 - `ArgumentException` is thrown for all unknown or malformed arguments.
+- The `snap` command and its options are parsed into typed properties, and every missing required option, option
+  without the command, command conflict, and invalid value is rejected with a message that names the option.
 - `ExitCode` is 1 after `WriteError` is called and 0 otherwise.
 - Silent mode suppresses console output but does not affect the log file.
 
@@ -80,6 +82,61 @@ thrown. This scenario is tested by `Context_Create_RepeatedCamerasCommand_Throws
 **Context_Create_UnknownCommand_ThrowsArgumentException**: `Context.Create` is called with
 `["list"]`; an `ArgumentException` for the unsupported argument `list` is thrown. This scenario is
 tested by `Context_Create_UnknownCommand_ThrowsArgumentException`.
+
+**Context_Create_SnapCommand_SetsSnapAndOptions**: `Context.Create` is called with the `snap` command and every
+option; the command and each option value are recorded, and the exit code is 0. This scenario is tested by
+`Context_Create_SnapCommand_SetsSnapAndOptions`.
+
+**Context_Create_SnapRequiredOptionsOnly_LeavesOptionalOptionsUnset**: Only `--camera` and `--output` are given; the
+crop, sizes, frame rate, and warm-up are unset. This scenario is tested by
+`Context_Create_SnapRequiredOptionsOnly_LeavesOptionalOptionsUnset`.
+
+**Context_Create_SnapOptionsAmongOtherOptions_SetsSnapAndOptions**: The command stands last, among `--silent` and the
+options, with a warm-up of 0; everything is recorded. This scenario is tested by
+`Context_Create_SnapOptionsAmongOtherOptions_SetsSnapAndOptions`.
+
+**Context_Create_SnapFpsWithDecimalPoint_UsesInvariantCulture**: With a culture whose decimal separator is a comma,
+`--fps 7.5` is read as 7.5. This scenario is tested by `Context_Create_SnapFpsWithDecimalPoint_UsesInvariantCulture`.
+
+**Context_Create_SnapWithHelp_DoesNotRequireOptions**: `["snap", "--help"]` is accepted although the required options
+are missing. This scenario is tested by `Context_Create_SnapWithHelp_DoesNotRequireOptions`.
+
+**Context_Create_SnapWithoutCamera_ThrowsArgumentException**: The `snap` command without `--camera` throws an
+`ArgumentException` that says `requires --camera`. This scenario is tested by
+`Context_Create_SnapWithoutCamera_ThrowsArgumentException`.
+
+**Context_Create_SnapWithoutOutput_ThrowsArgumentException**: The `snap` command without `--output` throws an
+`ArgumentException` that says `requires --output`. This scenario is tested by
+`Context_Create_SnapWithoutOutput_ThrowsArgumentException`.
+
+**Context_Create_SnapOptionWithoutSnap_ThrowsArgumentException**: Each of the seven `snap` options without the
+command throws an `ArgumentException` that names the option and the command. This scenario is tested by
+`Context_Create_SnapOptionWithoutSnap_ThrowsArgumentException`.
+
+**Context_Create_SnapAndCameras_ThrowsArgumentException**: The `cameras` and `snap` commands together throw an
+`ArgumentException` that says only one command can be given. This scenario is tested by
+`Context_Create_SnapAndCameras_ThrowsArgumentException`.
+
+**Context_Create_RepeatedSnapCommand_ThrowsArgumentException**: `["snap", "snap"]` throws an `ArgumentException` that
+says the command can be given only once. This scenario is tested by
+`Context_Create_RepeatedSnapCommand_ThrowsArgumentException`.
+
+**Context_Create_SnapCropInvalid_ThrowsArgumentException**: A crop with too few or too many values, a value that is not
+an integer, a negative position, or a size that is not positive, or an empty crop, throws an `ArgumentException` that
+names `--crop` and the expected form. This scenario is tested by
+`Context_Create_SnapCropInvalid_ThrowsArgumentException`.
+
+**Context_Create_SnapIntegerOptionInvalid_ThrowsArgumentException**: A `--width` or `--height` that is zero, negative,
+or not an integer, and a `--warmup` that is negative, above 60000, or not an integer, throws an `ArgumentException`
+that names the option. This scenario is tested by `Context_Create_SnapIntegerOptionInvalid_ThrowsArgumentException`.
+
+**Context_Create_SnapFpsInvalid_ThrowsArgumentException**: A `--fps` that is zero, negative, not a number, not finite,
+or empty throws an `ArgumentException` that names the option. This scenario is tested by
+`Context_Create_SnapFpsInvalid_ThrowsArgumentException`.
+
+**Context_Create_SnapOptionWithoutValue_ThrowsArgumentException**: Each of the seven `snap` options as the last
+argument, without its value, throws an `ArgumentException`. This scenario is tested by
+`Context_Create_SnapOptionWithoutValue_ThrowsArgumentException`.
 
 **Context_Create_LogFlag_WithoutValue_ThrowsArgumentException**: `Context.Create` is called
 with `["--log"]` (value missing); an `ArgumentException` is thrown. This scenario is tested by

@@ -115,8 +115,8 @@ internal static class Program
     /// <param name="context">The context containing command line arguments and program state.</param>
     /// <remarks>
     ///     Dispatch is priority-ordered: version check first, then help, then self-validation, then the
-    ///     <c>cameras</c> command, then the default tool behavior. Only the highest-priority matching action
-    ///     is executed per invocation.
+    ///     <c>cameras</c> command, then the <c>snap</c> command, then the default tool behavior. Only the
+    ///     highest-priority matching action is executed per invocation.
     /// </remarks>
     public static void Run(Context context)
     {
@@ -151,7 +151,14 @@ internal static class Program
             return;
         }
 
-        // Priority 5: Default behavior when no action flag or command was given
+        // Priority 5: The snap command
+        if (context.Snap)
+        {
+            SnapCommand.Run(context);
+            return;
+        }
+
+        // Priority 6: Default behavior when no action flag or command was given
         RunToolLogic(context);
     }
 
@@ -177,6 +184,16 @@ internal static class Program
         context.WriteLine("");
         context.WriteLine("Commands:");
         context.WriteLine("  cameras                    List the available cameras and the formats they support");
+        context.WriteLine("  snap                       Save one picture of a camera to a file");
+        context.WriteLine("");
+        context.WriteLine("Options of the snap command:");
+        context.WriteLine("  --camera <camera>          The camera: its index, identifier, or name (required)");
+        context.WriteLine("  --output <file>            The file to write: .png, .jpg, .jpeg, or .bmp (required)");
+        context.WriteLine("  --crop <x,y,w,h>           Keep only this region of the picture, in pixels");
+        context.WriteLine("  --width <px>               Prefer this frame width");
+        context.WriteLine("  --height <px>              Prefer this frame height");
+        context.WriteLine("  --fps <n>                  Prefer this frame rate");
+        context.WriteLine("  --warmup <ms>              Discard frames for this long after the camera starts (default: 1000)");
         context.WriteLine("");
         context.WriteLine("Options:");
         context.WriteLine("  -v, --version              Display version information");

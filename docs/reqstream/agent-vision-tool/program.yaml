@@ -63,6 +63,18 @@ sections:
             tests:
               - Program_Run_CamerasCommand_ListsOrReportsNone
 
+          - id: AgentVisionTool-Program-Snap
+            title: >-
+              The Program class shall run the snap command when the `snap` command is given, after the cameras
+              command in priority, and shall list the command and its options in the usage text.
+            justification: |
+              The `snap` command is how users and AI agents take a picture. The Program class is the dispatcher
+              that routes the parsed command to the code that answers it, and the usage text is where a user
+              first looks for the command and its options.
+            tests:
+              - Program_Run_SnapCommand_RunsSnap
+              - Program_Run_Help_ListsSnapAndOptions
+
           - id: AgentVisionTool-Program-NoCommand
             title: >-
               The Program class shall display guidance to the usage text and the help topics, and succeed,

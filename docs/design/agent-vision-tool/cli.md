@@ -81,9 +81,9 @@ passes it to all other units that produce output.
 `HelpCommand` writes its answers to the console itself. It is the one exception to `Context`
 owning all output, because the `help` command is answered before a `Context` exists.
 
-The subsystem has no dependencies on other tool subsystems. `Context` uses only .NET BCL types
-(`Console`, `StreamWriter`); `HelpCommand` uses the HelpCards OTS library and reads the
-tool version from `Program.Version`.
+The subsystem has no dependencies on other tool subsystems. `Context` uses .NET BCL types (`Console`, `StreamWriter`)
+and the library's `CropRectangle` value type; `HelpCommand` uses the HelpCards OTS library and reads the tool version
+from `Program.Version`.
 
 Error handling flows from `Context.Create` to `Program.Main`: argument parsing errors propagate
 as `ArgumentException`; log-file errors propagate as `InvalidOperationException`. Both are

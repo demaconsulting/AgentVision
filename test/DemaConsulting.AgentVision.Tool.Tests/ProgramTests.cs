@@ -183,6 +183,73 @@ public class ProgramTests
     }
 
     /// <summary>
+    ///     Test that Run with the snap command runs it: a camera that does not exist is reported as an error.
+    /// </summary>
+    [Fact]
+    public void Program_Run_SnapCommand_RunsSnap()
+    {
+        // Arrange: the snap command for camera 99, which no machine has; the real source is used but never opened
+        var originalOut = Console.Out;
+        var originalError = Console.Error;
+        var path = Path.Combine(Path.GetTempPath(), $"program_snap_{Guid.NewGuid()}.png");
+        try
+        {
+            using var outWriter = new StringWriter();
+            using var errorWriter = new StringWriter();
+            Console.SetOut(outWriter);
+            Console.SetError(errorWriter);
+            using var context = Context.Create(["snap", "--camera", "99", "--output", path]);
+
+            // Act: execute the operation being tested
+            Program.Run(context);
+
+            // Assert: the banner is printed, the snap command ran and reported the camera, and the run failed
+            Assert.Contains("AgentVision Tool version", outWriter.ToString());
+            Assert.Contains("Error: Camera '99' was not found", errorWriter.ToString());
+            Assert.Equal(1, context.ExitCode);
+            Assert.False(File.Exists(path));
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+        }
+    }
+
+    /// <summary>
+    ///     Test that the usage text lists the snap command and its options.
+    /// </summary>
+    [Fact]
+    public void Program_Run_Help_ListsSnapAndOptions()
+    {
+        // Arrange: setup test conditions
+        var originalOut = Console.Out;
+        try
+        {
+            using var outWriter = new StringWriter();
+            Console.SetOut(outWriter);
+            using var context = Context.Create(["--help"]);
+
+            // Act: execute the operation being tested
+            Program.Run(context);
+
+            // Assert: the command and each of its options are listed
+            var output = outWriter.ToString();
+            Assert.Contains("snap", output);
+            foreach (var option in new[] { "--camera", "--output", "--crop", "--width", "--height", "--fps", "--warmup" })
+            {
+                Assert.Contains(option, output);
+            }
+
+            Assert.Equal(0, context.ExitCode);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
+    }
+
+    /// <summary>
     ///     Test that Run without a command points to the usage text and the help topics.
     /// </summary>
     [Fact]

@@ -11,6 +11,7 @@ order: 1
 see-also:
   - command-line
   - cameras
+  - snap
   - self-validation
 examples:
   - name: install-local
@@ -59,10 +60,17 @@ examples:
     language: shell
     description: List the cameras of this machine. Exits 0, also when there is no camera.
     content: '{{tool}} cameras'
+  - name: snap
+    kind: snippet
+    language: shell
+    save-as: snap.sh
+    description: Save one picture of the first camera to a file. Needs a camera.
+    content: '{{tool}} snap --camera 0 --output frame.png'
 ---
 {{tool}} {{version}} is a .NET tool.
 It reads and writes only the files that options name, apart from a temporary folder that `--validate` uses.
-It looks at the video capture devices of the machine when you run `cameras`.
+It looks at the video capture devices of the machine when you run `cameras`, and it switches a camera on
+for a moment when you run `snap`.
 
 1. **Install it.** The tool needs the .NET 10 SDK or later. For a
    repository or CI, install it as a local tool. Run the commands
@@ -87,6 +95,9 @@ It looks at the video capture devices of the machine when you run `cameras`.
 4. **List your cameras.** The command that [[#cameras]] prints lists
    the cameras of the machine and the video formats each one
    supports. It exits 0 when there is no camera too; see [[cameras]].
+5. **Save a picture.** The command that [[#snap]] prints saves one
+   picture of a camera to a file. Use the index or the `Id` that `cameras`
+   shows; see [[snap]] for cropping, sizes, and the warm-up.
 
 Print any help topic with `{{tool}} help <topic>`, as in the command that
 [[#topic]] prints. Add `--search <words>` to find a topic, and `--json` to

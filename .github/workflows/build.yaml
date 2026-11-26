@@ -422,6 +422,22 @@ jobs:
           agentvision cameras || { echo "✗ Cameras command failed"; exit 1; }
           echo "✓ Cameras command succeeded"
 
+      # A CI runner has no camera, so the command must fail with a clear message and an exit code other than 0,
+      # and must not leave a picture behind.
+      - name: Test snap without a camera
+        shell: bash
+        run: |
+          echo "Testing agentvision snap without a camera..."
+          if agentvision snap --camera 0 --output "$RUNNER_TEMP/frame.png" 2> "$RUNNER_TEMP/snap-error.txt"; then
+            echo "✗ Snap command succeeded without a camera"; exit 1
+          fi
+          cat "$RUNNER_TEMP/snap-error.txt"
+          if ! grep -q "was not found" "$RUNNER_TEMP/snap-error.txt"; then
+            echo "✗ Snap command gave no clear message"; exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/frame.png" || { echo "✗ Snap command left a file behind"; exit 1; }
+          echo "✓ Snap command failed cleanly without a camera"
+
       - name: Run self-validation
         shell: bash
         run: |

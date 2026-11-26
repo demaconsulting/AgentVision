@@ -44,16 +44,16 @@ Inspects flags in priority order: (1) if `context.Version` is true, calls
 `context.WriteLine(Version)` and returns; (2) calls `PrintBanner`; (3) if `context.Help` is
 true, calls `PrintHelp` and returns; (4) if `context.Validate` is true, calls
 `Validation.Run(context)`; (5) if `context.Cameras` is true, calls `CamerasCommand.Run(context)`;
-(6) otherwise calls `RunToolLogic(context)`.
+(6) if `context.Snap` is true, calls `SnapCommand.Run(context)`; (7) otherwise calls `RunToolLogic(context)`.
 
 **PrintBanner**: Writes the tool name, version, and copyright line to `context`.
 
 - *Parameters*: `Context context` — output target.
 - *Returns*: `void`.
 
-**PrintHelp**: Writes the usage synopsis (`agentvision [options] [command]` and
-`agentvision help [topic]`), the commands table (`cameras`), and the options table to `context`, and
-ends with `HelpCommand.Default.Footer`, the pointer to the help command.
+**PrintHelp**: Writes the usage synopsis (`agentvision [options] [command]` and `agentvision help [topic]`), the
+commands table (`cameras` and `snap`), the options of the `snap` command, and the options table to `context`, and ends
+with `HelpCommand.Default.Footer`, the pointer to the help command.
 
 - *Parameters*: `Context context` — output target.
 - *Returns*: `void`.
@@ -84,6 +84,7 @@ propagate to `Main`.
   set.
 - **CamerasCommand** — `Program.Run` calls `CamerasCommand.Run(context)` when the `cameras` command
   is given.
+- **SnapCommand** — `Program.Run` calls `SnapCommand.Run(context)` when the `snap` command is given.
 
 ### Callers
 

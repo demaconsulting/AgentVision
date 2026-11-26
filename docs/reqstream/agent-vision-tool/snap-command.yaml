@@ -1,0 +1,61 @@
+---
+# Software Unit Requirements for the SnapCommand Class
+#
+# The SnapCommand unit implements the `snap` command: it maps the options to a request of the
+# AgentVision.Core library's CameraSnapper and reports the saved picture or the error. It is a thin
+# front-end; the camera work belongs to the library.
+
+sections:
+  - title: AgentVisionTool Requirements
+    sections:
+      - title: SnapCommand Unit Requirements
+        requirements:
+          - id: AgentVisionTool-SnapCommand-Snap
+            title: >-
+              The SnapCommand class shall save one picture of the chosen camera to the output file, with the crop,
+              picture size, frame rate, and warm-up that were requested, and report the saved file, its size, and
+              the camera.
+            justification: |
+              This is the purpose of the command. The options must reach the library unchanged and the options
+              that were not given must keep the library defaults, so that the picture is the one that was asked
+              for. The reported size is the size of the saved file, after cropping, and tells an agent what it
+              will read.
+            tests:
+              - SnapCommand_Run_FakeCamera_SavesFileAndReportsIt
+              - SnapCommand_Run_CameraByName_SavesFileAndClosesCamera
+              - SnapCommand_Run_WithCropAndFormat_PassesOptions
+
+          - id: AgentVisionTool-SnapCommand-Errors
+            title: >-
+              The SnapCommand class shall report an unknown camera, a camera that cannot be opened or fails, an
+              unsupported file type, a missing output folder, and a crop outside the picture with a clear message
+              on the error channel and exit code 1, shall leave no camera open, and shall not show the parameter
+              names of the library.
+            justification: |
+              A missing picture must never be mistaken for a good one. The message tells the user what to change,
+              the exit code lets a script stop, and a camera that stayed open would block every other program that
+              wants it. The parameter names of the library mean nothing on the command line.
+            tests:
+              - SnapCommand_Run_CameraNotFound_WritesErrorAndExitCodeOne
+              - SnapCommand_Run_OpenFailure_WritesErrorAndExitCodeOne
+              - SnapCommand_Run_CameraFails_WritesErrorAndReleasesCamera
+              - SnapCommand_Run_OutputDirectoryMissing_WritesErrorAndExitCodeOne
+              - SnapCommand_Run_UnsupportedExtension_WritesErrorWithoutParameterSuffix
+              - SnapCommand_Run_CropOutsidePicture_WritesErrorAndExitCodeOne
+              - SnapCommand_Run_ContextWithoutCamera_ThrowsInvalidOperationException
+              - SnapCommand_Run_ContextWithoutOutput_ThrowsInvalidOperationException
+              - SnapCommand_Run_NullContext_ThrowsArgumentNullException
+              - SnapCommand_Run_NullSnapper_ThrowsArgumentNullException
+
+          - id: AgentVisionTool-SnapCommand-Output
+            title: >-
+              The SnapCommand class shall write the result and the errors through the context, so that the silent
+              and log options apply to them and an error still sets exit code 1 when the console is silent.
+            justification: |
+              Scripts and AI agents use the same output options for every command. The result and the errors
+              follow them: hidden from the console under the silent option and kept in the log file when one is
+              given, while the exit code keeps reporting a failure.
+            tests:
+              - SnapCommand_Run_SilentContext_WritesNothingToConsole
+              - SnapCommand_Run_SilentContextWithError_StillExitsNonZero
+              - SnapCommand_Run_LogFile_ReceivesOutput

@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Globalization;
+using DemaConsulting.AgentVision.Core.Imaging;
 using DemaConsulting.AgentVision.Tool.Cli;
 
 namespace DemaConsulting.AgentVision.Tool.Tests;
@@ -43,6 +45,9 @@ public class ContextTests
         Assert.False(context.Silent);
         Assert.False(context.Validate);
         Assert.False(context.Cameras);
+        Assert.False(context.Snap);
+        Assert.Null(context.Camera);
+        Assert.Null(context.OutputFile);
         Assert.Null(context.ResultsFile);
         Assert.Equal(1, context.HeadingDepth);
         Assert.Equal(0, context.ExitCode);
@@ -249,6 +254,255 @@ public class ContextTests
         // Act & Assert: the command can be given only once
         var exception = Assert.Throws<ArgumentException>(() => Context.Create(["cameras", "cameras"]));
         Assert.Contains("only once", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test creating a context with the snap command and all of its options.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapCommand_SetsSnapAndOptions()
+    {
+        // Act: create a context from the snap command with every option
+        using var context = Context.Create(
+            ["snap", "--camera", "Desk Camera", "--output", "frame.png", "--crop", "10,20,30,40", "--width", "1280",
+             "--height", "720", "--fps", "29.97", "--warmup", "500"]);
+
+        // Assert: the command and every option are recorded, and there is no error
+        Assert.True(context.Snap);
+        Assert.False(context.Cameras);
+        Assert.Equal("Desk Camera", context.Camera);
+        Assert.Equal("frame.png", context.OutputFile);
+        Assert.Equal(new CropRectangle(10, 20, 30, 40), context.Crop);
+        Assert.Equal(1280, context.Width);
+        Assert.Equal(720, context.Height);
+        Assert.Equal(29.97, context.Fps);
+        Assert.Equal(500, context.WarmupMilliseconds);
+        Assert.Equal(0, context.ExitCode);
+    }
+
+    /// <summary>
+    ///     Test that the snap options that were not given stay unset, so the library defaults apply.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapRequiredOptionsOnly_LeavesOptionalOptionsUnset()
+    {
+        // Act: create a context with only the required options
+        using var context = Context.Create(["snap", "--camera", "0", "--output", "frame.jpg"]);
+
+        // Assert: the optional options are not set
+        Assert.True(context.Snap);
+        Assert.Null(context.Crop);
+        Assert.Null(context.Width);
+        Assert.Null(context.Height);
+        Assert.Null(context.Fps);
+        Assert.Null(context.WarmupMilliseconds);
+    }
+
+    /// <summary>
+    ///     Test that the snap command and its options may stand among the other options in any order.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapOptionsAmongOtherOptions_SetsSnapAndOptions()
+    {
+        // Act: create a context with the command last and a general option in between
+        using var context = Context.Create(
+            ["--output", "frame.bmp", "--silent", "--camera", "1", "--warmup", "0", "snap"]);
+
+        // Assert: everything is recorded, including a warm-up of zero
+        Assert.True(context.Snap);
+        Assert.True(context.Silent);
+        Assert.Equal("1", context.Camera);
+        Assert.Equal("frame.bmp", context.OutputFile);
+        Assert.Equal(0, context.WarmupMilliseconds);
+    }
+
+    /// <summary>
+    ///     Test that help can be asked for the snap command without giving its required options.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapWithHelp_DoesNotRequireOptions()
+    {
+        // Act: create a context that asks for the usage text
+        using var context = Context.Create(["snap", "--help"]);
+
+        // Assert: the command and the help flag are recorded and nothing is rejected
+        Assert.True(context.Snap);
+        Assert.True(context.Help);
+        Assert.Null(context.Camera);
+    }
+
+    /// <summary>
+    ///     Test that the snap command without a camera is rejected.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapWithoutCamera_ThrowsArgumentException()
+    {
+        // Act & Assert: the message names the missing option
+        var exception = Assert.Throws<ArgumentException>(() => Context.Create(["snap", "--output", "frame.png"]));
+        Assert.Contains("requires --camera", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that the snap command without an output file is rejected.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapWithoutOutput_ThrowsArgumentException()
+    {
+        // Act & Assert: the message names the missing option
+        var exception = Assert.Throws<ArgumentException>(() => Context.Create(["snap", "--camera", "0"]));
+        Assert.Contains("requires --output", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that every snap option without the snap command is rejected.
+    /// </summary>
+    /// <param name="option">The option.</param>
+    /// <param name="value">A valid value of the option.</param>
+    [Theory]
+    [InlineData("--camera", "0")]
+    [InlineData("--output", "frame.png")]
+    [InlineData("--crop", "0,0,1,1")]
+    [InlineData("--width", "640")]
+    [InlineData("--height", "480")]
+    [InlineData("--fps", "30")]
+    [InlineData("--warmup", "100")]
+    public void Context_Create_SnapOptionWithoutSnap_ThrowsArgumentException(string option, string value)
+    {
+        // Act & Assert: the message names the option and the command it belongs to
+        var exception = Assert.Throws<ArgumentException>(() => Context.Create([option, value]));
+        Assert.Contains(option, exception.Message);
+        Assert.Contains("'snap'", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that the snap and cameras commands cannot be combined.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapAndCameras_ThrowsArgumentException()
+    {
+        // Act & Assert: only one command is allowed
+        var exception = Assert.Throws<ArgumentException>(
+            () => Context.Create(["cameras", "snap", "--camera", "0", "--output", "frame.png"]));
+        Assert.Contains("Only one command", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that the snap command can be given only once.
+    /// </summary>
+    [Fact]
+    public void Context_Create_RepeatedSnapCommand_ThrowsArgumentException()
+    {
+        // Act & Assert: the command can be given only once
+        var exception = Assert.Throws<ArgumentException>(() => Context.Create(["snap", "snap"]));
+        Assert.Contains("only once", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that a crop that is not four valid integers is rejected.
+    /// </summary>
+    /// <param name="crop">The crop value.</param>
+    [Theory]
+    [InlineData("1,2,3")]
+    [InlineData("1,2,3,4,5")]
+    [InlineData("a,b,c,d")]
+    [InlineData("1,2,3,x")]
+    [InlineData("1.5,2,3,4")]
+    [InlineData("-1,0,10,10")]
+    [InlineData("0,-1,10,10")]
+    [InlineData("0,0,0,10")]
+    [InlineData("0,0,10,0")]
+    [InlineData("0,0,-5,10")]
+    [InlineData("")]
+    public void Context_Create_SnapCropInvalid_ThrowsArgumentException(string crop)
+    {
+        // Act & Assert: the message names the option and the expected form
+        var exception = Assert.Throws<ArgumentException>(
+            () => Context.Create(["snap", "--camera", "0", "--output", "frame.png", "--crop", crop]));
+        Assert.Contains("--crop requires four integers x,y,width,height", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that sizes and the warm-up that are not integers in range are rejected.
+    /// </summary>
+    /// <param name="option">The option.</param>
+    /// <param name="value">An invalid value.</param>
+    [Theory]
+    [InlineData("--width", "0")]
+    [InlineData("--width", "-5")]
+    [InlineData("--width", "wide")]
+    [InlineData("--height", "0")]
+    [InlineData("--height", "1.5")]
+    [InlineData("--warmup", "-1")]
+    [InlineData("--warmup", "60001")]
+    [InlineData("--warmup", "soon")]
+    public void Context_Create_SnapIntegerOptionInvalid_ThrowsArgumentException(string option, string value)
+    {
+        // Act & Assert: the message names the option
+        var exception = Assert.Throws<ArgumentException>(
+            () => Context.Create(["snap", "--camera", "0", "--output", "frame.png", option, value]));
+        Assert.Contains($"{option} requires an integer between", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that a frame rate that is not a number above zero is rejected.
+    /// </summary>
+    /// <param name="value">An invalid value.</param>
+    [Theory]
+    [InlineData("0")]
+    [InlineData("-30")]
+    [InlineData("fast")]
+    [InlineData("NaN")]
+    [InlineData("Infinity")]
+    [InlineData("")]
+    public void Context_Create_SnapFpsInvalid_ThrowsArgumentException(string value)
+    {
+        // Act & Assert: the message names the option
+        var exception = Assert.Throws<ArgumentException>(
+            () => Context.Create(["snap", "--camera", "0", "--output", "frame.png", "--fps", value]));
+        Assert.Contains("--fps requires a number above 0", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that every snap option without its value is rejected.
+    /// </summary>
+    /// <param name="option">The option.</param>
+    [Theory]
+    [InlineData("--camera")]
+    [InlineData("--output")]
+    [InlineData("--crop")]
+    [InlineData("--width")]
+    [InlineData("--height")]
+    [InlineData("--fps")]
+    [InlineData("--warmup")]
+    public void Context_Create_SnapOptionWithoutValue_ThrowsArgumentException(string option)
+    {
+        // Act & Assert: the option is the last argument, so its value is missing
+        var exception = Assert.Throws<ArgumentException>(() => Context.Create(["snap", option]));
+        Assert.Contains($"{option} requires", exception.Message);
+    }
+
+    /// <summary>
+    ///     Test that the frame rate is read with the invariant culture, so a dot is the decimal separator everywhere.
+    /// </summary>
+    [Fact]
+    public void Context_Create_SnapFpsWithDecimalPoint_UsesInvariantCulture()
+    {
+        // Arrange: a culture whose decimal separator is a comma
+        var original = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+
+            // Act: create a context with a fractional frame rate
+            using var context = Context.Create(["snap", "--camera", "0", "--output", "f.png", "--fps", "7.5"]);
+
+            // Assert: the value is 7.5
+            Assert.Equal(7.5, context.Fps);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = original;
+        }
     }
 
     /// <summary>

@@ -35,6 +35,7 @@ This document covers the verification design for the following software items:
 - **AgentVisionTool** — system, subsystem, and unit verification of the command-line tool:
   - **Program** — entry point and execution orchestrator
   - **CamerasCommand** — the `cameras` command
+  - **SnapCommand** — the `snap` command
   - **Cli** subsystem
     - **Context** — argument parser and I/O owner
     - **HelpCommand** — built-in help command

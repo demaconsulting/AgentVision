@@ -19,8 +19,9 @@ N/A - standard test environment.
 - `Program.Version` returns a non-empty, non-null string.
 - The `help` command is answered before the options are parsed, and the usage information ends
   with the pointer to the help command.
-- The `cameras` command is dispatched to the cameras command, and a run without a command prints
-  the guidance.
+- The `cameras` command is dispatched to the cameras command, the `snap` command to the snap command, and a run
+  without a command prints the guidance.
+- The usage text lists the `snap` command and each of its options.
 
 ### Test Scenarios
 
@@ -48,6 +49,16 @@ command was given, and exit code is 0. This scenario is tested by
 `["cameras"]`, using the real camera source; the output contains the banner and either
 `No cameras found.` or `Cameras found:` depending on the machine, and exit code is 0. This
 scenario is tested by `Program_Run_CamerasCommand_ListsOrReportsNone`.
+
+**Program_Run_SnapCommand_RunsSnap**: `Program.Run` is called with a context from
+`["snap", "--camera", "99", "--output", "<tmp>.png"]`, using the real camera source, which is asked for its cameras
+but never opens one; the output contains the banner, the error output contains `Error: Camera '99' was not found`,
+exit code is 1, and no file exists. The result does not depend on the machine. This scenario is tested by
+`Program_Run_SnapCommand_RunsSnap`.
+
+**Program_Run_Help_ListsSnapAndOptions**: `Program.Run` is called with a context from `["--help"]`; the usage text
+contains the `snap` command and the options `--camera`, `--output`, `--crop`, `--width`, `--height`, `--fps`, and
+`--warmup`, and exit code is 0. This scenario is tested by `Program_Run_Help_ListsSnapAndOptions`.
 
 **Program_Run_NoCommand_DisplaysGuidance**: `Program.Run` is called with an empty argument array;
 the output names the usage text (`agentvision --help`) and the help topics (`agentvision help`),

@@ -33,6 +33,8 @@ combinations. Temporary files and directories are created and cleaned up within 
 - The `help` command lists the topics with exit code 0, and exits with code 2 for an unknown
   topic.
 - The `cameras` command exits with code 0 and reports the cameras or that none were found.
+- The `snap` command exits with a non-zero code and a clear message for an unknown camera, a missing option, and an
+  invalid value, on a machine with or without cameras.
 - Every command example in the help cards gives the exit code and output that its card states.
 
 ## Test Scenarios
@@ -92,6 +94,26 @@ as the sole argument; the combined output contains either `No cameras found.` or
 and on a machine without any, because the result depends on the machine and finding no camera
 is not an error. This scenario is tested by
 `AgentVisionTool_Cameras_CamerasCommand_ExitsSuccessfully`.
+
+**AgentVisionTool_Snap_UnknownCamera_ReportsErrorAndExitsNonZero**: The `snap` command is passed with `--camera 99`
+and an output file in the temporary folder; no machine has 99 cameras, so no camera is opened. The combined output
+contains `Error: Camera '99' was not found`, the tool exits with a non-zero code, and no file is written. The
+scenario gives the same result on machines with and without cameras. This scenario is tested by
+`AgentVisionTool_Snap_UnknownCamera_ReportsErrorAndExitsNonZero`.
+
+**AgentVisionTool_Snap_InvalidCrop_ReportsErrorAndExitsNonZero**: The `snap` command is passed with `--crop 10,20`;
+the tool exits with a non-zero code and the output says that `--crop` requires four integers. This scenario is tested
+by `AgentVisionTool_Snap_InvalidCrop_ReportsErrorAndExitsNonZero`.
+
+**AgentVisionTool_Snap_MissingOutput_ReportsErrorAndExitsNonZero**: The `snap` command is passed with `--camera 0`
+and no `--output`; the tool exits with a non-zero code and the output says that `--output` is required. This
+scenario is tested by `AgentVisionTool_Snap_MissingOutput_ReportsErrorAndExitsNonZero`.
+
+**Success path of the `snap` command (limit of camera-less tests)**: Saving a picture needs a camera, which the build
+machines do not have, so no integration test takes a real picture. The success path is evidenced by the unit tests
+of `SnapCommand` and `Context` with a fake camera source, by the capture pipeline scenario of the library
+(`AgentVisionCore_Snap_FakeCamera_SavesCroppedPng`), and by the manual hardware checklist in the *SnapCommand*
+verification design.
 
 **AgentVisionTool_ResultAlias_LegacyFlag_WritesResultsFile**: The `--validate` flag is
 combined with `--result <path>.trx` (the legacy alias); a TRX file is created at the specified

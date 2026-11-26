@@ -18,9 +18,11 @@ front-end for the library. The goal of the project is low-latency webcam capture
 running through a background daemon.
 
 **Status**: under active development. Both packages can list the cameras of a machine and the video formats each one
-supports (`agentvision cameras`, or `CameraEnumerator` in the library). The library can also keep cameras open
-("hot"), hand out their newest frame with almost no delay, crop it, and save it as PNG, JPEG, or BMP. The
-command-line tool does not capture frames yet.
+supports (`agentvision cameras`, or `CameraEnumerator` in the library) and save one picture of a camera, optionally
+cropped, as PNG, JPEG, or BMP (`agentvision snap`, or `CameraSnapper` in the library). The library can also keep cameras
+open ("hot"), hand out their newest frame with almost no delay, crop it, and save it. The background daemon for the
+command-line tool is not available yet; each `agentvision snap` opens the camera, waits for the warm-up, and closes it
+again.
 
 The diagram below is a placeholder workflow diagram: replace its TODO boxes (in `docs/images/workflow.svg`,
 then re-render `docs/images/workflow.png`) to show how users prepare inputs, run the tool, get its outputs,
@@ -36,6 +38,9 @@ AgentVision provides:
 - **Camera Enumeration**: `agentvision cameras` lists the video capture devices of the machine with their stable
   identifiers, names, and supported formats (resolution, pixel format, and frame rate), using [FlashCap][link-flashcap];
   a machine without a camera is reported plainly and is not an error
+- **Snapshot Command**: `agentvision snap --camera <index|id|name> --output <file>` opens a camera, waits for it to
+  warm up, saves one picture (optionally cropped) as PNG, JPEG, or BMP, and closes the camera; problems give a clear
+  message on standard error and a non-zero exit code
 - **Hot Camera Capture (library)**: `CameraOpener` opens one or several cameras by index, identifier, or name and keeps
   them streaming; `CameraSession.Snapshot()` returns the newest frame from any thread without waiting, after a
   configurable warm-up that discards the dark first frames; disposing a session stops the camera
@@ -83,6 +88,12 @@ agentvision
 # List the cameras of this machine and the formats they support
 agentvision cameras
 
+# Save one picture of a camera (by index, identifier, or name) to a file
+agentvision snap --camera 0 --output frame.png
+
+# Keep only a region (x,y,width,height), prefer a size and frame rate, and warm up for 2 seconds
+agentvision snap --camera 0 --output region.jpg --crop 100,50,400,300 --width 1280 --height 720 --fps 30 --warmup 2000
+
 # Display version
 agentvision --version
 
@@ -93,7 +104,7 @@ agentvision --help
 agentvision help
 agentvision help getting-started
 agentvision help cameras
-
+agentvision help snap
 # Run self-validation
 agentvision --validate
 
@@ -128,8 +139,40 @@ Camera 0: Integrated Webcam
 
 When no camera is found, the output is `No cameras found.` Windows can report one physical camera through several
 backends (DirectShow, Media Foundation, and Video for Windows), so it may appear more than once, each time with its
-own `Id`. On Linux, cameras are reported through V4L2 and your account needs access to the `/dev/video*` devices,
-normally through the `video` group. Run `agentvision help cameras` for troubleshooting.
+own `Id`. The Video for Windows entry (usually named `Default`) is a legacy backend that often cannot be opened; use
+the DirectShow or Media Foundation entry of the camera instead. On Linux, cameras are reported through V4L2 and your
+account needs access to the `/dev/video*` devices, normally through the `video` group. If every snapshot shows a
+placeholder image, check the camera's privacy shutter/switch and the OS camera privacy settings. Run
+`agentvision help cameras` for troubleshooting.
+
+## Saving a Picture
+
+`agentvision snap` takes one picture and saves it:
+
+```bash
+agentvision snap --camera 0 --output frame.png
+```
+
+The tool opens the camera, discards the frames of the warm-up (1 second by default, because most cameras deliver dark
+frames at first), saves the next frame, closes the camera, prints one line such as
+`Saved frame.png (1280x720) from Integrated Webcam`, and exits with code 0. The camera is the index that
+`agentvision cameras` prints, its `Id`, or its name; the `Id` is the stable choice for scripts. The extension of the
+output file chooses the format: `.png`, `.jpg`, `.jpeg`, or `.bmp`. An existing file is overwritten, and its folder
+must exist.
+
+| Option | Description |
+| --- | --- |
+| `--camera <camera>` | Required. The index, identifier, or name of the camera |
+| `--output <file>` | Required. The picture file (`.png`, `.jpg`, `.jpeg`, or `.bmp`) |
+| `--crop <x,y,w,h>` | Keep only this region: left edge, top edge, width, and height, in pixels |
+| `--width <px>`, `--height <px>` | Prefer a picture of this size; the closest format of the camera is used |
+| `--fps <n>` | Prefer this frame rate |
+| `--warmup <ms>` | Discard the frames of the first milliseconds, 0 to 60000 (default: 1000) |
+
+A problem, such as an unknown camera, a camera that another program holds, a camera that delivers no frame within 5
+seconds after the warm-up, an unsupported extension, a missing folder, or a crop outside the picture, prints
+`Error: ...` with the reason on standard error, writes no file, and exits with code 1. The camera is always closed.
+Run `agentvision help snap` for the examples.
 
 The same list is available to any .NET application through the library:
 
@@ -193,6 +236,7 @@ pwsh ./build.ps1 -All -Hardware
 | Command | Description |
 | --- | --- |
 | `cameras` | List the available cameras and the formats they support |
+| `snap` | Save one picture of a camera to a file; see [Saving a Picture](#saving-a-picture) |
 | `help [topic]` | Display the built-in help topics |
 
 | Option | Description |
@@ -205,9 +249,13 @@ pwsh ./build.ps1 -All -Hardware
 | `--depth <#>` | Set heading depth for markdown output (default: 1) |
 | `--log <file>` | Write output to log file |
 
+The `snap` command also takes `--camera`, `--output`, `--crop`, `--width`, `--height`, `--fps`, and `--warmup`; they
+are an error without the `snap` command.
+
 ## Error Handling
 
-Unrecognized arguments, and a command that is given twice, cause the tool to print an error message to standard
+Unrecognized arguments, a command that is given twice, the `snap` and `cameras` commands together, a `snap` option
+without the command, and a missing or invalid option value cause the tool to print an error message to standard
 error and exit with a non-zero exit code. For example:
 
 ```text

@@ -353,6 +353,19 @@ reviews:
       - "src/**/CamerasCommand.cs"
       - "test/**/CamerasCommandTests.cs"
 
+  # AgentVisionTool - SnapCommand
+  - id: AgentVisionTool-SnapCommand
+    title: Review that AgentVisionTool SnapCommand Implementation is Correct
+    context:
+      - docs/design/agent-vision-tool.md
+      - docs/reqstream/agent-vision-tool.yaml
+    paths:
+      - "docs/reqstream/agent-vision-tool/snap-command.yaml"
+      - "docs/design/agent-vision-tool/snap-command.md"
+      - "docs/verification/agent-vision-tool/snap-command.md"
+      - "src/**/SnapCommand.cs"
+      - "test/**/SnapCommandTests.cs"
+
   # AgentVisionTool - Cli
   - id: AgentVisionTool-Cli
     title: Review that AgentVisionTool Cli Satisfies Subsystem Requirements
@@ -452,6 +465,7 @@ reviews:
     context:
       - docs/verification/agent-vision-tool.md
       - docs/verification/agent-vision-tool/cameras-command.md
+      - docs/verification/agent-vision-tool/snap-command.md
     paths:
       - "test/DemaConsulting.AgentVision.Tool.Tests/TestSupport/*.cs"
 

@@ -98,3 +98,12 @@ through `Context.Create` and `Program.Run` with the real camera source; the cont
 command, standard output contains either `No cameras found.` or `Cameras found:` depending on
 the machine, and exit code is 0. This scenario is tested by
 `CliSubsystem_CamerasFlow_ContextAndProgram_ListsCameras`.
+
+**CliSubsystem_Snap_ArgumentsAreParsed**: Arguments of the `snap` command with every option and camera 99 are passed
+through `Context.Create` and `Program.Run` with the real camera source; the context records the command and each
+option, the error output contains `not found`, and exit code is 1. This scenario is tested by
+`CliSubsystem_Snap_ArgumentsAreParsed`.
+
+**CliSubsystem_Snap_MissingRequiredOption_IsRejected**: Arguments `["snap", "--camera", "0"]` are passed directly to
+`Program.Main`; exit code is 1 and standard error says that `--output` is required. This scenario is tested by
+`CliSubsystem_Snap_MissingRequiredOption_IsRejected`.

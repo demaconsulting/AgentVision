@@ -1,6 +1,7 @@
 package AgentVisionTool {
     public import AgentVisionTool_Program::*;
     public import AgentVisionTool_CamerasCommand::*;
+    public import AgentVisionTool_SnapCommand::*;
     public import AgentVisionTool_CliSubsystem::*;
     public import AgentVisionTool_SelfTestSubsystem::*;
     public import AgentVisionTool_UtilitiesSubsystem::*;
@@ -27,6 +28,7 @@ package AgentVisionTool {
 
         part program : Program;
         part camerasCommand : CamerasCommand;
+        part snapCommand : SnapCommand;
         part cli : CliSubsystem;
         part selfTest : SelfTestSubsystem;
         part utilities : UtilitiesSubsystem;

@@ -467,6 +467,80 @@ public class CliSubsystemTests
     }
 
     /// <summary>
+    ///     Test that Context and Program work together to handle the snap command workflow.
+    /// </summary>
+    [Fact]
+    public void CliSubsystem_Snap_ArgumentsAreParsed()
+    {
+        // Arrange: the snap command with all options, for a camera that no machine has
+        var path = Path.Combine(Path.GetTempPath(), $"cli_snap_{Guid.NewGuid()}.png");
+        var args = new[]
+        {
+            "snap", "--camera", "99", "--output", path, "--crop", "0,0,10,10", "--width", "640", "--height", "480",
+            "--fps", "30", "--warmup", "100"
+        };
+        var originalOut = Console.Out;
+        var originalError = Console.Error;
+        using var capturedOut = new StringWriter();
+        using var capturedError = new StringWriter();
+
+        try
+        {
+            Console.SetOut(capturedOut);
+            Console.SetError(capturedError);
+
+            // Act: create context and run program logic
+            using var context = Context.Create(args);
+            Program.Run(context);
+
+            // Assert: the command and every option are parsed, and the run reports the unknown camera
+            Assert.True(context.Snap, "Context should parse the snap command");
+            Assert.Equal("99", context.Camera);
+            Assert.Equal(path, context.OutputFile);
+            Assert.NotNull(context.Crop);
+            Assert.Equal(640, context.Width);
+            Assert.Equal(480, context.Height);
+            Assert.Equal(30, context.Fps);
+            Assert.Equal(100, context.WarmupMilliseconds);
+            Assert.Equal(1, context.ExitCode);
+            Assert.Contains("not found", capturedError.ToString());
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+        }
+    }
+
+    /// <summary>
+    ///     Test that Program rejects the snap command without its required option, writes an error to stderr, and
+    ///     exits non-zero.
+    /// </summary>
+    [Fact]
+    public void CliSubsystem_Snap_MissingRequiredOption_IsRejected()
+    {
+        // Arrange: the snap command without --output
+        var args = new[] { "snap", "--camera", "0" };
+        var originalError = Console.Error;
+        try
+        {
+            using var errWriter = new StringWriter();
+            Console.SetError(errWriter);
+
+            // Act: invoke the actual CLI entry point
+            var result = Program.Main(args);
+
+            // Assert: the entry point fails and names the missing option on stderr
+            Assert.Equal(1, result);
+            Assert.Contains("requires --output", errWriter.ToString());
+        }
+        finally
+        {
+            Console.SetError(originalError);
+        }
+    }
+
+    /// <summary>
     ///     Test that Context and Program work together to handle the cameras command workflow.
     /// </summary>
     [Fact]

@@ -27,7 +27,7 @@ Local items:
 - **AgentVisionTool**: system, subsystem, and unit design for all local components of the command-line tool
   (command `agentvision`): the **Cli** subsystem (argument parsing and output, and **HelpCommand**, which answers the
   built-in `help` command), the **SelfTest** subsystem, the **Utilities** subsystem, the **Program** unit, and the
-  **CamerasCommand** unit (the `cameras` command).
+  **CamerasCommand** unit (the `cameras` command), and the **SnapCommand** unit (the `snap` command).
 
 OTS items:
 

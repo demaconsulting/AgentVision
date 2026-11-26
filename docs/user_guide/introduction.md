@@ -17,10 +17,11 @@ delivered as two packages:
 - **`DemaConsulting.AgentVision.Tool`**: a .NET tool, command `agentvision`, that exposes AgentVision from the
   command line. It is a thin front-end for the library.
 
-AgentVision is under active development. Listing the cameras of a machine and the video formats they support is
-available in both packages. The library can also keep cameras open and hand out their frames, crop them, and save them
-as PNG, JPEG, or BMP files; the command-line tool does not capture frames yet, and this guide documents only what exists
-in the current release.
+AgentVision is under active development. Listing the cameras of a machine and the video formats they support, and
+saving one picture of a camera (optionally cropped) as PNG, JPEG, or BMP, are available in both packages. The library
+can also keep cameras open and hand out their frames. The background daemon for the command-line tool is not available
+yet, so each `agentvision snap` opens the camera, waits for the warm-up, and closes it again; this guide documents only
+what exists in the current release.
 
 ## Scope
 
@@ -28,6 +29,7 @@ This user guide covers:
 
 - Installation instructions for the tool and the library
 - Listing cameras with the tool and with the library
+- Saving a picture with the tool
 - Capturing frames with the library: opening cameras, snapshots, cropping, saving, options, and errors
 - Usage examples for common tasks
 - The built-in `agentvision help` command
@@ -119,7 +121,9 @@ Each camera shows:
   rate in frames per second, the largest and fastest first. Formats that cannot be captured are not listed.
 
 Windows can report one physical camera through several backends, so the same camera can appear more than once,
-each time with its own `Backend` and `Id`; the Video for Windows entry named `Default` is not a real device. The
+each time with its own `Backend` and `Id`; the Video for Windows entry named `Default` is not a real device and, being a
+legacy backend that needs a message pump, often cannot be opened (use the DirectShow or Media Foundation entry of the
+camera instead). The
 tool does not merge these entries.
 
 ### No Camera Found
@@ -138,6 +142,66 @@ The listing follows `--silent` and `--log`, so a script can keep it in a file:
 ```bash
 agentvision --silent --log cameras.log cameras
 ```
+
+## Saving a Picture
+
+Save one picture of a camera to a file:
+
+```bash
+agentvision snap --camera 0 --output frame.png
+```
+
+The tool opens the camera, discards the frames of the warm-up, saves the next frame, closes the camera, and prints one
+line with the file, the size of the saved picture, and the camera, such as
+`Saved frame.png (1280x720) from Integrated Webcam`. The exit code is 0. Each call pays the start-up and warm-up time
+of the camera, which is a second or more.
+
+`--camera` takes the index that `agentvision cameras` prints, the `Id`, or the name of the camera. Use the `Id` or the
+name in scripts, because the index can change when cameras are attached or removed. A name that several cameras share
+is an error that asks for the `Id`. `--output` takes the file to write. The extension chooses the format: `.png`,
+`.jpg` or `.jpeg`, and `.bmp`. An existing file is overwritten, and the folder must exist.
+
+### Cropping, Size, Frame Rate, and Warm-Up
+
+```bash
+# Keep the region that starts at x=100, y=50 and is 400 by 300 pixels
+agentvision snap --camera 0 --output region.jpg --crop 100,50,400,300
+
+# Prefer a 1280 by 720 picture at 30 frames per second
+agentvision snap --camera "Integrated Webcam" --output hd.png --width 1280 --height 720 --fps 30
+
+# Let the camera settle for 2 seconds
+agentvision snap --camera 0 --output steady.png --warmup 2000
+```
+
+- `--crop <x,y,w,h>` takes four whole numbers: the left edge, the top edge, the width, and the height, in pixels. The
+  position must not be negative, the size must be positive, and the region must lie inside the picture.
+- `--width`, `--height`, and `--fps` are preferences: the tool opens the format of the camera that comes closest. The
+  line that the tool prints shows the size of the saved picture, after cropping.
+- `--warmup <ms>` sets how long frames are discarded after the camera starts, from 0 to 60000. The default is 1000.
+  Most cameras deliver dark or badly exposed frames at first. Raise the value for a camera that needs longer, or use 0
+  to take the first frame.
+
+All values are checked before the camera is touched, so a wrong command fails at once.
+
+### Snap Command Errors
+
+A problem prints `Error: ...` with the reason on standard error, writes no file, closes the camera, and exits with code
+
+1. Typical messages:
+
+- The camera was not found. The message lists the cameras that are available.
+- The camera cannot be opened, for example because another program holds it. Close that program and try again.
+- The `VideoForWindows` entry of a camera (usually named `Default`) did not open the device within 15 seconds. That
+  legacy backend is often unsupported; use the `DirectShow` or `MediaFoundation` entry of the same camera.
+- Every picture is a placeholder image (for example a dark blue screen with a crossed camera icon). Check the
+  camera's privacy shutter/switch and the OS camera privacy settings.
+- The camera delivers no frame within 5 seconds after the warm-up, or stops while it is used.
+- The output file has an extension that is not supported, or its folder does not exist.
+- The crop does not fit inside the picture that the camera delivers.
+
+`--silent` hides the message but the exit code stays 1, and `--log <file>` also writes the message to a file. Run
+`agentvision help snap` for these examples in the built-in help.
 
 ## Using the Library
 
@@ -343,6 +407,14 @@ mistakes of the caller. Every message names the camera or the selector and says 
 - **A camera cannot be opened.** Another application (a video call, the camera app) may hold it. Close that
   application and try again. On Linux the account must be allowed to use `/dev/video*`, normally through the
   `video` group.
+- **The `VideoForWindows` entry (usually named `Default`) cannot be opened.** Opening it fails after about 15 seconds
+  with an open exception that says the backend did not open the device. This legacy backend needs a message pump that
+  a console tool does not have and is often unsupported. Use the `DirectShow` or `MediaFoundation` entry of the same
+  camera instead.
+- **Every snapshot shows a placeholder image.** If every snapshot shows a placeholder image (for example a dark blue
+  screen with a crossed camera icon), check the camera's privacy shutter/switch and the OS camera privacy settings.
+  Some laptop cameras deliver real frames only during the first moments and then stream a "camera off" picture; that is
+  the behavior of the device or driver, not of AgentVision.
 - **Frames from a camera do not decode.** Many motion JPEG cameras omit the Huffman tables from their frames; the
   library inserts the standard tables, so those frames decode normally. A frame that is truly damaged raises an
   `InvalidDataException`.
@@ -466,8 +538,9 @@ agentvision --log output.log
 
 ## Error Handling
 
-Unrecognized arguments, and a command that is given twice, cause the tool to print an error message to standard
-error and exit with a non-zero exit code. For example:
+Unrecognized arguments, a command that is given twice, the `snap` and `cameras` commands together, a `snap` option
+without the command, a `snap` command without `--camera` or `--output`, and a missing or invalid option value cause the
+tool to print an error message to standard error and exit with a non-zero exit code. For example:
 
 ```text
 Error: Unsupported argument '--unknown'
@@ -484,6 +557,7 @@ The following commands and command-line options are supported:
 | Command | Description |
 | --- | --- |
 | `cameras` | List the available cameras and the formats they support |
+| `snap` | Save one picture of a camera to a file |
 | `help [topic]` | Display the built-in help topics |
 
 | Option | Description |
@@ -495,6 +569,17 @@ The following commands and command-line options are supported:
 | `--results <file>`, `--result <file>` | Write validation results to file (TRX or JUnit format) |
 | `--depth <#>` | Set heading depth for markdown output (default: 1) |
 | `--log <file>` | Write output to log file |
+
+The options of the `snap` command are an error without the `snap` command:
+
+| Option | Description |
+| --- | --- |
+| `--camera <camera>` | Required. The index, identifier, or name of the camera |
+| `--output <file>` | Required. The picture file (`.png`, `.jpg`, `.jpeg`, or `.bmp`) |
+| `--crop <x,y,w,h>` | Keep only this region, in pixels |
+| `--width <px>`, `--height <px>` | Prefer a picture of this size |
+| `--fps <n>` | Prefer this frame rate |
+| `--warmup <ms>` | Discard the frames of the first milliseconds, 0 to 60000 (default: 1000) |
 
 # Examples
 
@@ -520,6 +605,12 @@ agentvision --validate --results validation-results.trx
 
 ```bash
 agentvision --silent --log tool-output.log
+```
+
+## Example 5: Save a Picture
+
+```bash
+agentvision snap --camera 0 --output frame.png
 ```
 
 ## References

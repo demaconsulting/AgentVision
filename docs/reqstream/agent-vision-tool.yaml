@@ -197,6 +197,45 @@ sections:
         tests:
           - AgentVisionTool_Cameras_CamerasCommand_ExitsSuccessfully
 
+      - id: AgentVisionTool-System-Snap
+        title: >-
+          The tool shall save one picture of the chosen camera, cropped when requested, to the output file and
+          report it, with exit code 0, when run with the `snap` command, and shall write a clear message to the
+          error channel and exit with a non-zero code when the camera cannot be used.
+        tags: [system]
+        justification: |
+          An AI agent or a script needs one command that takes a picture: it opens the camera, waits for the
+          warm-up, saves the frame, and closes the camera. A failure must be unmistakable, with a message that
+          says what to change and a non-zero exit code, so that no one mistakes a missing picture for a good
+          one. The success path needs a camera, which the build machines do not have; it is evidenced by the
+          unit tests of the children with a fake camera source, by the capture pipeline test of the library
+          (AgentVisionCore-System-Snapshot), and by the manual hardware checklist in the verification design.
+        children:
+          - AgentVisionTool-Program-Snap
+          - AgentVisionTool-Cli-Snap
+          - AgentVisionTool-SnapCommand-Snap
+          - AgentVisionTool-SnapCommand-Errors
+          - AgentVisionTool-SnapCommand-Output
+        tests:
+          - AgentVisionTool_Snap_UnknownCamera_ReportsErrorAndExitsNonZero
+
+      - id: AgentVisionTool-System-SnapOptions
+        title: >-
+          The tool shall let the `snap` command choose the crop, the picture size, the frame rate, and the warm-up
+          with the `--crop`, `--width`, `--height`, `--fps`, and `--warmup` options, and shall reject missing
+          required options and invalid values with an error message and a non-zero exit code.
+        tags: [system]
+        justification: |
+          The defaults suit a typical webcam, but an agent often needs a region of the picture, a particular
+          size, or a longer warm-up for a camera that settles slowly. A wrong option must fail at once with a
+          message that names it, before a camera is switched on.
+        children:
+          - AgentVisionTool-Context-Snap
+          - AgentVisionTool-Context-SnapValidation
+        tests:
+          - AgentVisionTool_Snap_InvalidCrop_ReportsErrorAndExitsNonZero
+          - AgentVisionTool_Snap_MissingOutput_ReportsErrorAndExitsNonZero
+
       - id: AgentVisionTool-System-DefaultBehavior
         title: >-
           The tool shall display a banner, then guidance to the usage text and the help topics, when invoked

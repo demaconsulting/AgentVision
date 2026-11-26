@@ -5,10 +5,11 @@ aliases:
   - validate
 tags:
   - reference
-order: 4
+order: 5
 see-also:
   - command-line
   - cameras
+  - snap
 examples:
   - name: run
     kind: command

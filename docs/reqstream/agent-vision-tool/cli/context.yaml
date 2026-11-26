@@ -41,6 +41,43 @@ sections:
                   - Context_Create_CamerasCommand_SetsCamerasTrue
                   - Context_Create_CamerasCommandAmongOptions_SetsCamerasAndOptions
 
+              - id: AgentVisionTool-Context-Snap
+                title: >-
+                  The Context class shall expose whether the `snap` command was given and the values of its
+                  `--camera`, `--output`, `--crop`, `--width`, `--height`, `--fps`, and `--warmup` options, and
+                  leave an option that was not given unset.
+                justification: |
+                  The snap command and its options are words among the other options. The Context class parses
+                  them, so that the command reads typed properties and never parses the command line itself,
+                  and an option that was not given keeps the default of the library.
+                tests:
+                  - Context_Create_SnapCommand_SetsSnapAndOptions
+                  - Context_Create_SnapRequiredOptionsOnly_LeavesOptionalOptionsUnset
+                  - Context_Create_SnapOptionsAmongOtherOptions_SetsSnapAndOptions
+                  - Context_Create_SnapFpsWithDecimalPoint_UsesInvariantCulture
+
+              - id: AgentVisionTool-Context-SnapValidation
+                title: >-
+                  The Context class shall reject a `snap` command without `--camera` or `--output`, a `snap` option
+                  without the `snap` command, the `snap` and `cameras` commands together, a repeated `snap`
+                  command, a crop that is not four integers with a non-negative position and a positive size, a
+                  size or warm-up that is not an integer in range, a frame rate that is not a number above zero,
+                  and an option without its value.
+                justification: |
+                  A wrong value must fail at once with a message that names the option, before a camera is
+                  switched on. Help may be asked for without the required options, so that `snap --help` works.
+                tests:
+                  - Context_Create_SnapWithHelp_DoesNotRequireOptions
+                  - Context_Create_SnapWithoutCamera_ThrowsArgumentException
+                  - Context_Create_SnapWithoutOutput_ThrowsArgumentException
+                  - Context_Create_SnapOptionWithoutSnap_ThrowsArgumentException
+                  - Context_Create_SnapAndCameras_ThrowsArgumentException
+                  - Context_Create_RepeatedSnapCommand_ThrowsArgumentException
+                  - Context_Create_SnapCropInvalid_ThrowsArgumentException
+                  - Context_Create_SnapIntegerOptionInvalid_ThrowsArgumentException
+                  - Context_Create_SnapFpsInvalid_ThrowsArgumentException
+                  - Context_Create_SnapOptionWithoutValue_ThrowsArgumentException
+
               - id: AgentVisionTool-Context-CommandValidation
                 title: The Context class shall reject a command that is given more than once, and any unknown command.
                 justification: |
